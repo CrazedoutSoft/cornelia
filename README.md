@@ -15,7 +15,7 @@
 
 goto cornelia install directory.<br/>
 
-set env CORNELIA_HOME to where cornelia_d is located.
+set env CORNELIA_HOME to cornelia install dir.
 (export CORNELIA_HOME=<path to cornelia>)
 
 run make<br/>
