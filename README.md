@@ -28,7 +28,7 @@ to /usr/lib<br/>
 test if you have php-cgi installed<br/>
 ./php-cgi
 <p/>
-otherwise download and install php-cgi lie so:<br/>
+otherwise download and install php-cgi like so:<br/>
 sudo apt install php<br/>
 sudo apt install php-cgi<br/>
 <p/>
