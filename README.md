@@ -7,10 +7,10 @@
 </div>
 
 ******************************************************
-*  Welcome to Cornelia Web Sever                     *
-*  CrazedoutSoft 2022 by Fredrik Roos.               *
-*  http://crazedout.com/corny/ info@crazedout.com    *
-*  https://github.com/openssl                        *
+*  Welcome to Cornelia Web Server                    
+*  CrazedoutSoft 2022 by Fredrik Roos.           
+*  http://crazedout.com/corny/ info@crazedout.com   
+*  https://github.com/openssl                      
 ******************************************************
 
 goto cornelia install directory.<br/>
