@@ -1,10 +1,17 @@
+
+<div >
+<a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="www/corny_logo.png" alt="Logo" width="600" >
+  </a>
+ 
+</div>
+
 ******************************************************
 *  Welcome to Cornelia Web Sever                     *
 *  CrazedoutSoft 2022 by Fredrik Roos.               *
 *  http://crazedout.com/corny/ info@crazedout.com    *
 *  https://github.com/openssl                        *
 ******************************************************
-
 
 goto cornelia install directory.
 
