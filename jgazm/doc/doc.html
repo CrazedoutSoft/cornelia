@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>jGazm 1.0</title>
+<style>
+ body{
+	font-family: verdana;
+	font-size: 12px;
+ }
+</style>
+</head>
+<body>
+<span name="field">
+<a name="flags"/>
+<h3>@flags</h3>
+	Set <a href="usage.html#allflags">jGazm flags</a> directly in the code.<p>
+	@flags -clean -check -showcp ...<p>
+	Flags set in this operation will override <a href="usage.html#allflags">flags</a> given on the command line.<br>
+	<i>-stdin, -version, -showapi, -java and -help</i> does nothing here.
+</span>
+<hr>
+<span name="field">
+<a name="import"/>
+<h3>@import</h3>
+Same as Java <i>import</i><p/>
+@import com.crazedout.jgazm.*;<p>
+Default imports are:<br>
+<code><pre>
+com.crazedout.jgazm.*;
+java.util.*;
+java.io.*;
+java.net.*
+static java.util.Arrays.*;
+</code></pre>
+Use -noimport to turn this off.
+</span>
+<hr>
+<span name="field">
+<a name="classpath"/>
+<h3>@classpath</h3>
+	Include classpath directly in the code:<p/>
+	@classpath "c:/path/to/mylib.jar;c:/temp/myjar.jar"<br>
+	If classpath is not absolute the <b><i>jgazm.home</i></b> path will we used as base directory.
+</span>
+<hr>
+<span name="field">
+<a name="include"/>
+<h3>@include</h3>
+	Include other jGazm source.<p/>
+	@include "c:/path/to/myscript.jgazm"<br>
+	If included file path is not absolute the <b><i>jgazm.home</i></b> path will we used as base directory.
+</span>
+<hr>
+<span name="field">
+<a name="global"/>
+<h3>@global</h3>
+	Sets a variable or object as global in the source.<p/>
+	@global String title = "My App Title";<br>
+	or<br>
+	@global {<br>
+	&nbsp;&nbsp;String[] myNames = {"John",<br>
+	&nbsp;&nbsp;"Paul",<br>
+	&nbsp;&nbsp;"George",<br>
+	&nbsp;&nbsp;"Ringo"};<br>
+	&nbsp;}<br>
+</span>
+<hr>
+<span name="field">
+<a name="class"/>
+<h3>@class</h3>
+	Annotates a inner class.<p/>
+	<code>
+	<pre>
+	@class
+	public class MyClass(){
+		public MyClass(){
+		}
+		public String getName(){
+			return this.class.toString();
+		}
+	}
+	</pre>
+	</code>
+</span>
+<hr>
+<span name="field">
+<a name="method"/>
+<h3>@method</h3>
+	Annotates a method.<p/>
+	<code>
+	<pre>
+	@method
+	public String getHello(){
+		return "HelloWorld";
+	}
+	</pre>
+	</code>
+</span>
+<hr>
+<span name="field">
+<a name="catch"/>
+<h3>@catch</h3>
+Encapsulates given code in an try/catch <i>onException</i> statement.
+<pre><code>
+@catch{
+	Integer.parseInt("Ringo");
+}
+equivs to:
+try{
+	Integer.parseInt("Ringo");
+}catch(Exception ex){
+	onException(ex);
+}
+</pre></code>
+Mostly used inside methods otherwise not worth while...
+<hr>
+</span>
+<span name="field">
+<a name="thread"/>
+<h3>@thread</h3>
+	Executes code inside a Thread.Runnable().run() method.<p/>
+	<code>
+	<pre>
+	@thread {
+		String html = sendGet("http://www.google.com");
+		out(html);
+	}
+	</pre>
+	</code>
+</span>
+<hr>
+<span name="field">
+<a name="string"/>
+<h3>@string</h3>
+	Compiles the text inside this annotation as a Java String.<br/>
+	Java code within $ will be executed as Java and inserted into the string.<br/>
+	@ sign inside a @string statement must be escaped as \@.
+	<code>
+	<pre>
+	@string(name="myString") {
+		Hello. This is a message from jGazm string util.
+		The directory of this runnable is $System.getProperty("user.dir")$.
+		The End.
+	}
+	alert(myString);
+	</pre>
+	</code>
+</span>
+<hr>
+<span name="field">
+<a name="exception"/>
+<h3>@exception</h3>
+    Overrides the Lang.onException(Exception) which is called when an Exception is raised
+    in the main code of jGazm.
+	<code>
+	<pre>
+     @exception {
+        alert("An Exception of type " + ex.getClass() + " was thrown...");
+	 }
+    </pre>
+    </code>
+    This can also be handled like this:
+	<code>
+    <pre>
+        @method
+        public void onException(Excepetion ex){
+            alert("An Exception of type " + ex.getClass() + " was thrown...");
+        }
+		
+	</pre>
+	</code>
+	<hr>
+</span>
+</body>
+</html>

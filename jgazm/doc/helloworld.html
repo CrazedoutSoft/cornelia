@@ -1,0 +1,44 @@
+<html>
+<code><pre>
+@classpath ".;" //Set to current dir for example. Change to what ever classpath you want or remove.
+
+@import javax.swing.*; // Not needed in this example but put here for reference.
+
+/* execute the whole file or selected text as long as the texts is executable Java */
+System.out.println("Hello from jGazm"); // Select only this statement and hit CTRL+ENTER...
+
+/* View the .setup file for more reference */
+
+String hello = "Hello World";
+
+MyClass mc = new MyClass("Ringo");
+out(mc.getName()); //com.crazedout.jgazm.Lang.out(Object out);
+showMessage(hello);
+
+@method /* Needed to identify method */
+void showMessage(String msg){
+	alert(msg); //com.crazedout.jgazm.Lang.alert(String msg);
+}
+
+@class /* Needed to identify inner class */
+public class MyClass {
+	String name;
+	public MyClass(String name){
+		this.name = name + " Star";
+	}
+
+	public String getName(){
+		return this.name;
+	}
+}
+@thread {
+	out("Executed inside a threads run() method");
+}
+
+@exception {
+	out("Handle exception" + ex.getMessage());
+}
+
+
+</code></pre>
+</html>

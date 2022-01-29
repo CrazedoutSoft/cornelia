@@ -1,0 +1,22 @@
+
+@import java.awt.*;
+@import javax.swing.*;
+
+@class
+public class FRAME extends JFrame {
+
+	public FRAME(String title){
+		super(title);
+	}
+	
+	public FRAME(){
+		this("");
+	}
+
+	public void sizeAndCenter(int width, int height){
+		setSize(width,height);
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+          setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
+	}
+}
+

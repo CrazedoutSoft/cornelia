@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>start</title>
+<style>
+ body{
+	font-family: verdana;
+	font-size: 12px;
+ }
+</style>
+
+</head>
+<body>
+<center>
+<p>&nbsp;<p/>
+<img src="crz.png"/></p>
+<h2>Usage</h2>
+<table width="600"><tr><td>
+jGazm must be used with a JDK 1.7 or higher.
+When distrubuting your jGazm code use <i>-export</i> to make it pure Java and runnable on JRE.
+<hr>
+<a name="allflags">
+<code><pre>
+CrazedoutSoft (c) 2016.
+Usage: jgazm {options} [file] %arg1 %arg2 ...
+Options:
+-stdin				Read input directly from System.in (Single "." + ENTER quits)
+-dump				dump script as POJO to stdout.
+-dump:[file]			dump script as POJO to [file].
+-clean				Remove all temp files generated.
+-export:[dest_jar]  		export the works as one java runnable package.
+-java				Input file is pure Java. Can not be used with -stdin.
+				-dump,-clean,-noimport and -keepsource has no meaning when -java in used.
+				will be set by default if file ends width '.java'.
+-keepsource			Do not delete generated POJO code.
+-noimport			Do not import any packages by default.
+-version			Print jgazm version.
+-check				Compile only.
+-showapi			Print methods of com.crazedout.jgazm.Lang.
+-help or /?			Prints this message.
+</code></pre>
+Command line arguments to jGazm programs must be preceded with '%' (%myarg1 %myarg2).
+<hr>
+Editor mode:
+<code><pre>
+Start editor:
+java -jar jgazm.jar
+	
+Run jgazm from command line:
+java -cp ".;jgazm.jar" com.crazedout.jgazm.JGazm [options] [input.file]
+
+</pre></code>
+<hr>
+Pure mode:
+<code><pre>
+Start jGazm:
+java -jar jgazm_pure.jar [options] [input.file]
+	
+or:
+java -cp ".;jgazm_pure.jar" com.crazedout.jgazm.JGazm [options] [input.file]
+
+</pre></code>
+<hr>
+Pipe Java code from command line:
+<code><pre>
+echo File dir = new File("."); String[] files = dir.list(); for(String f:files) out(f); | jgazm -stdin
+</code></pre>
+<hr>
+jgazmEdit.bat Starts in editor mode.
+<code><pre>
+@echo off
+REM %JAVA_HOME% must point to current JDK.
+set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45\jre
+
+REM Path to jgazm.jar file.
+set JGAZ_BIN=C:\Fredriks_Mapp\Java\JGazm\release\.\bin\jgazm.jar
+set JGAZ_HOME=C:\Fredriks_Mapp\Java\JGazm\release\.
+
+REM Path to user imports file.
+set JGAZM_PROPS=C:\Fredriks_Mapp\Java\JGazm\release\.\bin\user.properties
+
+"%JAVA_HOME%/bin/javaw" -classpath "%JGAZ_BIN%" -Djgazm.home="%JGAZ_HOME%" -Djgazm.props="%JGAZM_PROPS%" com.crazedout.jgazm.editor.Editor %1 %2 %3 %4
+
+</pre></code>
+<hr>
+jgazm.bat starts in command line mode.
+<code><pre>
+@echo off	
+REM %JAVA_HOME% must point to current JDK.
+set JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45\jre
+
+REM Path to jgazm.jar file.
+set JGAZ_BIN=C:\Fredriks_Mapp\Java\JGazm\release\.\bin\jgazm.jar
+set JGAZ_HOME=C:\Fredriks_Mapp\Java\JGazm\release\.
+
+REM Path to user imports file.
+set JGAZM_PROPS=C:\Fredriks_Mapp\Java\JGazm\release\.\bin\user.properties
+
+"%JAVA_HOME%/bin/java" -classpath "%JGAZ_BIN%" -Djgazm.home="%JGAZ_HOME%" -Djgazm.props="%JGAZM_PROPS%" com.crazedout.jgazm.JGazm %1 %2 %3 %4
+</pre></code>
+<hr>
+</td></tr></table>
+</center>
+
+</body>
+</html>

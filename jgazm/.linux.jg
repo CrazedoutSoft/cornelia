@@ -1,0 +1,99 @@
+
+@import java.io.*;
+@classpath "./bin/jgazm.jar";
+
+@global File bin = new File(System.getProperty("jgazm.bin"));
+@global File home = bin.getParentFile().getParentFile();
+@global File props = new File(System.getProperty("jgazm.props"));
+
+@string(name="bat"){
+#!/bin/bash
+
+# JAVA_HOME must point to current JDK.
+JAVA_HOME=$System.getProperty("java.home")$
+
+# Path to jgazm.jar file.
+JGAZ_BIN=$bin.getAbsolutePath()$
+JGAZ_HOME=$home.getAbsolutePath()$
+
+#Path to user imports file.
+JGAZM_PROPS=$props.getAbsolutePath()$
+"%JAVA_HOME/bin/java" -classpath "%JGAZ_BIN" -Djgazm.home="%JGAZ_HOME" -Djgazm.props="%JGAZM_PROPS" com.crazedout.jgazm.JGazm %1 %2 %3 %4
+}
+
+writeLines(new File("jgazm"),bat.replace('%','$'));
+
+@string(name="bat2"){
+# JAVA_HOME must point to current JDK.
+JAVA_HOME=$System.getProperty("java.home")$
+
+# Path to jgazm.jar file.
+JGAZ_BIN=$bin.getAbsolutePath()$
+JGAZ_HOME=$home.getAbsolutePath()$
+
+# Path to user imports file.
+JGAZM_PROPS=$props.getAbsolutePath()$
+
+"%JAVA_HOME/bin/java" -classpath "%JGAZ_BIN" -Djgazm.home="%JGAZ_HOME" -Djgazm.props="%JGAZM_PROPS" com.crazedout.jgazm.editor.Editor %1 %2 %3 %4
+}
+
+writeLines(new File("jedit"),bat2.replace('%','$'));
+
+String user = "jgazm.user.classpath=\njgazm.user.jdbc.driver=\njgazm.user.imports=\njgazm.workdir=" + home.getAbsolutePath() + File.separatorChar + "work";
+writeLines(props,user.replace("\\","/"));
+
+String dir = "current.file=" + (new File("helloworld.jgazm")).getAbsolutePath();
+File edit = new File(home.getAbsolutePath() + File.separatorChar + "gazmedit.properties");
+writeFile(edit,dir.replace("\\","/"));
+
+String code = "@classpath .: //Set to current dir for example. Change to what ever classpath you want or remove.\r\n\r\n";
+
+code += "@import javax.swing.*; // Not needed in this example but put here for reference.\r\n\r\n";
+
+code +="/* execute the whole file or selected text as long as the texts is executable Java */\r\n";
+code +="System.out.println(\"Hello from jGazm\"); // Select only this statement and hit CTRL+ENTER...\r\n\r\n";
+
+code += "/* View the .setup file for more reference */\r\n\r\n";
+
+code += "String hello = \"Hello World\";\r\n\r\n";
+code += "double d = 23.2 / 34.3 * 2;\r\n\r\n";
+code += "MyClass mc = new MyClass(\"Ringo\");\r\n";
+code += "out(mc.getName()); //com.crazedout.jgazm.Lang.out(Object out);\r\n";
+code += "showMessage(hello);\r\n\r\n";
+
+code +="@method /* Needed to identify method */\r\n";
+code +="void showMessage(String msg){\r\n";
+code +="	alert(msg); //com.crazedout.jgazm.Lang.alert(String msg);\r\n";
+code +="}\r\n\r\n";
+
+code += "@class /* Needed to identify inner class */\r\n";
+code += "public class MyClass {\r\n";
+code +="	String name;\r\n";
+code +="	public MyClass(String name){\r\n";
+code +="		this.name = name + \" Star\";\r\n";
+code +="	}\r\n\r\n";
+
+code +="	public String getName(){\r\n";
+code +="		return this.name;\r\n";
+code +="	}\r\n";
+code +="}\r\n";
+
+code += "@thread {\r\n";
+code += "	out(\"Executed inside a threads run() method\");\r\n";
+code += "}\r\n\r\n";
+
+code += "@exception {\r\n";
+code += "	out(\"Handle exception:\" + ex.getMessage());\r\n";
+code += "}\r\n";
+
+
+writeFile(new File("helloworld.jgazm"),code);
+/*
+@import javax.swing.*;
+UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+if(JOptionPane.showConfirmDialog(null,"jGazm 1.2.2 setup complete. Start jGazm editor now?","Start editor?",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+	com.crazedout.jgazm.editor.Editor.main(new String[0]);
+}
+*/
+
+

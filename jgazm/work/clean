@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rm jedit
+rm jgazm
+rm gazmedit.properties
+rm helloworld.jgazm
+
+echo "jGazm cleaned. Run ./setup_linux to restore"
+
+

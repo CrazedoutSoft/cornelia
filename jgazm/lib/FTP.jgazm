@@ -1,0 +1,67 @@
+
+@classpath "./lib/res/commons-net-3.3.jar"
+@import org.apache.commons.net.ftp.*;
+
+@class 
+public class FTP {
+
+    FTPClient client; 
+    
+    public FTP(String server, String user, String passwd) throws Exception {
+    	client = new FTPClient();
+    	client.connect(server);
+    	if(!client.login(user,passwd)){
+    		throw new Exception("Login failed...");
+    	}
+    }
+
+    List<FTPFile> list(String directory) throws Exception {
+     FTPFile[] files = client.listFiles(directory);
+    	return Arrays.asList(files);
+    }
+
+	byte[] getFile(String file) throws Exception {
+		InputStream in = client.retrieveFileStream(file);
+		BufferedInputStream inbf = new BufferedInputStream(in);
+		byte buffer[] = new byte[1024];
+		int readCount;
+		byte result[] = null;
+		int length = 0;
+
+		while( (readCount = inbf.read(buffer)) > 0) {
+      		int preLength = length;
+      		length += readCount;
+      		byte temp[] = new byte[length];
+      		result = new byte[length];
+      		System.arraycopy(temp,0,result,0,temp.length); 
+      		System.arraycopy(buffer,0,result,preLength,readCount); 
+		}
+		return result;		
+	}
+
+	public boolean putFile(String remotePath, File file) throws Exception {
+		client.setFileType(FTPClient.ASCII_FILE_TYPE);
+		client.setFileTransferMode(FTPClient.ASCII_FILE_TYPE);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+		boolean res = client.storeFile(remotePath + "/" + file.getName(), bis);
+		bis.close();
+		return res;
+	}
+
+	public boolean putBinaryFile(String remotePath, File file)  throws Exception  {
+		client.setFileType(FTPClient.BINARY_FILE_TYPE);
+		client.setFileTransferMode(FTPClient.BINARY_FILE_TYPE);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+		boolean res = client.storeFile(remotePath + "/" + file.getName(), bis);
+		bis.close();
+		return res;
+	}
+
+    public void logout() throws Exception {
+    	client.logout();
+    }
+}
+
+
+
+

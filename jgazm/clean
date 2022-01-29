@@ -1,0 +1,14 @@
+#!/bin/bash
+
+rm jedit
+rm jgazm
+rm gazmedit.properties
+rm helloworld.jgazm
+
+rm bin/user.properties
+
+printf "%s\n%s\n%s\n%s\n" jgazm.user.classpath= jgazm.user.jdbc.driver= jgazm.user.imports= jgazm.workdir=./work > bin/user.properties
+
+echo "jGazm cleaned. Run ./setup_linux to restore"
+
+

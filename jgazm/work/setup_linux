@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# JAVA_HOME must point to current JDK.
+
+# Edit this line to set JAVA_HOME variable or set system variable JAVA_HOME.
+# -----------------------------
+JAVA_HOME=/usr/
+# ------------------------------
+
+JGAZ_BIN=./bin/jgazm.jar
+JGAZ_PROPS=./bin/user.properties
+JGAZ_HOME=./bin/..
+
+$JAVA_HOME/bin/java -classpath ".:$JGAZ_BIN" -Djgazm.home=$JGAZ_HOME -Djgazm.props=$JGAZ_PROPS -Djgazm.bin=$JGAZ_BIN com.crazedout.jgazm.JGazm -clean "./.linux.jg"
+
+chmod 777 jgazm

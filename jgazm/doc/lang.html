@@ -1,0 +1,489 @@
+<html>
+<pre><code>
+package com.crazedout.jgazm;
+
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.util.*;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+/**
+ * jGazm base class.
+ * jGazm Java code will be inserted in Lang.execute().
+ * @author Fredrik Roos.
+ */
+
+public abstract class Lang {
+
+    public static final String EOL = "\n";//System.getProperty("line.separator");
+
+    public abstract void execute();
+
+    /**
+     * Called by generated codes try/catch.
+     * @param ex
+     */
+    public void onException(Exception ex){
+        ex.printStackTrace();
+    }
+
+    /**
+     * Prints the array objects to stdout.
+     * @param array
+     */
+    public void loop(Object[] array){
+        loop(Arrays.asList(array));
+    }
+
+    /**
+     * Prins the array object tp ps.
+     * @param array Array
+     * @param ps PrintStream
+     */
+    public void loop(Object[] array, PrintStream ps){
+        loop(Arrays.asList(array),ps);
+    }
+
+    /**
+     * Prints the List objects to stdout.
+     * @param list
+     */
+    public void loop(List<?> list){
+        loop(list,System.out);
+    }
+
+    /**
+     * Prins the List object tp ps.
+     * @param list List
+     * @param ps PrintStream
+     */
+    public void loop(List<?> list, PrintStream ps){
+        for(int i = 0; i < list.size(); i++){
+            ps.println(list.get(i).toString());
+        }
+    }
+
+    /**
+     * Starts the given file by Windows default program.
+     * @param file
+     * @throws IOException
+     */
+    public void startWindowsFile(String file) throws IOException {
+        Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + file);
+    }
+
+    /**
+     * Executes the commands and puts the output in buffer.
+     * @param buffer StringBuilder
+     * @param command commands
+     * @throws Exception
+     */
+    public void exec(StringBuilder buffer, String... command) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null){
+            buffer.append(line + EOL);
+            process.waitFor();
+        }
+    }
+
+    /**
+     * Starts a Process.
+     * @param command commands
+     * @return Process object.
+     * @throws Exception
+     */
+    public Process exec(String... command) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        return pb.start();
+    }
+
+    /**
+     * Prints object.toString() to stdout.
+     * @param s
+     */
+    public void out(Object s){
+        System.out.println(s.toString());
+    }
+
+    /**
+     * Reads a file by readLine() and returns as String.
+     * @param file File to read.
+     * @return
+     */
+    public String readFile(String file) {
+        StringBuilder sb = new StringBuilder();
+        try{
+            BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String line = null;
+            while((line=r.readLine())!=null){
+                sb.append(line + EOL);
+            }
+            r.close();
+            return sb.toString();
+        }catch(IOException ex){
+            System.err.println(ex);
+            return null;
+        }
+    }
+
+    /**
+     * Reads a file by readLine() and returns as String.
+     * @param file File to read.
+     * @return
+     */
+    public String readFile(File file) {
+        return this.readFile(file.getAbsolutePath());
+    }
+
+    /**
+     * Searches string, line by line, for indexOf(find).
+     * @param string String to search
+     * @param find word to find.
+     * @return String of 'hits'. Line separated.
+     */
+    public String filter(String string, String find){
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader r = new BufferedReader(new StringReader(string));
+            String line = null;
+            while ((line = r.readLine()) != null) {
+                if(line.indexOf(find)>-1){
+                    sb.append(line + "\r\n");
+                }
+            }
+            return sb.toString();
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     * Writes text lines to file.
+     * @param file File to write to
+     * @param string string of lines.
+     * @return
+     */
+    public boolean writeLines(File file, String string){
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, false)));
+            String str = string.replace("\r","");
+            for(String s:str.split("\n")){
+                out.println(s);
+            }
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Writes string to File.
+     * @param file File to write to
+     * @param string string to be written.
+     * @return
+     */
+    public boolean writeFile(File file, String string){
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, false)));
+            out.println(string);
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Appends string to file.
+     * @param file File to be appended.
+     * @param string string to append.
+     * @return
+     */
+    public boolean appendFile(File file, String string){
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+            out.println(string);
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Shows a JOptionPane.showMessageDialog with JOptionPane.INFORMATION_MESSAGE.
+     * @param message message to show.
+     */
+    public void alert(String message){
+        javax.swing.JOptionPane.showMessageDialog(null,message,"alert", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Shows a JOptionPane.showMessageDialog with JOptionPane.INFORMATION_MESSAGE.
+     * @param title title to show.
+     * @param message message to show.
+     */
+    public void alert(String title, String message){
+        javax.swing.JOptionPane.showMessageDialog(null,message,title, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Shows a JOptionPane.showMessageDialog() with JOptionPane.ERROR_MESSAGE.
+     * @param title
+     * @param message
+     */
+    public void errorAlert(String title, String message){
+        javax.swing.JOptionPane.showMessageDialog(null,message,title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Sends a 'GET' request and returns the response as String.
+     * @param url URL to request.
+     * @return Response from URL.
+     * @throws Exception
+     */
+    public String sendGet(String url) throws Exception {
+        String resp = null;
+        try {
+            String USER_AGENT = "Mozilla/5.0";
+
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            // optional default is GET
+            con.setRequestMethod("GET");
+
+            //add request header
+            con.setRequestProperty("User-Agent", USER_AGENT);
+
+            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine + "\r\n");
+            }
+            in.close();
+            resp=response.toString();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return resp;
+
+    }
+
+
+    /**
+     * Sends a 'POST' request to URL.
+     * @param url URL to request.
+     * @param urlParameters POST parameters, name=value.
+     * @return Response from URL.
+     */
+    public String sendPost(String url, String urlParameters) {
+        String resp = null;
+        try {
+            String USER_AGENT = "Mozilla/5.0";
+            URL obj = new URL(url);
+            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+            //add reuqest header
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+            // Send post request
+            con.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(urlParameters);
+            wr.flush();
+            wr.close();
+
+            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            resp=response.toString();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return resp;
+    }
+
+    /**
+     * Shows a JFileChooser.showOpenDialog
+     * @param c Parent component
+     * @param currentDir Set current directory.
+     * @return Selected File or null if aborted.
+     */
+    public File showOpenFileDialog(Component c, File currentDir){
+        JFileChooser fc = new JFileChooser();
+        fc.setCurrentDirectory(currentDir);
+        int returnVal = fc.showOpenDialog(c);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            return fc.getSelectedFile();
+        }
+    return null;
+    }
+
+    /**
+     * Shows a JFileChooser.showSaveDialog
+     * @param c Parent component
+     * @param currentDir Set current directory.
+     * @return Selected File or null if aborted.
+     */
+    public File showSaveFileDialog(Component c, File currentDir){
+        JFileChooser fc = new JFileChooser();
+        fc.setCurrentDirectory(currentDir);
+        int returnVal = fc.showSaveDialog(c);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            return fc.getSelectedFile();
+        }
+        return null;
+    }
+
+    /**
+     * Traverses recursevly the given directory and returns List<File>.
+     * @param file Directory to search.
+     * @param result List of Files found.
+     * @param find File to be found.
+     */
+    public void findFile(File file, List<File> result, String find) {
+        File[] files = file.listFiles();
+        for(File f:files){
+            if(f.isDirectory()){
+                findFile(f,result,find);
+            }else{
+                if(f.getName().indexOf(find)>-1){
+                    result.add(f);
+                }
+            }
+        }
+    }
+
+    /**
+     * Zip a directory
+     * @param directory Directory to be zipped
+     * @param zipfile Zip file to create.
+     * @throws IOException
+     */
+    public void zip(File directory, File zipfile) throws IOException {
+        URI base = directory.toURI();
+        Deque<File> queue = new LinkedList<File>();
+        queue.push(directory);
+        OutputStream out = new FileOutputStream(zipfile);
+        Closeable res = out;
+        try {
+            ZipOutputStream zout = new ZipOutputStream(out);
+            res = zout;
+            while (!queue.isEmpty()) {
+                directory = queue.pop();
+                for (File kid : directory.listFiles()) {
+                    String name = base.relativize(kid.toURI()).getPath();
+                    if (kid.isDirectory()) {
+                        queue.push(kid);
+                        name = name.endsWith("/") ? name : name + "/";
+                        zout.putNextEntry(new ZipEntry(name));
+                    } else {
+                        zout.putNextEntry(new ZipEntry(name));
+                        copy(kid, zout);
+                        zout.closeEntry();
+                    }
+                }
+            }
+        } finally {
+            res.close();
+        }
+    }
+
+    /**
+     * unzip a directory
+     * @param directory Destination directory
+     * @param zipfile Zip file to be unzipped
+     * @throws IOException
+     */
+    public void unzip(File zipfile, File directory) throws IOException {
+        ZipFile zfile = new ZipFile(zipfile);
+        Enumeration<? extends ZipEntry> entries = zfile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            File file = new File(directory, entry.getName());
+            if (entry.isDirectory()) {
+                file.mkdirs();
+            } else {
+                file.getParentFile().mkdirs();
+                InputStream in = zfile.getInputStream(entry);
+                try {
+                    copy(in, file);
+                } finally {
+                    in.close();
+                }
+            }
+        }
+    }
+
+    private void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        while (true) {
+            int readCount = in.read(buffer);
+            if (readCount < 0) {
+                break;
+            }
+            out.write(buffer, 0, readCount);
+        }
+    }
+
+    private void copy(File file, OutputStream out) throws IOException {
+        InputStream in = new FileInputStream(file);
+        try {
+            copy(in, out);
+        } finally {
+            in.close();
+        }
+    }
+
+    private void copy(InputStream in, File file) throws IOException {
+        OutputStream out = new FileOutputStream(file);
+        try {
+            copy(in, out);
+        } finally {
+            out.close();
+        }
+    }
+}
+
+
+
+
+
+</code>
+</pre>
+</html>

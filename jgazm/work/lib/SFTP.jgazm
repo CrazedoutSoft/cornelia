@@ -1,0 +1,52 @@
+
+@classpath "./lib/res/jsch-0.1.53.jar"
+
+@import com.jcraft.jsch.*;
+
+
+@class
+public class SFTP {
+    
+    private JSch jsch = new JSch();
+    private Session session = null;
+    private Channel channel;
+
+    public SFTP(String host, String username, String password) throws JSchException {
+        this(host, username, password, 22);
+    }
+
+	public SFTP(String host, String username, String password, int port) throws JSchException {
+            session = jsch.getSession(username, host, port);
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.setPassword(password);
+            session.connect();
+            channel = session.openChannel("sftp");
+            channel.connect();
+	}
+
+	public File getFile(String file) throws SftpException, IOException {
+        ChannelSftp sftpChannel = (ChannelSftp) channel;
+        File temp = File.createTempFile("sftp",null);
+        temp.deleteOnExit();
+        sftpChannel.get(file, temp.getAbsolutePath());
+        sftpChannel.exit();
+        return temp;
+	}
+
+	public Channel getChannel(){
+        return this.channel;
+	}
+
+	public void close() {
+        session.disconnect();
+	}
+}
+
+
+
+
+
+
+
+
+

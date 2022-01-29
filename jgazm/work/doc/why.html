@@ -1,0 +1,35 @@
+<html>
+<head>
+<style>
+ body{
+	font-family: verdana;
+	font-size: 12px;
+ }
+</style>
+
+</head>
+<body>
+<center>
+<table width="600"><tr><td>
+<h2>Why jGazm?</h2>
+
+Java is a very powerful coding language but has a very high setup/startup overhead.
+When wanting to use the Java language for smaller or temporary assignments it's is a pain to go through the
+boilerplate coding of setting up a class and static void main etc. Then you have to compile the source and run the
+class separately. What if there was a way to execute Java code directly without the hassle of creating the class overhead.<p>
+<b>jGazm</b> is created for tht soul purpose to execute Java code on the fly, right of the bat without a IDE or java/javac.
+It can also be used to create batch files or other scripting jobs as file parsing, FTP/HTTP downloads, instant database access and so on...
+<p>
+<h2>Running jGazm programs without jGazm</h2>
+By using the command line option <i><b>-export</b></i> all the class files, resources, classpaths etc, will be exported and packed in a executable jar file.
+This means the you can distribute you jGazm program as a standard Java program with ease.
+<pre><code>
+>jgazm -stdin -export:C:\\myexport\\MyApp.jar
+alert("Hello from pure Java");
+.
+Exported to:C:\myexport\MyApp.jar
+</td></tr></table>
+</center>
+
+</body>
+</html>

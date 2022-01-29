@@ -1,0 +1,80 @@
+
+@import java.io.*;
+@import java.sql.*;
+
+@class
+public class JDBC<T>
+{
+    private Connection con;
+
+    private JDBC(final String url, final String user, final String passwd) {
+        try {
+            this.con = DriverManager.getConnection(url, user, passwd);
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public JDBC getJDBC(final String url, final String user, final String passwd){
+        return new JDBC(url,user,passwd);
+    }
+
+    public void printQuery(final PrintStream out, final String sql) {
+        try {
+            final Statement stmt = this.con.createStatement();
+            final ResultSet rs = stmt.executeQuery(sql);
+            final ResultSetMetaData meta = rs.getMetaData();
+            for (int i = 0; i < meta.getColumnCount() - 1; ++i) {
+                final String text = meta.getColumnLabel(i + 1);
+                final int n = meta.getColumnDisplaySize(i + 1);
+                final int s = n - text.length();
+                out.print(text);
+                for (int a = 0; a < s; ++a) {
+                    out.print(" ");
+                }
+                out.print("|");
+            }
+            out.println();
+            while (rs.next()) {
+                for (int i = 0; i < meta.getColumnCount() - 1; ++i) {
+                    try {
+                        final Object obj = rs.getObject(i + 1);
+                        final String str = (obj != null) ? obj.toString() : "null";
+                        final int n2 = meta.getColumnDisplaySize(i + 1);
+                        final int s2 = n2 - str.length();
+                        out.print(str);
+                        for (int a2 = 0; a2 < s2; ++a2) {
+                            out.print(" ");
+                        }
+                        out.print("|");
+                    }
+                    catch (Exception ex2) {
+                        out.print("(NA)");
+                    }
+                }
+                out.println();
+            }
+            rs.close();
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public T query(final String sql) {
+        try {
+            final Statement stmt = this.con.createStatement();
+            final ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return (T)rs.getObject(1);
+            }
+            rs.close();
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+}
+
