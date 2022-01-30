@@ -79,45 +79,6 @@ int copy_file(const char* orig, const char* newf){
  return r;
 }
 
-/*
-char* list_dir (const http_request* request, char* buffer, int len) {
-
-   DIR *dp;
-   struct dirent *ep;
-   char* tmp = (char*)malloc(1024);
-   char* res = (char*)malloc(1024);
-
-   memset(tmp,0,1024);
-
-  sprintf(tmp,"%s/%s%s",&request->workdir[0], &request->www_root[0], &request->path[0]);
-
-  dp = opendir (tmp);
-  if (dp != NULL){
-
-      while ((ep = readdir (dp))){
-	if(strlen(ep->d_name)<2) continue;
-	if(strcmp(ep->d_name,"..")==0){
-	  sprintf(tmp,"<a href=\"%s\"><img src=\"/res/back.gif\" /> </a><a href=\"%s\">%s</a><br/>\n", ep->d_name, ep->d_name, ep->d_name);
-	}else if(ep->d_type==4){
-	  sprintf(tmp,"<a href=\"%s/\"><img src=\"/res/folder.gif\" /> </a><a href=\"%s/\">%s</a><br/>\n", ep->d_name, ep->d_name, ep->d_name);
-	}else if(ep->d_type==8) {
-	  sprintf(tmp,"<a href=\"%s\"><img src=\"/res/text.gif\" /> </a><a href=\"%s\">%s</a><br/>\n", ep->d_name,ep->d_name, ep->d_name);
-	}
-	strcat(buffer,tmp);
-      }
-       (void) closedir (dp);
-    }
-  else{
-    perror ("Couldn't open the directory for listing");
-  }
-
-  free(res);
-  free(tmp);
-
-  return buffer;
-}
-*/
-
 int file_exists(const char* file){
 
    FILE *fd;
