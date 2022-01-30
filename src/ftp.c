@@ -59,6 +59,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define WORD	unsigned int
 #define MAX_ALLOC	65536
 
+int setenv(const char *name, const char *value, int overwrite);
+
 typedef struct clientAddr_ {
 
 	char ip[20];
@@ -736,22 +738,65 @@ void usage(){
 	printf("Cornelia simple FTP Server\n");
 	printf("CrazedoutSoft (c) 2022\n\n");
 	printf("usage:\n");
-	printf("ftp_cornelia [pasv ip adress] -lip [list availbale ip adresses]\n");
+	printf("ftp_cornelia -bind <ip> -port <port> -lip [list availbale ip adresses]\n");
 	printf("Example:\n");
 	printf(">ftp_cornelia -lip\n");
 	printf("eth0 IP Address 169.254.255.169\nlo IP Address 127.0.0.1\nwifi0 IP Address 192.168.10.145\n");
-	printf("\n>ftp_cornelia 192.168.10.145\n\n");
-
+	printf("\n>ftp_cornelia -bind 192.168.10.145 -port 8021\n\n");
 }
 
 int main(int args, char* argv[]){
 
-	if(args>1){
-	  if(strcmp(argv[1],"-lip")==0) {
+	char* dir = (char*)malloc(1024);
+	char* bind = (char*)malloc(20);
+	char* port = (char*)malloc(20);
+
+	get_work_dir(dir,1024);
+
+	if(getenv("CORNELIA_HOME")==NULL){
+	  printf("env CORNELIA_HOME should be set to cornelia_d workdir\n");
+	  printf("export CORNELIA_HOME=<dir of cornelia_d>\n");
+	  printf("Asuming: %s - Lets's try it..\n", dir);
+	  setenv("CORNELIA_HOME",dir,1);
+	}
+	free(dir);
+
+	if(args<2) {
+	  usage();
+	  free(dir);
+	  free(bind);
+	  free(port);
+	  return 0;
+	}
+
+	for(int i = 0; i < args; i++){
+
+	  if(strcmp(argv[i],"-bind")==0){
+	   if(i<args-1) strcpy(bind,argv[i+1]);
+	  }
+	  else if(strcmp(argv[i],"-lip")==0) {
 	    list_ip();
 	    return 0;
-	  }else init_server(argv[1], atoi(argv[2]));
-	}else usage();
+	  }
+	  else if(strcmp(argv[i],"-port")==0){
+	   if(i<args-1) strcpy(port,argv[i+1]);
+	  }
+	}
+
+	if(strlen(bind)==0){
+	 strcpy(bind, "127.0.0.1");
+	 printf("Bind adress missing. defaulting to 127.0.0.1\n");
+	}
+	if(strlen(port)==0){
+	 strcpy(port, "8021");
+	 printf("port missing. defaulting to 8021\n");
+	}
+
+	init_server(bind, atoi(port));
+
+	free(dir);
+	free(bind);
+	free(port);
 
   return 0;
 }
