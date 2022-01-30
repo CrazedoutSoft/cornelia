@@ -29,6 +29,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
+#include <sys/stat.h>
 
 #define SOCKET unsigned int
 
@@ -46,6 +47,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TYPE "TYPE"
 #define PASV "PASV"
 #define STOR "STOR"
+#define QUIT "QUIT"
+#define MKD  "MKD"
+#define RNFR "RNFR"
+#define RNTO "RNTO"
 
 #define BINARY 'I'
 #define ASCII  'A'
@@ -81,6 +86,7 @@ typedef struct _ftp_session_ {
 	char pasv_ip[20];
 	unsigned int pasv_port;
 	unsigned int pasv_sockfd;
+	char* tmp_value;
 
 } ftp_session;
 
@@ -135,6 +141,10 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session);
 int type(SOCKET sockfd, const char* value, ftp_session* session);
 int pasv(SOCKET sockfd, ftp_session* session);
 int stor(SOCKET sockfd, const char* value, ftp_session* session);
+int mkd(SOCKET sockfd, const char* value);
+int rnfr(SOCKET sockfd, ftp_session* session, const char* value);
+int rnto(SOCKET sockfd, ftp_session* session, const char* value);
+
 
 int open_server_sock(ftp_session* session){
 
@@ -338,7 +348,9 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *ptr;
 	char verb[12];
 	char *value = NULL;
+	char *value2 = NULL;
 	int r = 0;
+
 
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
@@ -355,7 +367,16 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	   strcpy(value, clip(ptr));
 	   value=clip(value);
 	  }
+	  ptr=strtok(NULL," ");
+	  if(ptr!=NULL){
+	   value2=(char*)malloc(strlen(ptr));
+	   memset(value2,0, strlen(ptr));
+	   strcpy(value2, clip(ptr));
+	   value=clip(value2);
+	  }
 	}
+
+	//printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, value);
@@ -369,6 +390,8 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],CWD)==0) r=cwd(sockfd, value);
 	else if(strcmp(&verb[0],TYPE)==0) r=type(sockfd,value,session);
 	else if(strcmp(&verb[0],PASV)==0) r=pasv(sockfd,session);
+	else if(strcmp(&verb[0],RNFR)==0) r=rnfr(sockfd,session,value);
+	else if(strcmp(&verb[0],RNTO)==0) r=rnto(sockfd,session,value);
 	else{
 	  strcpy(buffer,"502 Command not implemented.\r\n");
 	  r=sock_write(sockfd,buffer,strlen(buffer));
@@ -388,6 +411,59 @@ char* toHiLow(int num, char* buffer){
 	sprintf(buffer,"%d,%d", hi,low);
 
  return buffer;
+}
+
+int rnto(SOCKET sockfd, ftp_session* session, const char* value){
+
+	char* buffer = (char*)malloc(256);
+	char err[] = "550 Requested action not taken; file unavailable...\r\n";
+
+	if(session->tmp_value!=NULL){
+	  if(rename(session->tmp_value, value)==0){
+	    strcpy(buffer,"250 Requested file action okay, completed.\r\n");
+	  }else{
+	    strcpy(buffer,&err[0]);
+	  }
+	  free(session->tmp_value);
+	}else{
+	  strcpy(buffer,&err[0]);
+	}
+	sock_write(sockfd, buffer, strlen(buffer));
+	free(buffer);
+ return 1;
+}
+
+int rnfr(SOCKET sockfd, ftp_session* session, const char* value){
+
+	char* buffer = (char*)malloc(256);
+	FILE* fd;
+	if((fd=fopen(value,"r"))!=NULL){
+	  strcpy(buffer,"350 RNFR accepted. Please supply new name for RNTO.\r\n");
+	  session->tmp_value=(char*)malloc(1024);
+	  strcpy(session->tmp_value, value);
+	  fclose(fd);
+	}else{
+	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
+	}
+	sock_write(sockfd, buffer, strlen(buffer));
+	free(buffer);
+
+  return 1;
+}
+
+int mkd(SOCKET sockfd, const char* value){
+
+	char* buffer = (char*)malloc(256);
+	if(mkdir(value, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)==0){
+	  sprintf(buffer, "257 \"%s\" : The directory was successfully created\r\n", value);
+	}else{
+	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
+	}
+	sock_write(sockfd, buffer, strlen(buffer));
+	free(buffer);
+
+
+ return 1;
 }
 
 int pasv(SOCKET sockfd, ftp_session* session){
