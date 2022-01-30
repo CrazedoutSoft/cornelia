@@ -375,7 +375,7 @@ int find_default_page(http_request* request){
 	char* ptr;
 	char* fi = (char*)malloc(MAX_ALLOC);
 	int found=0;
-	char* tmp = (char*)malloc(strlen(&serv_conf.default_page[0]));
+	char* tmp = (char*)malloc(MAX_ALLOC);
 
 	strcpy(tmp,&serv_conf.default_page[0]);
 	ptr=strtok(tmp,",");
