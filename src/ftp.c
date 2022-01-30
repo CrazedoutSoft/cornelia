@@ -80,6 +80,7 @@ typedef struct _ftp_session_ {
 	struct sockaddr_in addr;
 	char pasv_ip[20];
 	unsigned int pasv_port;
+	unsigned int pasv_sockfd;
 
 } ftp_session;
 
@@ -141,12 +142,14 @@ int open_server_sock(ftp_session* session){
 	struct sockaddr_in cli_addr;
 	unsigned int clilen;
 
-	session->cAddr.sockfd=0;
+	session->pasv_sockfd=0;
 	servsock=create_socket(session->pasv_port);
-         if((session->cAddr.sockfd = accept(servsock, (struct sockaddr *) &cli_addr, &clilen))<0){
+         if((session->pasv_sockfd = accept(servsock, (struct sockaddr *) &cli_addr, &clilen))<0){
             perror("Accept error: pasv\n");
             return -1;
           }
+
+	printf("Accept:%d\n",session->pasv_port);
 
  return 0;
 }
@@ -182,7 +185,7 @@ int ftp_stor(SOCKET sockfd, const char* value, ftp_session* session){
         if(session->mode==MODE_ACTIVE){
           s = open_socket_by_ip(&session->cAddr.ip[0], session->cAddr.port);
         }else{
-          s=session->cAddr.sockfd;
+          s=session->pasv_sockfd;
         }
         if(s<0){
          printf("Socket fail %s %d\n", &session->cAddr.ip[0], session->cAddr.port);
@@ -222,7 +225,7 @@ int ftp_retr(SOCKET sockfd, const char* value, ftp_session* session){
 	if(session->mode==MODE_ACTIVE){
           s = open_socket_by_ip(&session->cAddr.ip[0], session->cAddr.port);
 	}else{
-	  s=session->cAddr.sockfd;
+	  s=session->pasv_sockfd;
 	}
         if(s<0){
          printf("Socket fail %s %d\n", &session->cAddr.ip[0], session->cAddr.port);
@@ -247,6 +250,7 @@ int ftp_retr(SOCKET sockfd, const char* value, ftp_session* session){
 	  shutdown(session->cAddr.sockfd,SHUT_RDWR);
 	}
         free(buffer);
+
 return r;
 }
 
@@ -264,14 +268,14 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 
 	int n = 0;
 	int r=0;
-	char* buffer = (char*)malloc(MAX_ALLOC);
+	char* buffer = (char*)malloc(1024);
         char* argv[5];
 	SOCKET s;
 
 	if(session->mode==MODE_ACTIVE){
 	  s = open_socket_by_ip(&session->cAddr.ip[0], session->cAddr.port);
 	}else{
-	  s=session->cAddr.sockfd;
+	  s=session->pasv_sockfd;
 	}
 	if(s<0){
 	 printf("Socket fail %s %d\n", &session->cAddr.ip[0], session->cAddr.port);
@@ -308,11 +312,12 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 	  perror("bad fork() list dir\n");
 	}else{
 	  close(pipefd[1]);
-	  char* ptr;
-	  while((r=read(pipefd[0], buffer, MAX_ALLOC))>0){
-	    ptr=strstr(buffer, "\n")+1;
-	    r=sock_write(s,ptr,strlen(ptr));
+	  memset(buffer,0,1024);
+	  while((r=read(pipefd[0], buffer, 1024))){
+	      buffer[r]='\0';
+	      r=sock_write(s,buffer,strlen(buffer));
 	  }
+	  close(pipefd[0]);
 	  strcpy(buffer,"226 Closing data connection.\r\n");
 	  r=sock_write(sockfd, buffer, strlen(buffer));
 	  shutdown(s,SHUT_RDWR);
@@ -391,6 +396,7 @@ int pasv(SOCKET sockfd, ftp_session* session){
 	char* buffer = (char*)malloc(1024);
 	char hilow[8];
 	session->pasv_port++;
+	session->mode=MODE_PASV;
 	//TODO: Need to fix pasv_port range.
 	sprintf(buffer,"227 Entering Passive Mode (%s,%s)\r\n", &session->pasv_ip[0], toHiLow(session->pasv_port,&hilow[0]));
 	r=sock_write(sockfd, buffer, strlen(buffer));
@@ -563,7 +569,6 @@ int port(SOCKET sockfd, char* value, ftp_session* session){
 	port = p1*256+p2;
 
 	session->mode=MODE_ACTIVE;
-	session->type=ASCII;
 	session->cAddr.port=port;
 	strcpy(&session->cAddr.ip[0], &ip[0]);
 
@@ -683,7 +688,8 @@ void init_server(char* pasv_ip, int port, const char* root) {
     	sock = create_socket(port);
 	int connections=0;
 
-	printf("Cornelia FTP Server listening on %s:%d at %s/%s\n", pasv_ip, port, getenv("CORNELIA_HOME"), root);
+	printf("Cornelia FTP Server listening on %s:%d at %s\n", pasv_ip, port, root);
+
 	while(loop){
           int client = accept(sock, (struct sockaddr*)&addr, &len);
 	  connections++;
@@ -695,7 +701,11 @@ void init_server(char* pasv_ip, int port, const char* root) {
 		ftp_session session;
 		memset(&session,0,sizeof(ftp_session));
 		session.addr=addr;
-		sprintf(&session.workdir[0], "%s/%s", getenv("CORNELIA_HOME"), root);
+		if(root[0]=='/'){
+		  sprintf(&session.workdir[0], "%s", root);
+		}else{
+		  sprintf(&session.workdir[0], "%s/%s", getenv("CORNELIA_HOME"), root);
+		}
 		strcpy(&session.pasv_ip[0], parse_pasv_ip(pasv_ip));
 		session.pasv_port=port_base + (connections*30);
 	        pV4Addr = (struct sockaddr_in*)&cli;
