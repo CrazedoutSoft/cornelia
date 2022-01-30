@@ -639,10 +639,6 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 	char* buffer = (char*)malloc(1024);
 	int r;
 
-	printf("session pasv:%d\n", session->pasv_port);
-
-	sprintf(&session->workdir[0], "%s/ftp", getenv("CORNELIA_HOME"));
-
 	if(chdir(&session->workdir[0])==-1){
 	 printf("Error: can't chdir.\n");
 	 return;
@@ -676,7 +672,7 @@ char* parse_pasv_ip(char* ip){
  return ip;
 }
 
-void init_server(char* pasv_ip, int port) {
+void init_server(char* pasv_ip, int port, const char* root) {
 
     	int sock;
 	struct sockaddr_in* pV4Addr;
@@ -687,7 +683,7 @@ void init_server(char* pasv_ip, int port) {
     	sock = create_socket(port);
 	int connections=0;
 
-	printf("Cornelia FTP Server listening on %s %d\n", pasv_ip, port);
+	printf("Cornelia FTP Server listening on %s:%d at %s/%s\n", pasv_ip, port, getenv("CORNELIA_HOME"), root);
 	while(loop){
           int client = accept(sock, (struct sockaddr*)&addr, &len);
 	  connections++;
@@ -699,6 +695,7 @@ void init_server(char* pasv_ip, int port) {
 		ftp_session session;
 		memset(&session,0,sizeof(ftp_session));
 		session.addr=addr;
+		sprintf(&session.workdir[0], "%s/%s", getenv("CORNELIA_HOME"), root);
 		strcpy(&session.pasv_ip[0], parse_pasv_ip(pasv_ip));
 		session.pasv_port=port_base + (connections*30);
 	        pV4Addr = (struct sockaddr_in*)&cli;
@@ -750,6 +747,7 @@ int main(int args, char* argv[]){
 	char* dir = (char*)malloc(1024);
 	char* bind = (char*)malloc(20);
 	char* port = (char*)malloc(20);
+	char* root = (char*)malloc(2048);
 
 	get_work_dir(dir,1024);
 
@@ -763,6 +761,7 @@ int main(int args, char* argv[]){
 
 	if(args<2) {
 	  usage();
+	  free(root);
 	  free(dir);
 	  free(bind);
 	  free(port);
@@ -781,19 +780,27 @@ int main(int args, char* argv[]){
 	  else if(strcmp(argv[i],"-port")==0){
 	   if(i<args-1) strcpy(port,argv[i+1]);
 	  }
+	  else if(strcmp(argv[i],"-root")==0){
+	   if(i<args-1) strcpy(root,argv[i+1]);
+	  }
 	}
 
 	if(strlen(bind)==0){
 	 strcpy(bind, "127.0.0.1");
-	 printf("Bind adress missing. defaulting to 127.0.0.1\n");
+	 printf("Bind adress missing - defaulting to 127.0.0.1\n");
 	}
 	if(strlen(port)==0){
 	 strcpy(port, "8021");
-	 printf("port missing. defaulting to 8021\n");
+	 printf("Port missing - defaulting to 8021\n");
+	}
+	if(strlen(root)==0){
+	 strcpy(root, "ftp");
+	 printf("Root dir missing - defaulting to $CORNELIA_HOME/ftp\n");
 	}
 
-	init_server(bind, atoi(port));
+	init_server(bind, atoi(port), root);
 
+	free(root);
 	free(dir);
 	free(bind);
 	free(port);
