@@ -29,6 +29,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define AUTH_CONF   		"[auth_conf]"
 #define CONTENT_TYPE_CONF   	"[content_type_conf]"
 #define CGI_BIN_CONF		"[cgi_exec_conf]"
+#define VHOSTS_CONF		"[virtual_hosts]"
 
 void read_server_conf(FILE* fd, server_conf* serv){
 
@@ -198,6 +199,8 @@ void read_cgi_bin(FILE* fd, server_conf* serv){
    while(fgets(buffer,1024,fd)!=NULL){
 
         if(strcmp(clip(buffer),CGI_BIN_CONF)==0) break;
+	if(buffer[0]=='#') continue;
+
 	if(buffer[0]=='.'){
 	 ptr=strtok(buffer,"=");
 	 if(ptr!=NULL){
@@ -218,6 +221,46 @@ void read_cgi_bin(FILE* fd, server_conf* serv){
 
 }
 
+void read_vhosts(FILE* fd, server_conf* serv){
+
+	int n = 0;
+	char* buffer = (char*)malloc(1024);
+	char* mem = (char*)malloc(1024);
+	char* tmp = (char*)malloc(256);
+	char* ptr;
+	char* ptr2;
+
+   	while(fgets(buffer,1024,fd)!=NULL){
+
+	  if(strcmp(clip(buffer),VHOSTS_CONF)==0) break;
+	  if(buffer[0]=='#') continue;
+	  if(strlen(buffer)==0) continue;
+
+	  strcpy(mem, buffer);
+  	  serv->v_hosts[n] = (virtual_host*)malloc(sizeof(virtual_host));
+	  memset(serv->v_hosts[n],0,sizeof(virtual_host));
+	  serv->v_hosts[n]->port=80;
+	   if((ptr=strtok(mem,";"))!=NULL){
+	     strcpy(&serv->v_hosts[n]->name[0],ptr);
+	     strcpy(tmp, ptr);
+	     if((ptr2=strtok(tmp,":"))!=NULL){
+	       strcpy(&serv->v_hosts[n]->name[0],ptr2);
+	       if((ptr2=strtok(NULL,":"))!=NULL){
+		 serv->v_hosts[n]->port=atoi(ptr2);
+	       }
+	     }
+	   }
+	   if((ptr=strstr(buffer,";"))!=NULL){
+	     strcpy(&serv->v_hosts[n]->path[0],ptr+1);
+	   }
+	n++;
+	}
+	serv->v_hosts[n]=NULL;
+
+	free(buffer);
+	free(tmp);
+}
+
 int init_conf(const char* conf_file, server_conf *serv, auth_conf *auth){
 
     char* buffer = (char*)malloc(1024);
@@ -228,6 +271,7 @@ int init_conf(const char* conf_file, server_conf *serv, auth_conf *auth){
 	 else if(strcmp(clip(buffer),AUTH_CONF)==0) read_auth_conf(fd,serv,auth);
 	 else if(strcmp(clip(buffer),CONTENT_TYPE_CONF)==0) read_content_types(fd,serv);
 	 else if(strcmp(clip(buffer),CGI_BIN_CONF)==0) read_cgi_bin(fd,serv);
+	 else if(strcmp(clip(buffer),VHOSTS_CONF)==0) read_vhosts(fd,serv);
 	}
     }else{
      fprintf(stderr, "Bad conf file:%s\n", conf_file);

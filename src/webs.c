@@ -984,6 +984,13 @@ void dump_conf(){
 	  n++;
 	}
 
+	n=0;
+	while(1){
+	  if(serv_conf.v_hosts[n]==NULL) break;
+	  printf("%s:%d/%s\n", &serv_conf.v_hosts[n]->name[0], serv_conf.v_hosts[n]->port, &serv_conf.v_hosts[n]->path[0]);
+	  n++;
+	}
+
 }
 
 int read_http_responses(){
