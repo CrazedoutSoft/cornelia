@@ -257,6 +257,7 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	}
 	serv->v_hosts[n]=NULL;
 
+	free(mem);
 	free(buffer);
 	free(tmp);
 }
