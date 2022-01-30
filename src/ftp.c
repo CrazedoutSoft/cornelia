@@ -87,6 +87,8 @@ typedef struct _ftp_session_ {
 	unsigned int pasv_port;
 	unsigned int pasv_sockfd;
 	char* tmp_value;
+	char user[64];
+	char pass[64];
 
 } ftp_session;
 
@@ -128,8 +130,8 @@ int sock_read(unsigned int sockfd, char* buffer, int len){
 
 char* ftp_resolve_pasv(struct sockaddr_in* sockAddr, char* ipaddr);
 
-int pass(SOCKET sockfd, const char* value);
-int user(SOCKET sockfd, const char* value);
+int pass(SOCKET sockfd, ftp_session* session, const char* value);
+int user(SOCKET sockfd, ftp_session* session, const char* value);
 int quit(SOCKET sockfd, const char* value);
 int noop(SOCKET sockfd, const char* value);
 int syst(SOCKET sockfd, const char* value);
@@ -144,6 +146,7 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session);
 int mkd(SOCKET sockfd, const char* value);
 int rnfr(SOCKET sockfd, ftp_session* session, const char* value);
 int rnto(SOCKET sockfd, ftp_session* session, const char* value);
+int login(ftp_session* session);
 
 
 int open_server_sock(ftp_session* session){
@@ -378,8 +381,8 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 
 	//printf("%s %s %s\n", &verb[0], value, value2);
 
-	if(strcmp(&verb[0],USER)==0) r=user(sockfd, value);
-	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, value);
+	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
+	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
 	else if(strcmp(&verb[0],QUIT)==0) r=quit(sockfd, value);
 	else if(strcmp(&verb[0],SYST)==0) r=syst(sockfd, value);
 	else if(strcmp(&verb[0],PORT)==0) r=port(sockfd, value, session);
@@ -679,11 +682,16 @@ int syst(SOCKET sockfd, const char* value){
  return r;
 }
 
-int pass(SOCKET sockfd, const char* value){
+int pass(SOCKET sockfd, ftp_session* session, const char* value){
 
         int r;
         char* buffer = (char*)malloc(256);
-        strcpy(buffer,"230 Login successful.\r\n");
+	strcpy(&session->pass[0],value);
+	if(login(session)){
+          strcpy(buffer,"230 Login successful.\r\n");
+	}else{
+	  strcpy(buffer,"530 Login incorrect.\r\n");
+	}
         r=sock_write(sockfd, buffer, strlen(buffer));
         free(buffer);
 
@@ -691,15 +699,20 @@ int pass(SOCKET sockfd, const char* value){
 }
 
 
-int user(SOCKET sockfd, const char* value){
+int user(SOCKET sockfd, ftp_session* session, const char* value){
 
 	int r;
 	char* buffer = (char*)malloc(256);
+	strcpy(&session->user[0],value);
 	strcpy(buffer,"331 Please, specify the password.\r\n");
 	r=sock_write(sockfd, buffer, strlen(buffer));
 	free(buffer);
 
  return r;
+}
+
+int login(ftp_session* session){
+  return 1;
 }
 
 char* ftp_resolve_pasv(struct sockaddr_in* sockAddr, char* ipaddr){
