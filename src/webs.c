@@ -21,6 +21,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE S
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "../include/mkpasswd.h"
 #include "../include/tls.h"
 #include "../include/ssl.h"
 #include "../include/conf.h"
@@ -40,6 +41,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/time.h>
 #include <poll.h>
 #include <time.h>
+#include <crypt.h>
 
 #define SA struct sockaddr
 #define AUTH_REQUEST_SENT	0
@@ -595,14 +597,33 @@ char* getExecutable(const char* file){
  return NULL;
 }
 
+char* get_user(const char* basic, char* buff){
+
+	char* ptr;
+	if((ptr=strstr(basic,":"))!=NULL){
+	  int i=ptr-basic;
+	  strcpy(buff, basic);
+	  buff[i] = '\0';
+	}
+
+  return buff;
+}
+
+char* get_passwd(const char* basic){
+	return strstr(basic,":")+1;
+}
+
 int handle_auth(http_request* request){
 
 	 int len;
 	 char* tmp = (char*)malloc(1024);
+	 char* cmp = (char*)malloc(1024);
 	 int handled=AUTH_OK;
 	 char* basic;
 	 int n = 0;
 	 char* decode;
+	 char* user;
+	 char* passwd;
 
 	while(1){
 	 if(serv_conf.auth[n]==NULL) break;
@@ -610,9 +631,14 @@ int handle_auth(http_request* request){
 	  if((basic=get_header(request,"Authorization="))!=NULL){
 		decode=(char*)base64_decode((unsigned char*)basic+6, strlen(basic+6), &len);
 	 	decode[len]='\0';
-		if(strcmp(&serv_conf.auth[n]->base64auth[0], decode)==0) {
-		  return AUTH_OK;
-	 	}
+		user=get_user(decode, tmp);
+		passwd=get_passwd(decode);
+		sprintf(cmp, "%s:%s", user, crypt(passwd,SALT));
+		if(strcmp(&serv_conf.auth[n]->base64auth[0],cmp)==0){
+		 free(cmp);
+		 free(tmp);
+		 return AUTH_OK;
+		}
 	    }
 	    strcpy(tmp,"HTTP/1.1 401 Unauthorized\r\n");
 	    socket_write(request,tmp,strlen(tmp));
@@ -630,6 +656,7 @@ int handle_auth(http_request* request){
   	  n++;
 	}
 
+	free(cmp);
 	free(tmp);
 
  return handled;
