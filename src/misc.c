@@ -116,7 +116,7 @@ char *url_encode( char *table, unsigned char *s, char *enc){
 char* toupperc(char* upper, const char* buffer, char stop){
 
         int st=0;
-        for(int i = 0; i < strlen(buffer); i++){
+        for(int i = 0; i < (int)strlen(buffer); i++){
          if(buffer[i]==stop) st=1;
          if(!st) {
           if(buffer[i]=='-') upper[i]='_';
@@ -130,7 +130,7 @@ char* toupperc(char* upper, const char* buffer, char stop){
 
 char* clip(char* buffer){
 
-	for(int i = 0; i < strlen(buffer); i++){
+	for(int i = 0; i < (int)strlen(buffer); i++){
 	  if(buffer[i]=='\r' || buffer[i]=='\n') {
 	    buffer[i]='\0';
 	    break;
@@ -162,11 +162,12 @@ void split(const char* buffer, char* path, char* file, char* qs){
 }
 
 void do_nothing(int r){
+	(void)(r);
 }
 
 int startsw(const char* str, const char* str2){
         int n=0;
-        for(int i = 0; i < strlen(str2); i++){
+        for(int i = 0; i < (int)strlen(str2); i++){
          if(str[i]!=str2[i]) n++;
         }
 
@@ -177,7 +178,7 @@ char* trim(char* buffer){
 	int mark=0;
 	int n=0;
 	char* tmp = (char*)malloc(strlen(buffer));
-	for(int i = 0; i < strlen(buffer); i++){
+	for(int i = 0; i < (int)strlen(buffer); i++){
 	  if(buffer[i]!=' '){
 	    mark=1;
 	  }

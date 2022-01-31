@@ -31,7 +31,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <netinet/in.h>
 #include <sys/stat.h>
 
-#define SOCKET unsigned int
+#define SOCKET int
 
 #define USER "USER"
 #define PASS "PASS"
@@ -84,8 +84,8 @@ typedef struct _ftp_session_ {
 	char workdir[256];
 	struct sockaddr_in addr;
 	char pasv_ip[20];
-	unsigned int pasv_port;
-	unsigned int pasv_sockfd;
+	int pasv_port;
+	int pasv_sockfd;
 	char* tmp_value;
 	char user[64];
 	char pass[64];
@@ -521,22 +521,21 @@ int cwd(SOCKET sockfd, const char* value){
   return r;
 }
 
-void empty(char* c){}
-
 int pwd(SOCKET sockfd, ftp_session* session){
 
         int r;
         char* buffer = (char*)malloc(1024);
         char* dir = (char*)malloc(1024);
 
-	empty(getcwd(dir,1024));
-
-	sprintf(buffer,"257 %s/\r\n",&dir[strlen(&session->workdir[0])]);
+	if(getcwd(dir,1024)==NULL){
+	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
+	}else{
+	  sprintf(buffer,"257 %s/\r\n",&dir[strlen(&session->workdir[0])]);
+	}
 	r=sock_write(sockfd,buffer,strlen(buffer));
-
-	do_nothing(r);
 	free(buffer);
 	free(dir);
+	(void)(r);
 
   return r;
 }
@@ -667,6 +666,7 @@ int quit(SOCKET sockfd, const char* value){
         r=sock_write(sockfd, buffer, strlen(buffer));
 	do_nothing(r);
         free(buffer);
+	(void)(value);
 
  return -1;
 }
@@ -678,6 +678,7 @@ int syst(SOCKET sockfd, const char* value){
         strcpy(buffer,"215 Linux.\r\n");
         r=sock_write(sockfd, buffer, strlen(buffer));
         free(buffer);
+	(void)(value);
 
  return r;
 }
@@ -712,20 +713,8 @@ int user(SOCKET sockfd, ftp_session* session, const char* value){
 }
 
 int login(ftp_session* session){
+	(void)(session);
   return 1;
-}
-
-char* ftp_resolve_pasv(struct sockaddr_in* sockAddr, char* ipaddr){
-
-	int i = 0;
-	strcpy(ipaddr,inet_ntoa(sockAddr->sin_addr));
-	for(i = 0; i < (signed)strlen(ipaddr);i++){
-	if(ipaddr[i]=='.') ipaddr[i] = ',';}
-        sprintf(ipaddr,"%s,%d,%d",ipaddr,
-        HIBYTE(ntohs(sockAddr->sin_port)),
-        LOBYTE(ntohs(sockAddr->sin_port)));
-
- return ipaddr;
 }
 
 void handle_session(unsigned int sockfd, ftp_session* session){
@@ -759,7 +748,7 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 
 char* parse_pasv_ip(char* ip){
 
-	for(int i = 0; i <strlen(ip); i++){
+	for(int i = 0; i < (int)strlen(ip); i++){
 	  if(ip[i]=='.') ip[i]=',';
 	}
 

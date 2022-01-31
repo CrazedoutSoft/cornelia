@@ -26,7 +26,7 @@ If lib errors appears in make process or runtime you may have to copy: <br/>
 to /usr/lib<br/>
 
 test if you have php-cgi installed<br/>
-./php-cgi
+>which php-cgi
 <p/>
 otherwise download and install php-cgi like so:<br/>
 sudo apt install php<br/>

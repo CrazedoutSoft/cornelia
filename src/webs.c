@@ -79,9 +79,10 @@ void usleep(unsigned long);
 
 void init_server() {
 
-	SOCKET connfd;
+	int connfd;
 	SOCKET port = serv_conf.port;
-        unsigned int sockfd, len;
+        int sockfd;
+	unsigned int len;
         struct sockaddr_in servaddr, cli;
         struct sockaddr_in* pV4Addr;
         struct in_addr ipAddr;
@@ -284,7 +285,7 @@ void send_internal_error(http_response* response){
 	free(buffer);
 }
 
-char* list_dir (const char* dir, char* buffer, int len) {
+char* list_dir (const char* dir, char* buffer) {
 
    DIR *dp;
    struct dirent *ep;
@@ -351,7 +352,7 @@ void send_list_dir(const http_request* request){
 	memset(tmp,0,MAX_ALLOC);
 
 	sprintf(dir,"%s/%s%s%s", &serv_conf.workdir[0], &serv_conf.www_root[0], &request->path[0], &request->file[0]);
-	list_dir(dir,buffer,65536);
+	list_dir(dir,buffer);
 	sprintf(tmp,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><html><head><title>%s</title></head><body><h1>Index of %s</h1>\n",
 		&request->path[0], &request->path[0]);
 
@@ -375,7 +376,7 @@ int find_default_page(http_request* request){
 	char* ptr;
 	char* fi = (char*)malloc(MAX_ALLOC);
 	int found=0;
-	char* tmp = (char*)malloc(strlen(&serv_conf.default_page[0]));
+	char* tmp = (char*)malloc(strlen(&serv_conf.default_page[0])+1);
 
 	strcpy(tmp,&serv_conf.default_page[0]);
 	ptr=strtok(tmp,",");
@@ -403,7 +404,7 @@ int find_default_page(http_request* request){
  return found;
 }
 
-char* get_content_type(const http_request* request, char* file, char* ct){
+char* get_content_type(char* file, char* ct){
 
 	char* ptr;
 	char ext[64];
@@ -656,7 +657,7 @@ void doGetPost(http_request *request){
 	}
 
   	response.content_length = get_file_size(&request->path[0], &request->file[0]);
-	strcpy(&response.content_type[0],get_content_type(request,&request->file[0], &ext[0]));
+	strcpy(&response.content_type[0],get_content_type(&request->file[0], &ext[0]));
 
 	if(response.content_length<1){
 	  send_bad_request(&response,"404 Not Found");
@@ -1187,7 +1188,7 @@ int main(int args, char* argv[]){
 	memset(&serv_conf,0,sizeof(server_conf));
 	memset(&a_conf,0,sizeof(auth_conf));
 
-	if(init_conf(&conf_file[0], &serv_conf, &a_conf)>-1){
+	if(init_conf(&conf_file[0], &serv_conf)>-1){
   	  if(user_port>0) serv_conf.port=user_port;
   	  if(user_ssl_port>0) serv_conf.ssl_port=user_ssl_port;
   	  if(user_tsl_port>0) serv_conf.tls_port=user_tsl_port;

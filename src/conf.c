@@ -98,7 +98,7 @@ void read_server_conf(FILE* fd, server_conf* serv){
 
 }
 
-void read_auth_conf(FILE* fd, server_conf *serv, auth_conf *auth){
+void read_auth_conf(FILE* fd, server_conf *serv){
 
     char* buffer = (char*)malloc(1024);
     char* ptr,*tptr;
@@ -262,14 +262,14 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	free(tmp);
 }
 
-int init_conf(const char* conf_file, server_conf *serv, auth_conf *auth){
+int init_conf(const char* conf_file, server_conf *serv){
 
     char* buffer = (char*)malloc(1024);
     FILE* fd;
     if((fd=fopen(conf_file,"r"))!=NULL){
 	while(fgets(buffer,1024,fd)!=NULL){
 	 if(strcmp(clip(buffer),SERVER_CONF)==0) read_server_conf(fd,serv);
-	 else if(strcmp(clip(buffer),AUTH_CONF)==0) read_auth_conf(fd,serv,auth);
+	 else if(strcmp(clip(buffer),AUTH_CONF)==0) read_auth_conf(fd,serv);
 	 else if(strcmp(clip(buffer),CONTENT_TYPE_CONF)==0) read_content_types(fd,serv);
 	 else if(strcmp(clip(buffer),CGI_BIN_CONF)==0) read_cgi_bin(fd,serv);
 	 else if(strcmp(clip(buffer),VHOSTS_CONF)==0) read_vhosts(fd,serv);

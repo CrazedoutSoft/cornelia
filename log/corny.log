@@ -1,4 +1,0 @@
-|127.0.0.1|Sun Jan 30 23:15:02 2022
-GET / HTTP/1.1|127.0.0.1|Sun Jan 30 23:15:11 2022
-GET /corny_logo.png HTTP/1.1|127.0.0.1|Sun Jan 30 23:15:11 2022
-GET /favicon.ico HTTP/1.1|127.0.0.1|Sun Jan 30 23:15:11 2022
