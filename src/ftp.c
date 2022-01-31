@@ -19,6 +19,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE S
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "../include/mkpasswd.h"
 #include "../include/misc.h"
 #include <unistd.h>
 #include <string.h>
@@ -30,6 +31,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <sys/stat.h>
+#include <crypt.h>
 
 #define SOCKET int
 
@@ -65,6 +67,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define WORD	unsigned int
 #define MAX_ALLOC	65536
 
+#define READ    	1
+#define WRITE   	2
+#define CREATE  	4
+
 int setenv(const char *name, const char *value, int overwrite);
 
 typedef struct clientAddr_ {
@@ -90,6 +96,7 @@ typedef struct _ftp_session_ {
 	char* tmp_value;
 	char user[64];
 	char pass[64];
+	unsigned int cred;
 
 } ftp_session;
 
@@ -121,6 +128,22 @@ int create_socket(int port)
     return s;
 }
 
+int has_read(ftp_session* session){
+	return ((session->cred >> READ) & 1U) > 0;
+}
+
+int has_write(ftp_session* session){
+	return ((session->cred >> WRITE) & 1U) > 0;
+}
+
+int has_create(ftp_session* session){
+	return ((session->cred >> CREATE) & 1U) > 0;
+}
+
+void set_cred(ftp_session* session, unsigned int cred){
+	 session->cred |= 1UL << cred;
+}
+
 int sock_write(unsigned int sockfd, char* buffer, int len){
 	return write(sockfd, buffer, len);
 }
@@ -150,6 +173,34 @@ int rnto(SOCKET sockfd, ftp_session* session, const char* value);
 int dele(SOCKET sockfd, ftp_session* session, const char* value);
 int login(ftp_session* session);
 
+char* find_user_passwd(const char* user, char* buffer, int len){
+
+	FILE *fd;
+	char *ptr=NULL;
+	char* ftp_passwd = (char*)malloc(1024);
+
+	sprintf(ftp_passwd,"%s/conf/ftp.passwd", getenv("CORNELIA_HOME"));
+
+	if((fd=fopen(ftp_passwd,"r"))!=NULL){
+	  while((fgets(buffer,len,fd))!=NULL){
+	   if(buffer[0]=='#') continue;
+	   if((ptr=strstr(buffer,":"))!=NULL){
+	     int i = ptr-buffer;
+	     buffer[i]='\0';
+	     if(strcmp(user,buffer)==0){
+		free(ftp_passwd);
+		fclose(fd);
+	        return clip(ptr+1);
+	     }
+	   }
+	  }
+	  fclose(fd);
+	}
+
+	free(ftp_passwd);
+
+  return NULL;
+}
 
 int open_server_sock(ftp_session* session){
 
@@ -355,8 +406,6 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *value = NULL;
 	char *value2 = NULL;
 	int r = 0;
-
-	printf("%s\n", buffer);
 
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
@@ -708,15 +757,16 @@ int pass(SOCKET sockfd, ftp_session* session, const char* value){
         int r;
         char* buffer = (char*)malloc(256);
 	strcpy(&session->pass[0],value);
-	if(login(session)){
+	if(login(session)==0){
           strcpy(buffer,"230 Login successful.\r\n");
 	}else{
 	  strcpy(buffer,"530 Login incorrect.\r\n");
 	}
         r=sock_write(sockfd, buffer, strlen(buffer));
         free(buffer);
+	(void)(r);
 
- return r;
+ return -1;
 }
 
 
@@ -733,8 +783,14 @@ int user(SOCKET sockfd, ftp_session* session, const char* value){
 }
 
 int login(ftp_session* session){
-	(void)(session);
-  return 1;
+
+	char* passwd;
+	char buffer[128];
+	passwd=find_user_passwd(&session->user[0],&buffer[0],128);
+	if(passwd==NULL) return -1;
+	return strcmp(passwd,crypt(&session->pass[0],SALT));
+
+  return -1;
 }
 
 void handle_session(unsigned int sockfd, ftp_session* session){

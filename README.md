@@ -42,7 +42,7 @@ must compile your own OpenSLL libs and replace them in dir openssl<br/>
 https://github.com/openssl
 <br/>
 <p>
-Cornelia handles all default CGI such as plain c binaries, shell script, perl and so on.
+Cornelia handles all default CGI such as plain c binaries, shell script, perl and so on.<br/>
 PHP is handled by php-cgi and *.jgazm by jGazm.
 <p/>
 <p/>

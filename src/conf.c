@@ -37,9 +37,9 @@ void read_server_conf(FILE* fd, server_conf* serv){
     char* chome = (char*)malloc(1024);
     char* ptr;
 
-   strcpy(chome, getenv("CORNELIA_HOME"));
+    strcpy(chome, getenv("CORNELIA_HOME"));
 
-    while(fgets(buffer,1024,fd)!=NULL){
+    while((fgets(buffer,1024,fd))!=NULL){
 
 	if(buffer[0]=='#') continue;
 	if(strcmp(clip(buffer),SERVER_CONF)==0) break;
@@ -267,16 +267,17 @@ int init_conf(const char* conf_file, server_conf *serv){
     char* buffer = (char*)malloc(1024);
     FILE* fd;
     if((fd=fopen(conf_file,"r"))!=NULL){
-	while(fgets(buffer,1024,fd)!=NULL){
-	 if(strcmp(clip(buffer),SERVER_CONF)==0) read_server_conf(fd,serv);
-	 else if(strcmp(clip(buffer),AUTH_CONF)==0) read_auth_conf(fd,serv);
-	 else if(strcmp(clip(buffer),CONTENT_TYPE_CONF)==0) read_content_types(fd,serv);
-	 else if(strcmp(clip(buffer),CGI_BIN_CONF)==0) read_cgi_bin(fd,serv);
-	 else if(strcmp(clip(buffer),VHOSTS_CONF)==0) read_vhosts(fd,serv);
+	while((fgets(buffer,1024,fd))!=NULL){
+	  if(strcmp(clip(buffer),SERVER_CONF)==0) read_server_conf(fd,serv);
+	  else if(strcmp(clip(buffer),AUTH_CONF)==0) read_auth_conf(fd,serv);
+	  else if(strcmp(clip(buffer),CONTENT_TYPE_CONF)==0) read_content_types(fd,serv);
+	  else if(strcmp(clip(buffer),CGI_BIN_CONF)==0) read_cgi_bin(fd,serv);
+	  else if(strcmp(clip(buffer),VHOSTS_CONF)==0) read_vhosts(fd,serv);
 	}
+     fclose(fd);
     }else{
      fprintf(stderr, "Bad conf file:%s\n", conf_file);
-     printf("Bad conf file:%s\nTry --help\n", conf_file);
+     free(buffer);
      return -1;
     }
 
