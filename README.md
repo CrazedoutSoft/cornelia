@@ -41,6 +41,10 @@ If you can't build Cornelia with the OpenSSL headers and libs provided you <br/>
 must compile your own OpenSLL libs and replace them in dir openssl<br/>
 https://github.com/openssl
 <br/>
+<p>
+Cornelia handles all default CGI such as plain c binaries, shell script, perl and so on.
+PHP is handled by php-cgi and *.jgazm by jGazm.
+<p/>
 <p/>
 jGazm:<br/>
  1) Java JDK 1.7 or above must be installed. Some JRE's may work but no guarantee.<br/>
