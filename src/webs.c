@@ -503,7 +503,6 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	  argv[1]=NULL;
 	}
 
-	printf("%s %s\n", executable, file_path);
         if ((pid=fork()) == 0){
           close(pipefd[0]);
           dup2(pin[0], 0);
@@ -885,7 +884,7 @@ virtual_host* get_virtual_host(char* host){
 
 	while(1){
 	  if(serv_conf.v_hosts[n]==NULL) break;
-	  if(serv_conf.v_hosts[n]->port==0){
+	  if(serv_conf.v_hosts[n]->port==0 || serv_conf.v_hosts[n]->port==80){
 	    sprintf(tmp,"%s", &serv_conf.v_hosts[n]->name[0]);
 	  }else{
 	    sprintf(tmp,"%s:%d", &serv_conf.v_hosts[n]->name[0], serv_conf.v_hosts[n]->port);
