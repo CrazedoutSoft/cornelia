@@ -146,7 +146,6 @@ int get_file_size(const http_request* request){
         FILE *fd;
         int size=-1;
         char*tmp = (char*)malloc(MAX_ALLOC);
-        //sprintf(tmp,"%s%s%s",&serv_conf.www_root[0],&request->path[0],&request->file[0]);
         sprintf(tmp,"%s%s%s",&request->virtual_path[0],&request->path[0],&request->file[0]);
 
 	 if((fd=fopen(tmp,"rb"))!=NULL){
