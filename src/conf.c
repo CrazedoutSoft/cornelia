@@ -240,7 +240,7 @@ void read_vhosts(FILE* fd, server_conf* serv){
   	  serv->v_hosts[n] = (virtual_host*)malloc(sizeof(virtual_host));
 	  memset(serv->v_hosts[n],0,sizeof(virtual_host));
 	  serv->v_hosts[n]->port=80;
-	   if((ptr=strtok(mem,";"))!=NULL){
+	   if((ptr=strtok(mem,"/"))!=NULL){
 	     strcpy(&serv->v_hosts[n]->name[0],ptr);
 	     strcpy(tmp, ptr);
 	     if((ptr2=strtok(tmp,":"))!=NULL){
@@ -250,7 +250,7 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	       }
 	     }
 	   }
-	   if((ptr=strstr(buffer,";"))!=NULL){
+	   if((ptr=strstr(buffer,"/"))!=NULL){
 	     strcpy(&serv->v_hosts[n]->path[0],ptr+1);
 	   }
 	n++;

@@ -51,6 +51,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MKD  "MKD"
 #define RNFR "RNFR"
 #define RNTO "RNTO"
+#define DELE "DELE"
 
 #define BINARY 'I'
 #define ASCII  'A'
@@ -146,6 +147,7 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session);
 int mkd(SOCKET sockfd, const char* value);
 int rnfr(SOCKET sockfd, ftp_session* session, const char* value);
 int rnto(SOCKET sockfd, ftp_session* session, const char* value);
+int dele(SOCKET sockfd, ftp_session* session, const char* value);
 int login(ftp_session* session);
 
 
@@ -354,6 +356,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *value2 = NULL;
 	int r = 0;
 
+	printf("%s\n", buffer);
 
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
@@ -395,6 +398,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],PASV)==0) r=pasv(sockfd,session);
 	else if(strcmp(&verb[0],RNFR)==0) r=rnfr(sockfd,session,value);
 	else if(strcmp(&verb[0],RNTO)==0) r=rnto(sockfd,session,value);
+	else if(strcmp(&verb[0],DELE)==0) r=dele(sockfd,session,value);
 	else{
 	  strcpy(buffer,"502 Command not implemented.\r\n");
 	  r=sock_write(sockfd,buffer,strlen(buffer));
@@ -414,6 +418,22 @@ char* toHiLow(int num, char* buffer){
 	sprintf(buffer,"%d,%d", hi,low);
 
  return buffer;
+}
+
+int dele(SOCKET sockfd, ftp_session* session, const char* value){
+
+	char* buffer = (char*)malloc(256);
+	if(remove(value)==0){
+	    strcpy(buffer,"250 Requested file action okay, completed.\r\n");
+	}else{
+	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
+	}
+	sock_write(sockfd, buffer, strlen(buffer));
+	free(buffer);
+
+	(void)(session);
+
+ return 1;
 }
 
 int rnto(SOCKET sockfd, ftp_session* session, const char* value){

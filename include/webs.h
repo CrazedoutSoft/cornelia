@@ -69,6 +69,7 @@ typedef struct http_request_t {
         unsigned char* post_data;
 	void* cSSL;
 	char connection[65];
+	char virtual_path[1024];
 
 } http_request;
 

@@ -53,6 +53,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CONN_CLOSE		0
 #define MAX_ALLOC		65536
 
+#define HTTP_POST		"POST"
+#define HTTP_GET		"GET"
+
 server_conf serv_conf;
 auth_conf   a_conf;
 
@@ -138,12 +141,13 @@ void init_server() {
         }
 }
 
-int get_file_size(const char* path, const char* file){
+int get_file_size(const http_request* request){
 
         FILE *fd;
         int size=-1;
         char*tmp = (char*)malloc(MAX_ALLOC);
-        sprintf(tmp,"%s%s%s",&serv_conf.www_root[0],path,file);
+        //sprintf(tmp,"%s%s%s",&serv_conf.www_root[0],&request->path[0],&request->file[0]);
+        sprintf(tmp,"%s%s%s",&request->virtual_path[0],&request->path[0],&request->file[0]);
 
 	 if((fd=fopen(tmp,"rb"))!=NULL){
          fseek(fd,0L,SEEK_END);
@@ -353,7 +357,7 @@ void send_list_dir(const http_request* request){
 	memset(dir,0,MAX_ALLOC);
 	memset(tmp,0,MAX_ALLOC);
 
-	sprintf(dir,"%s/%s%s%s", &serv_conf.workdir[0], &serv_conf.www_root[0], &request->path[0], &request->file[0]);
+	sprintf(dir,"%s/%s%s%s", &serv_conf.workdir[0], &request->virtual_path[0], &request->path[0], &request->file[0]);
 	list_dir(dir,buffer);
 	sprintf(tmp,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><html><head><title>%s</title></head><body><h1>Index of %s</h1>\n",
 		&request->path[0], &request->path[0]);
@@ -383,7 +387,7 @@ int find_default_page(http_request* request){
 	strcpy(tmp,&serv_conf.default_page[0]);
 	ptr=strtok(tmp,",");
 	if(ptr!=NULL){
-	 sprintf(fi, "%s/%s%s%s", &serv_conf.workdir[0], &serv_conf.www_root[0], &request->path[0],ptr);
+	 sprintf(fi, "%s/%s%s%s", &serv_conf.workdir[0], &request->virtual_path[0], &request->path[0], ptr);
 	  if(file_exists(fi)) {
 	   strcpy(&request->file[0],ptr);
 	   found=1;
@@ -391,7 +395,7 @@ int find_default_page(http_request* request){
 	  }
 	}
 	while((ptr=strtok(NULL,","))!=NULL){
-	 sprintf(fi, "%s/%s%s%s", &serv_conf.workdir[0], &serv_conf.www_root[0], &request->path[0],ptr);
+	 sprintf(fi, "%s/%s%s%s", &serv_conf.workdir[0], &request->virtual_path[0], &request->path[0],ptr);
 	  if(file_exists(fi)) {
 	   strcpy(&request->file[0],ptr);
 	   found=1;
@@ -475,7 +479,8 @@ int exec_cgi(http_response* response, const char* exe_ptr){
         n=0;
 
         sprintf(file_path,"%s%s%s",
-		&serv_conf.www_root[0],&response->request->path[0],&response->request->file[0]);
+		&response->request->virtual_path[0],&response->request->path[0],&response->request->file[0]);
+
 
 	/* FIX */
 	if(strstr(exe_ptr,"jgazm")!=NULL){
@@ -498,6 +503,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	  argv[1]=NULL;
 	}
 
+	printf("%s %s\n", executable, file_path);
         if ((pid=fork()) == 0){
           close(pipefd[0]);
           dup2(pin[0], 0);
@@ -516,7 +522,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	  headb = (char*)malloc(1024);
           close(pipefd[1]);
 	  if(!abort){
-            if(strcmp(&response->request->method[0],"POST")==0 && response->request->post_data!=NULL) {
+            if(strcmp(&response->request->method[0],HTTP_POST)==0 && response->request->post_data!=NULL) {
 	      clen = response->content_length;
 	      r=write(pin[1], response->request->post_data, clen);
 	    }
@@ -564,7 +570,7 @@ int write_plain_file(const http_response* response, int len, char*path, char* fi
 	memset(file,0,4048);
 	memset(tmp,0,len+1);
 
-	sprintf(file,"%s%s%s", &serv_conf.www_root[0], path, fil);
+	sprintf(file,"%s%s%s", &response->request->virtual_path[0], path, fil);
 
 	if((fd=fopen(file,"rb"))!=NULL){
 	  r = fread(tmp, 1, len, fd);
@@ -683,14 +689,14 @@ void doGetPost(http_request *request){
 	  return;
 	}
 
-  	response.content_length = get_file_size(&request->path[0], &request->file[0]);
+  	response.content_length = get_file_size(request);
 	strcpy(&response.content_type[0],get_content_type(&request->file[0], &ext[0]));
 
 	if(response.content_length<1){
 	  send_bad_request(&response,"404 Not Found");
 	}else{
 	  parse_env(&response);
-	  if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],"POST")==0){
+	  if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],HTTP_POST)==0){
 	    exec_cgi(&response, exe_ptr);
 	  }else{
 	    get_head(&response,&tmp[0],"200 OK");
@@ -727,9 +733,7 @@ int parse_http(char* buffer, http_request* request){
 	}
 
 	if(strlen(&request->file[0])==0) {
-	  if(!find_default_page(request)){
 	    return -1;
-	  }
 	}
 
  return 0;
@@ -842,7 +846,7 @@ void parse_env(http_response* res){
 	strcpy(res->envp[n], tmp);
 	n++;
 
-	sprintf(tmp,"SCRIPT_FILENAME=%s/www%s%s", &serv_conf.workdir[0],&res->request->path[0],&res->request->file[0]);
+	sprintf(tmp,"SCRIPT_FILENAME=%s/%s%s%s", &serv_conf.workdir[0], &res->request->virtual_path[0], &res->request->path[0],&res->request->file[0]);
 	res->envp[n] = (char*)malloc(strlen(tmp)+1);
 	strcpy(res->envp[n], tmp);
 	n++;
@@ -873,6 +877,32 @@ void read_post_data(http_request *request, int len){
 	}
 }
 
+virtual_host* get_virtual_host(char* host){
+
+	int n = 0;
+	char* tmp = (char*)malloc(256);
+	virtual_host* h_ptr = NULL;
+
+	while(1){
+	  if(serv_conf.v_hosts[n]==NULL) break;
+	  if(serv_conf.v_hosts[n]->port==0){
+	    sprintf(tmp,"%s", &serv_conf.v_hosts[n]->name[0]);
+	  }else{
+	    sprintf(tmp,"%s:%d", &serv_conf.v_hosts[n]->name[0], serv_conf.v_hosts[n]->port);
+	  }
+	  if(strcmp(tmp,host)==0){
+	    h_ptr=serv_conf.v_hosts[n];
+	    break;
+	  }
+	 n++;
+	}
+	free(tmp);
+
+ return h_ptr;
+}
+
+
+
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	int r=CONN_CLOSE;
@@ -892,6 +922,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	char* tmp = (char*)malloc(4096);
 	int n = 0;
 	char* ptr;
+	char* host;
 	int ret = CONN_CLOSE;
 	FILE* logfd;
 
@@ -913,9 +944,29 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	    fclose(logfd);
 	  }
 	}
-
+	strcpy(&request.virtual_path[0],&serv_conf.www_root[0]);
 	memset(tmp,0,4048);
-	if(parse_http(buffer,&request)<0){
+
+	int parse_h = parse_http(buffer,&request);
+
+	while((r=readline(&request,buffer,1024))>0){
+	 parse_headers(buffer,&request);
+	 n++;
+	}
+
+	// Set virtual path if Host header matches.
+	if((host=get_header(&request,"Host="))!=NULL){
+	  virtual_host* h = get_virtual_host(host);
+	  if(h!=NULL){
+	   // Setting virtual_path.
+	   strcpy(&request.virtual_path[0], &h->path[0]);
+	  }else{
+	   // No virtual path defaulting to www_root.
+	   strcpy(&request.virtual_path[0], &serv_conf.www_root[0]);
+	  }
+	}
+
+	if(parse_h<0 && find_default_page(&request)==0){
 	  if((strcmp(&serv_conf.allow_dir_listing[0],"=yes"))==0){
 	    send_list_dir(&request);
 	  }else {
@@ -927,14 +978,9 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	 return CONN_CLOSE;
 	}
 
-	while((r=readline(&request,buffer,1024))>0){
-	 parse_headers(buffer,&request);
-	 n++;
-	}
-
 	strcpy(&request.connection[0],get_header(&request, "Connection="));
 
-	if(strcmp(&request.method[0],"POST")==0){
+	if(strcmp(&request.method[0],HTTP_POST)==0){
 	 if((ptr = get_header(&request,"Content-Length="))!=NULL){
 	  read_post_data(&request, atoi(ptr));
 	 }else request.post_data=NULL;
