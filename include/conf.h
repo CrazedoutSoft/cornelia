@@ -22,6 +22,6 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _CORNY_CONF_
 #define _CORNY_CONF_
 #include "webs.h"
-int init_conf(const char* conf_file, server_conf* serv, auth_conf *auth);
+int init_conf(const char* conf_file, server_conf* serv);
 
 #endif

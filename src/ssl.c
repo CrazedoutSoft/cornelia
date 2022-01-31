@@ -41,8 +41,6 @@ SSL *cSSL;
 void InitializeSSL();
 void DestroySSL();
 void ShutdownSSL();
-void ignore(int r){};
-
 int passwd_error=0;
 
 char* read_ssl_passwd(char* passwd, int size){
@@ -106,13 +104,11 @@ int my_pem_password_cb_fun(char *buf, int size, int rwflag, void *u){
 
 	strncpy(buf, (char *)u, size);
 	buf[size - 1] = '\0';
+	(void)(rwflag);
 	return strlen(buf);
 
 }
 
-void empty(void* v){}
-
-//void init_ssl_server(unsigned int port, const char* cert, const char* key){
 void init_ssl_server(const server_conf* serv_conf){
 
 	struct sockaddr_in cli_addr,cli;
@@ -134,8 +130,8 @@ void init_ssl_server(const server_conf* serv_conf){
 	int use_cert = SSL_CTX_use_certificate_file(sslctx, &serv_conf->cert[0], SSL_FILETYPE_PEM);
 	int use_prv = SSL_CTX_use_PrivateKey_file(sslctx, &serv_conf->cert_key[0], SSL_FILETYPE_PEM);
 
-	ignore(use_cert);
-	ignore(use_prv);
+	(void)(use_cert);
+	(void)(use_prv);
 
 	sockfd=create_socket(serv_conf->ssl_port);
 	printf("Cornelia listening on %d [HTTPS/SSL]\n", serv_conf->ssl_port);

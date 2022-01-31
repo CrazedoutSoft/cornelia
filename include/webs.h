@@ -27,6 +27,14 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
+typedef struct virtual_host_t {
+
+	char name[128];
+	char path[1024];
+	int port;
+
+} virtual_host;
+
 typedef struct auth_t {
 
         char realm[128];
@@ -61,6 +69,7 @@ typedef struct http_request_t {
         unsigned char* post_data;
 	void* cSSL;
 	char connection[65];
+	char virtual_path[1024];
 
 } http_request;
 
@@ -98,6 +107,7 @@ typedef struct server_conf_t {
 	char keycrt[1024];
 	int  max_keep_alive_requests;
 	int  keep_alive_timeout;
+	virtual_host* v_hosts[64];
 
 } server_conf;
 

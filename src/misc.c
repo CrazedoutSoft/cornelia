@@ -79,45 +79,6 @@ int copy_file(const char* orig, const char* newf){
  return r;
 }
 
-/*
-char* list_dir (const http_request* request, char* buffer, int len) {
-
-   DIR *dp;
-   struct dirent *ep;
-   char* tmp = (char*)malloc(1024);
-   char* res = (char*)malloc(1024);
-
-   memset(tmp,0,1024);
-
-  sprintf(tmp,"%s/%s%s",&request->workdir[0], &request->www_root[0], &request->path[0]);
-
-  dp = opendir (tmp);
-  if (dp != NULL){
-
-      while ((ep = readdir (dp))){
-	if(strlen(ep->d_name)<2) continue;
-	if(strcmp(ep->d_name,"..")==0){
-	  sprintf(tmp,"<a href=\"%s\"><img src=\"/res/back.gif\" /> </a><a href=\"%s\">%s</a><br/>\n", ep->d_name, ep->d_name, ep->d_name);
-	}else if(ep->d_type==4){
-	  sprintf(tmp,"<a href=\"%s/\"><img src=\"/res/folder.gif\" /> </a><a href=\"%s/\">%s</a><br/>\n", ep->d_name, ep->d_name, ep->d_name);
-	}else if(ep->d_type==8) {
-	  sprintf(tmp,"<a href=\"%s\"><img src=\"/res/text.gif\" /> </a><a href=\"%s\">%s</a><br/>\n", ep->d_name,ep->d_name, ep->d_name);
-	}
-	strcat(buffer,tmp);
-      }
-       (void) closedir (dp);
-    }
-  else{
-    perror ("Couldn't open the directory for listing");
-  }
-
-  free(res);
-  free(tmp);
-
-  return buffer;
-}
-*/
-
 int file_exists(const char* file){
 
    FILE *fd;
@@ -155,7 +116,7 @@ char *url_encode( char *table, unsigned char *s, char *enc){
 char* toupperc(char* upper, const char* buffer, char stop){
 
         int st=0;
-        for(int i = 0; i < strlen(buffer); i++){
+        for(int i = 0; i < (int)strlen(buffer); i++){
          if(buffer[i]==stop) st=1;
          if(!st) {
           if(buffer[i]=='-') upper[i]='_';
@@ -169,7 +130,7 @@ char* toupperc(char* upper, const char* buffer, char stop){
 
 char* clip(char* buffer){
 
-	for(int i = 0; i < strlen(buffer); i++){
+	for(int i = 0; i < (int)strlen(buffer); i++){
 	  if(buffer[i]=='\r' || buffer[i]=='\n') {
 	    buffer[i]='\0';
 	    break;
@@ -201,11 +162,12 @@ void split(const char* buffer, char* path, char* file, char* qs){
 }
 
 void do_nothing(int r){
+	(void)(r);
 }
 
 int startsw(const char* str, const char* str2){
         int n=0;
-        for(int i = 0; i < strlen(str2); i++){
+        for(int i = 0; i < (int)strlen(str2); i++){
          if(str[i]!=str2[i]) n++;
         }
 
@@ -216,7 +178,7 @@ char* trim(char* buffer){
 	int mark=0;
 	int n=0;
 	char* tmp = (char*)malloc(strlen(buffer));
-	for(int i = 0; i < strlen(buffer); i++){
+	for(int i = 0; i < (int)strlen(buffer); i++){
 	  if(buffer[i]!=' '){
 	    mark=1;
 	  }
