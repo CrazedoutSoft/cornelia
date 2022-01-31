@@ -29,8 +29,10 @@ test if you have php-cgi installed<br/>
 >which php-cgi
 <p/>
 otherwise download and install php-cgi like so:<br/>
+
 >sudo apt install php<br/>
 >sudo apt install php-cgi<br/>
+
 <p/>
 OpenSSL:<br/>
 If you can't build Cornelia with the OpenSSL headers and libs provided you <br/>
