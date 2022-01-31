@@ -558,21 +558,25 @@ int write_plain_file(const http_response* response, int len, char*path, char* fi
 	int r=0;
 	char *file;
 
-	char* tmp = (char*)malloc(len+1);
+	char* tmp = (char*)malloc(2048+1);
 	if(tmp==NULL) {
-	 fprintf(stderr,"Can't malloc %d for %s", len+1, fil);
+	 fprintf(stderr,"Can't malloc for %s", fil);
 	 return -1;
 	}
 
-	file = (char*)malloc(4048);
-	memset(file,0,4048);
-	memset(tmp,0,len+1);
+	file = (char*)malloc(2048);
+	memset(file,0,2048);
+	memset(tmp,0,2048+1);
 
 	sprintf(file,"%s%s%s", &response->request->virtual_path[0], path, fil);
 
+	int n = 0;
 	if((fd=fopen(file,"rb"))!=NULL){
-	  r = fread(tmp, 1, len, fd);
-	  socket_write(response->request, tmp, r);
+	  while((r=fread(tmp, 1, 2048, fd))>0){
+	    socket_write(response->request, tmp, r);
+	    n+=r;
+	  }
+	  if(n!=len) fprintf(stderr,"Bytes read: %d are less than content-length: %d\n", n, len);
 	  fclose(fd);
 	}else{
 	  fprintf(stderr,"Bad file: %s%s\n", path, file);
