@@ -70,6 +70,11 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define READ    	1
 #define WRITE   	2
 #define CREATE  	4
+#define DELETE		8
+
+#define ANONYMOUS	"anonymous"
+
+unsigned int anonymous_allowed = 1;
 
 int setenv(const char *name, const char *value, int overwrite);
 
@@ -167,7 +172,7 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session);
 int type(SOCKET sockfd, const char* value, ftp_session* session);
 int pasv(SOCKET sockfd, ftp_session* session);
 int stor(SOCKET sockfd, const char* value, ftp_session* session);
-int mkd(SOCKET sockfd, const char* value);
+int mkd(SOCKET sockfd, ftp_session* session, const char* value);
 int rnfr(SOCKET sockfd, ftp_session* session, const char* value);
 int rnto(SOCKET sockfd, ftp_session* session, const char* value);
 int dele(SOCKET sockfd, ftp_session* session, const char* value);
@@ -448,6 +453,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],RNFR)==0) r=rnfr(sockfd,session,value);
 	else if(strcmp(&verb[0],RNTO)==0) r=rnto(sockfd,session,value);
 	else if(strcmp(&verb[0],DELE)==0) r=dele(sockfd,session,value);
+	else if(strcmp(&verb[0],MKD)==0) r=mkd(sockfd,session,value);
 	else{
 	  strcpy(buffer,"502 Command not implemented.\r\n");
 	  r=sock_write(sockfd,buffer,strlen(buffer));
@@ -459,7 +465,6 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 }
 
 char* toHiLow(int num, char* buffer){
-
 	double n = (double)num;
 	double nn = n / 256.0;
 	int hi = (int)nn;
@@ -469,9 +474,21 @@ char* toHiLow(int num, char* buffer){
  return buffer;
 }
 
+int check_cred(ftp_session* session, unsigned int type){
+
+	(void)(session);
+	(void)(type);
+	//550 Access is denied.
+	return 1;
+}
+
 int dele(SOCKET sockfd, ftp_session* session, const char* value){
 
-	char* buffer = (char*)malloc(256);
+	char* buffer;
+
+	if(!check_cred(session, DELETE)) return 1;
+
+	buffer = (char*)malloc(256);
 	if(remove(value)==0){
 	    strcpy(buffer,"250 Requested file action okay, completed.\r\n");
 	}else{
@@ -487,7 +504,11 @@ int dele(SOCKET sockfd, ftp_session* session, const char* value){
 
 int rnto(SOCKET sockfd, ftp_session* session, const char* value){
 
-	char* buffer = (char*)malloc(256);
+	char* buffer;
+
+	if(!check_cred(session, CREATE)) return 1;
+
+	buffer = (char*)malloc(256);
 	char err[] = "550 Requested action not taken; file unavailable...\r\n";
 
 	if(session->tmp_value!=NULL){
@@ -507,7 +528,11 @@ int rnto(SOCKET sockfd, ftp_session* session, const char* value){
 
 int rnfr(SOCKET sockfd, ftp_session* session, const char* value){
 
-	char* buffer = (char*)malloc(256);
+	char* buffer;
+
+	if(!check_cred(session, CREATE)) return 1;
+
+	buffer = (char*)malloc(256);
 	FILE* fd;
 	if((fd=fopen(value,"r"))!=NULL){
 	  strcpy(buffer,"350 RNFR accepted. Please supply new name for RNTO.\r\n");
@@ -523,9 +548,13 @@ int rnfr(SOCKET sockfd, ftp_session* session, const char* value){
   return 1;
 }
 
-int mkd(SOCKET sockfd, const char* value){
+int mkd(SOCKET sockfd, ftp_session* session, const char* value){
 
-	char* buffer = (char*)malloc(256);
+	char* buffer;
+
+	if(!check_cred(session, CREATE)) return 1;
+
+	buffer = (char*)malloc(256);
 	if(mkdir(value, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)==0){
 	  sprintf(buffer, "257 \"%s\" : The directory was successfully created\r\n", value);
 	}else{
@@ -541,7 +570,9 @@ int mkd(SOCKET sockfd, const char* value){
 int pasv(SOCKET sockfd, ftp_session* session){
 
 	int r;
-	char* buffer = (char*)malloc(1024);
+	char* buffer;
+
+	buffer=(char*)malloc(1024);
 	char hilow[8];
 	session->pasv_port++;
 	session->mode=MODE_PASV;
@@ -613,8 +644,13 @@ int pwd(SOCKET sockfd, ftp_session* session){
 int stor(SOCKET sockfd, const char* value, ftp_session* session){
 
 	int r;
-        char* buffer = (char*)malloc(256);
-	char* file = (char*)malloc(1024);
+        char* buffer;
+	char* file;
+
+	if(!check_cred(session, WRITE|CREATE)) return 1;
+
+	buffer = (char*)malloc(256);
+	file=(char*)malloc(1024);
 
         FILE* fd;
 
@@ -639,8 +675,13 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session){
 int retr(SOCKET sockfd, const char* value, ftp_session* session){
 
 	int r;
-        char* buffer = (char*)malloc(256);
-	char* file = (char*)malloc(1024);
+	char* buffer;
+	char* file;
+
+	if(!check_cred(session, READ)) return 1;
+
+        buffer = (char*)malloc(256);
+	file = (char*)malloc(1024);
 	FILE* fd;
 
 	sprintf(file,"%s/%s", &session->workdir[0], value);
@@ -754,19 +795,21 @@ int syst(SOCKET sockfd, const char* value){
 
 int pass(SOCKET sockfd, ftp_session* session, const char* value){
 
-        int r;
+        int r,ret;
         char* buffer = (char*)malloc(256);
 	strcpy(&session->pass[0],value);
 	if(login(session)==0){
+	  ret=1;
           strcpy(buffer,"230 Login successful.\r\n");
 	}else{
+	  ret=-1;
 	  strcpy(buffer,"530 Login incorrect.\r\n");
 	}
         r=sock_write(sockfd, buffer, strlen(buffer));
         free(buffer);
 	(void)(r);
 
- return -1;
+ return ret;
 }
 
 
@@ -786,6 +829,11 @@ int login(ftp_session* session){
 
 	char* passwd;
 	char buffer[128];
+
+	if(anonymous_allowed && (strcmp(&session->user[0],ANONYMOUS)==0)){
+	  session->cred=READ;
+	  return 0;
+	}
 	passwd=find_user_passwd(&session->user[0],&buffer[0],128);
 	if(passwd==NULL) return -1;
 	return strcmp(passwd,crypt(&session->pass[0],SALT));
