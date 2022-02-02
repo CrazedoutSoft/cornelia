@@ -15,5 +15,7 @@ The ENV varibles that are passed to CGI are at this time:
 <li>SERVER_NAME</li>
 </ul>
 
+Incoming headers are also set as ENV as <i>HTTP_[header_name]=[header_value]</i>.
+
 </body>
 </html>
