@@ -31,9 +31,11 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 </code>
 </pre>
 
->bin/ftp_cornelia
+>bin/ftp_cornelia -bind <mynonlocalip> -port 8821 -anonymous yes
 
-Cornelia FTP needs a IP for PASV connection. This can be uptained by using bin/findip.
+Cornelia FTP needs a IP for PASV connection. Otherwise the PASV IP counld be 127.0.0.1 which<br/>
+non local users can't connect to.<br>
+Non local IP can be uptained by using <i>bin/findip</i>.
 
 </body>
 <html>
