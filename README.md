@@ -9,7 +9,7 @@
 ******************************************************
 *  Welcome to Cornelia Web Server                    
 *  CrazedoutSoft 2022 by Fredrik Roos.           
-*  http://crazedout.com/corny/ info@crazedout.com   
+*  http://crazedout.com info@crazedout.com   
 *  https://github.com/openssl                      
 ******************************************************
 
