@@ -69,12 +69,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define READ    	1
 #define WRITE   	2
-#define CREATE  	4
-#define DELETE		8
 
 #define ANONYMOUS	"anonymous"
 
-unsigned int anonymous_allowed = 1;
+unsigned int anonymous_allowed = 0;
 
 int setenv(const char *name, const char *value, int overwrite);
 
@@ -139,10 +137,6 @@ int has_read(ftp_session* session){
 
 int has_write(ftp_session* session){
 	return ((session->cred >> WRITE) & 1U) > 0;
-}
-
-int has_create(ftp_session* session){
-	return ((session->cred >> CREATE) & 1U) > 0;
 }
 
 void set_cred(ftp_session* session, unsigned int cred){
@@ -474,19 +468,28 @@ char* toHiLow(int num, char* buffer){
  return buffer;
 }
 
-int check_cred(ftp_session* session, unsigned int type){
+int check_cred(SOCKET sockfd, ftp_session* session, unsigned int type){
 
-	(void)(session);
-	(void)(type);
-	//550 Access is denied.
-	return 1;
+	char* buffer;
+
+	if(((session->cred >> type) & 1U) > 0){
+	  return 1;
+	}
+	else{
+	  buffer = (char*)malloc(64);
+	  strcpy(buffer, "550 Access is denied.\r\n");
+	  sock_write(sockfd, buffer, strlen(buffer));
+	  free(buffer);
+	}
+
+	return 0;
 }
 
 int dele(SOCKET sockfd, ftp_session* session, const char* value){
 
 	char* buffer;
 
-	if(!check_cred(session, DELETE)) return 1;
+	if(!check_cred(sockfd, session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
 	if(remove(value)==0){
@@ -506,7 +509,7 @@ int rnto(SOCKET sockfd, ftp_session* session, const char* value){
 
 	char* buffer;
 
-	if(!check_cred(session, CREATE)) return 1;
+	if(!check_cred(sockfd,session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
 	char err[] = "550 Requested action not taken; file unavailable...\r\n";
@@ -530,7 +533,7 @@ int rnfr(SOCKET sockfd, ftp_session* session, const char* value){
 
 	char* buffer;
 
-	if(!check_cred(session, CREATE)) return 1;
+	if(!check_cred(sockfd,session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
 	FILE* fd;
@@ -552,7 +555,7 @@ int mkd(SOCKET sockfd, ftp_session* session, const char* value){
 
 	char* buffer;
 
-	if(!check_cred(session, CREATE)) return 1;
+	if(!check_cred(sockfd, session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
 	if(mkdir(value, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)==0){
@@ -647,7 +650,7 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session){
         char* buffer;
 	char* file;
 
-	if(!check_cred(session, WRITE|CREATE)) return 1;
+	if(!check_cred(sockfd,session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
 	file=(char*)malloc(1024);
@@ -678,7 +681,7 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session){
 	char* buffer;
 	char* file;
 
-	if(!check_cred(session, READ)) return 1;
+	if(!check_cred(sockfd,session, READ)) return 1;
 
         buffer = (char*)malloc(256);
 	file = (char*)malloc(1024);
@@ -785,7 +788,7 @@ int syst(SOCKET sockfd, const char* value){
 
         int r;
         char* buffer = (char*)malloc(256);
-        strcpy(buffer,"215 Linux.\r\n");
+        strcpy(buffer,"215 Cornelia FTP server on Linux.\r\n");
         r=sock_write(sockfd, buffer, strlen(buffer));
         free(buffer);
 	(void)(value);
@@ -831,8 +834,12 @@ int login(ftp_session* session){
 	char buffer[128];
 
 	if(anonymous_allowed && (strcmp(&session->user[0],ANONYMOUS)==0)){
-	  session->cred=READ;
+	  set_cred(session,READ);
 	  return 0;
+	}
+	else {
+	  set_cred(session,READ);
+	  set_cred(session,WRITE);
 	}
 	passwd=find_user_passwd(&session->user[0],&buffer[0],128);
 	if(passwd==NULL) return -1;
@@ -972,12 +979,7 @@ int main(int args, char* argv[]){
 	free(dir);
 
 	if(args<2) {
-	  usage();
-	  free(root);
-	  free(dir);
-	  free(bind);
-	  free(port);
-	  return 0;
+	  printf("All default values. Try ftp_cornelia --help\r\n");
 	}
 
 	for(int i = 0; i < args; i++){
@@ -994,6 +996,17 @@ int main(int args, char* argv[]){
 	  }
 	  else if(strcmp(argv[i],"-root")==0){
 	   if(i<args-1) strcpy(root,argv[i+1]);
+	  }
+	  else if(strcmp(argv[i],"-anonymous_allowed")==0){
+	    anonymous_allowed=1;
+	  }
+	  else if(strcmp(argv[i],"--help")==0){
+	    free(dir);
+	    free(bind);
+	    free(port);
+	    free(root);
+	    usage();
+	    return 0;
 	  }
 	}
 
