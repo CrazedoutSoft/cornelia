@@ -3,7 +3,7 @@
 
 <h2>Simple FTP Server</h2>
 A simple FTP server is provided in the Cornalia package.</br>
-Users are defined in conf/ftp.passwd and has READ nd WRITE access.<br/>
+Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 <i>anonymous</i> can be set to accept but has only READ access.<p/>
 <b>Following werbs are implemented so far</b>.<br/>
 
@@ -30,6 +30,8 @@ Users are defined in conf/ftp.passwd and has READ nd WRITE access.<br/>
 #define DELE "DELE"
 </code>
 </pre>
+
+>bin/ftp_cornelia
 
 </body>
 <html>
