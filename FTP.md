@@ -33,5 +33,7 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 
 >bin/ftp_cornelia
 
+Cornelia FTP needs a IP for PASV connection. This can be uptained by using bin/findip.
+
 </body>
 <html>
