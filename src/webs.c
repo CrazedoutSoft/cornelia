@@ -55,6 +55,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define HTTP_POST		"POST"
 #define HTTP_GET		"GET"
+#define HTTP_PUT		"PUT"
 
 server_conf serv_conf;
 auth_conf   a_conf;
@@ -670,6 +671,11 @@ int handle_auth(http_request* request){
  return handled;
 }
 
+void doPut(http_request* request){
+	printf("PUT %s\n", request->post_data);
+	(void)(request);
+}
+
 void doGetPost(http_request *request){
 
 	char tmp[1024];
@@ -698,7 +704,10 @@ void doGetPost(http_request *request){
 	  send_bad_request(&response,"404 Not Found");
 	}else{
 	  parse_env(&response);
-	  if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],HTTP_POST)==0){
+	  if(strcmp(&response.request->method[0],HTTP_PUT)==0){
+	   doPut(request);
+	  }
+	  else if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],HTTP_POST)==0){
 	    exec_cgi(&response, exe_ptr);
 	  }else{
 	    get_head(&response,&tmp[0],"200 OK");
@@ -982,7 +991,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	strcpy(&request.connection[0],get_header(&request, "Connection="));
 
-	if(strcmp(&request.method[0],HTTP_POST)==0){
+	if(strcmp(&request.method[0],HTTP_POST)==0 || strcmp(&request.method[0],HTTP_PUT)==0){
 	 if((ptr = get_header(&request,"Content-Length="))!=NULL){
 	  read_post_data(&request, atoi(ptr));
 	 }else request.post_data=NULL;
