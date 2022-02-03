@@ -214,8 +214,6 @@ int open_server_sock(ftp_session* session){
             return -1;
           }
 
-	printf("Accept:%d\n",session->pasv_port);
-
  return 0;
 }
 

@@ -1,5 +1,14 @@
 <html>
 <body>
+Default .cgi exec.
+
+[cgi_exec_conf]
+.cgi=<shell>
+.pl=<shell>
+.php=/usr/bin/php-cgi
+.jgazm=jgazm/jgazm
+[cgi_exec_conf]
+
 
 The ENV varibles that are passed to CGI are at this time:
 

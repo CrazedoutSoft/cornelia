@@ -31,7 +31,6 @@ typedef struct virtual_host_t {
 
 	char name[128];
 	char path[1024];
-	int port;
 
 } virtual_host;
 
