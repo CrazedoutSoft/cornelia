@@ -31,6 +31,90 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CGI_BIN_CONF		"[cgi_exec_conf]"
 #define VHOSTS_CONF		"[virtual_hosts]"
 
+void print_server_conf(server_conf* serv){
+
+	int n = 0;
+
+	printf("[server_conf]\n");
+	printf("server.name=%s\n", &serv->server_name[0]);
+	printf("server.port=%d\n", serv->port);
+	printf("server.ssl.port=%d\n", serv->ssl_port);
+	printf("server.tls.port=%d\n", serv->tls_port);
+	printf("server.ssl.certpm=%s\n", &serv->cert[0]);
+	printf("server.ssl.keypm=%s\n", &serv->cert_key[0]);
+	printf("server.tls.certcrt=%s\n", &serv->certcrt[0]);
+	printf("server.tls.keycrt=%s\n", &serv->keycrt[0]);
+	printf("server.logfile=%s\n", &serv->logfile[0]);
+	printf("server.www_root=%s\n", &serv->www_root[0]);
+	printf("server.default_page=%s\n", &serv->default_page[0]);
+	printf("#cgi-bin value must be relative too www_root and start with /\n");
+	printf("#bug in this release do not change cgi-bin value.\n");
+	printf("server.cgi-bin=%s\n", &serv->cgi_bin[0]);
+	printf("server.allow_dir_listning=%s\n", &serv->allow_dir_listing[0]);
+	printf("server.max.keep_alive.requests=%d\n", serv->max_keep_alive_requests);
+	printf("#microseconds 1 sec = 1000000\n");
+	printf("#this value should be as short as possible as long it works. try 250000\n");
+	printf("server.keep_alive.timeout=%d\n", serv->keep_alive_timeout);
+	printf("[server_conf]\n\n");
+
+
+	printf("[content_type_conf]\n");
+        n=0;
+        while(1){
+         if(serv->content_types[n]==NULL) break;
+           printf("%s=%s\n", &serv->content_types[n]->file_ext[0],
+                &serv->content_types[n]->content_type[0]);
+           n++;
+        }
+	printf("[content_type_conf]\n\n");
+	printf("[cgi_exec_conf]\n");
+
+        n=0;
+        while(1){
+          if(serv->exec_c[n]==NULL) break;
+          printf("%s=%s\n", &serv->exec_c[n]->ext[0], &serv->exec_c[n]->exec[0]);
+          n++;
+        }
+	printf("[cgi_exec_conf]\n\n");
+
+	printf("[auth_conf]\n");
+
+	n=0;
+	char realms[1024];
+	memset(&realms[0],0,1024);
+	while(1){
+	  if(serv->auth[n]==NULL) break;
+	  strcat(&realms[0],&serv->auth[n]->realm[0]);
+	  strcat(&realms[0],",");
+	  n++;
+	}
+	realms[strlen(&realms[0])-1]='\0';
+	printf("auth.realms=%s\n", &realms[0]);
+
+	n=0;
+	while(1){
+	  if(serv->auth[n]==NULL) break;
+	  printf("auth.%s.path=%s\n", &serv->auth[n]->realm[0], &serv->auth[n]->path[0]);
+	  printf("auth.%s.users=%s\n", &serv->auth[n]->realm[0], &serv->auth[n]->base64auth[0]);
+	  n++;
+	}
+
+
+	printf("[auth_conf]\n\n");
+
+
+	printf("[virtual_hosts]\n");
+        n=0;
+        while(1){
+          if(serv->v_hosts[n]==NULL) break;
+          printf("%s/%s\n", &serv->v_hosts[n]->name[0], &serv->v_hosts[n]->path[0]);
+          n++;
+        }
+	printf("[virtual_hosts]\n\n");
+
+
+}
+
 void read_server_conf(FILE* fd, server_conf* serv){
 
     char* buffer = (char*)malloc(1024);
@@ -228,7 +312,6 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	char* mem = (char*)malloc(1024);
 	char* tmp = (char*)malloc(256);
 	char* ptr;
-	char* ptr2;
 
    	while(fgets(buffer,1024,fd)!=NULL){
 
@@ -239,19 +322,11 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	  strcpy(mem, buffer);
   	  serv->v_hosts[n] = (virtual_host*)malloc(sizeof(virtual_host));
 	  memset(serv->v_hosts[n],0,sizeof(virtual_host));
-	  serv->v_hosts[n]->port=80;
 	   if((ptr=strtok(mem,"/"))!=NULL){
 	     strcpy(&serv->v_hosts[n]->name[0],ptr);
-	     strcpy(tmp, ptr);
-	     if((ptr2=strtok(tmp,":"))!=NULL){
-	       strcpy(&serv->v_hosts[n]->name[0],ptr2);
-	       if((ptr2=strtok(NULL,":"))!=NULL){
-		 serv->v_hosts[n]->port=atoi(ptr2);
-	       }
+	     if((ptr=strtok(NULL,"/"))!=NULL){
+	     	strcpy(&serv->v_hosts[n]->path[0],ptr);
 	     }
-	   }
-	   if((ptr=strstr(buffer,"/"))!=NULL){
-	     strcpy(&serv->v_hosts[n]->path[0],ptr+1);
 	   }
 	n++;
 	}

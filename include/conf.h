@@ -23,5 +23,5 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define _CORNY_CONF_
 #include "webs.h"
 int init_conf(const char* conf_file, server_conf* serv);
-
+void print_server_conf(server_conf* serv);
 #endif

@@ -892,21 +892,25 @@ virtual_host* get_virtual_host(char* host){
 
 	int n = 0;
 	char* tmp = (char*)malloc(256);
+	char* htmp = (char*)malloc(256);
 	virtual_host* h_ptr = NULL;
+	char *ptr;
+
+	strcpy(htmp, host);
+	if((ptr=strstr(htmp,":"))!=NULL){
+	 htmp[ptr-htmp]='\0';
+	}
 
 	while(1){
 	  if(serv_conf.v_hosts[n]==NULL) break;
-	  if(serv_conf.v_hosts[n]->port==0 || serv_conf.v_hosts[n]->port==80){
-	    sprintf(tmp,"%s", &serv_conf.v_hosts[n]->name[0]);
-	  }else{
-	    sprintf(tmp,"%s:%d", &serv_conf.v_hosts[n]->name[0], serv_conf.v_hosts[n]->port);
-	  }
-	  if(strcmp(tmp,host)==0){
+	  sprintf(tmp,"%s", &serv_conf.v_hosts[n]->name[0]);
+	  if(strcmp(tmp,htmp)==0){
 	    h_ptr=serv_conf.v_hosts[n];
 	    break;
 	  }
 	 n++;
 	}
+	free(htmp);
 	free(tmp);
 
  return h_ptr;
@@ -1027,55 +1031,6 @@ void free_response(http_response* r){
 	 if(r->envp[n]==NULL) break;
 	 free(r->envp[n++]);
 	}
-}
-
-
-void dump_conf(){
-
-	int n = 0;
-
-	printf("config:%s\n", &conf_file[0]);
-	printf("server.name=%s\n", &serv_conf.server_name[0]);
-	printf("server.port=%d\n", serv_conf.port);
-	printf("server.tls.port=%d\n", serv_conf.tls_port);
-	printf("server.ssl_port=%d\n", serv_conf.ssl_port);
-	printf("server.www_root=%s\n", &serv_conf.www_root[0]);
-	printf("server.default_page=%s\n", &serv_conf.default_page[0]);
-	printf("server.cgi-bin=%s\n", &serv_conf.cgi_bin[0]);
-	printf("server.logfile=%s\n", &serv_conf.logfile[0]);
-	printf("server.max.keep_alive.requests=%d\n", serv_conf.max_keep_alive_requests);
-	printf("server.keep_alive.timeout=%d\n", serv_conf.keep_alive_timeout);
-
-	while(1){
-	 if(serv_conf.auth[n]==NULL) break;
-	 printf("auth.realm:%s\n", &serv_conf.auth[n]->realm[0]);
-	 printf("auth.%s.path=%s\n", &serv_conf.auth[n]->realm[0],&serv_conf.auth[n]->path[0]);
-	 printf("auth.%s.users=%s\n", &serv_conf.auth[n]->realm[0],&serv_conf.auth[n]->base64auth[0]);
-	 n++;
-	}
-
-	n=0;
-	while(1){
-	 if(serv_conf.content_types[n]==NULL) break;
-	   printf("%s=%s\n", &serv_conf.content_types[n]->file_ext[0],
-		&serv_conf.content_types[n]->content_type[0]);
-	   n++;
-	}
-
-	n=0;
-	while(1){
-	  if(serv_conf.exec_c[n]==NULL) break;
-	  printf("%s=%s\n", &serv_conf.exec_c[n]->ext[0], &serv_conf.exec_c[n]->exec[0]);
-	  n++;
-	}
-
-	n=0;
-	while(1){
-	  if(serv_conf.v_hosts[n]==NULL) break;
-	  printf("%s:%d/%s\n", &serv_conf.v_hosts[n]->name[0], serv_conf.v_hosts[n]->port, &serv_conf.v_hosts[n]->path[0]);
-	  n++;
-	}
-
 }
 
 int read_http_responses(){
@@ -1276,7 +1231,7 @@ int main(int args, char* argv[]){
   	  if(user_port>0) serv_conf.port=user_port;
   	  if(user_ssl_port>0) serv_conf.ssl_port=user_ssl_port;
   	  if(user_tsl_port>0) serv_conf.tls_port=user_tsl_port;
-	  if(dump_c) {dump_conf();}
+	  if(dump_c) {print_server_conf(&serv_conf);}
 	  else {
 	   check_conf(use_ssl, use_tls);
            if(use_ssl==0 && use_tls==0){
