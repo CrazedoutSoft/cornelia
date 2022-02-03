@@ -622,10 +622,27 @@ char* get_passwd(const char* basic){
 	return strstr(basic,":")+1;
 }
 
+int get_user_pass_from_file(const char* file, const char* base64){
+
+	FILE* fd;
+	int ret=0;
+	char *buffer = (char*)malloc(128);
+	if((fd=fopen(file,"r"))!=NULL){
+	 while((fgets(buffer, 128, fd))!=NULL){
+	  if(strcmp(clip(buffer), base64)==0){
+	   ret=1;
+	  }
+ 	 }
+	 fclose(fd);
+	}
+
+ return ret;
+}
+
 int handle_auth(http_request* request){
 
 	 int len;
-	 char* tmp = (char*)malloc(1024);
+	 char* tmp = (char*)malloc(2024);
 	 char* cmp = (char*)malloc(1024);
 	 int handled=AUTH_OK;
 	 char* basic;
@@ -643,11 +660,20 @@ int handle_auth(http_request* request){
 		user=get_user(decode, tmp);
 		passwd=get_passwd(decode);
 		sprintf(cmp, "%s:%s", user, crypt(passwd,SALT));
-		if(strcmp(&serv_conf.auth[n]->base64auth[0],cmp)==0){
-		 free(cmp);
-		 free(tmp);
-		 return AUTH_OK;
+		if((strstr(&serv_conf.auth[n]->base64auth[0],".passwd"))!=NULL){
+		  sprintf(tmp,"%s/conf/%s", &serv_conf.workdir[0], &serv_conf.auth[n]->base64auth[0]);
+	          if(get_user_pass_from_file(tmp, cmp)){
+		    free(cmp);
+		    free(tmp);
+		   return AUTH_OK;
 		}
+		}else{
+		  if(strcmp(&serv_conf.auth[n]->base64auth[0],cmp)==0){
+		    free(cmp);
+		    free(tmp);
+		   return AUTH_OK;
+		}
+	      }
 	    }
 	    strcpy(tmp,"HTTP/1.1 401 Unauthorized\r\n");
 	    socket_write(request,tmp,strlen(tmp));
