@@ -3,8 +3,8 @@
 Default .cgi exec.<p/>
 
 [cgi_exec_conf]<br/>
-.cgi=<shell><br/>
-.pl=<shell><br/>
+.cgi=&lt;shell&gt;<br/>
+.pl=&lt;shell&gt;<br/>
 .php=/usr/bin/php-cgi<br/>
 .jgazm=jgazm/jgazm<br/>
 [cgi_exec_conf]<br/>
