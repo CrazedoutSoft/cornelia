@@ -1,13 +1,13 @@
 <html>
 <body>
-Default .cgi exec.
+Default .cgi exec.<p/>
 
-[cgi_exec_conf]
-.cgi=<shell>
-.pl=<shell>
-.php=/usr/bin/php-cgi
-.jgazm=jgazm/jgazm
-[cgi_exec_conf]
+[cgi_exec_conf]<br/>
+.cgi=&lt;shell&gt;<br/>
+.pl=&lt;shell&gt;<br/>
+.php=/usr/bin/php-cgi<br/>
+.jgazm=jgazm/jgazm<br/>
+[cgi_exec_conf]<br/>
 
 
 The ENV varibles that are passed to CGI are at this time:
@@ -25,6 +25,7 @@ The ENV varibles that are passed to CGI are at this time:
 </ul>
 
 Incoming headers are also set as ENV as <i>HTTP_[header_name]=[header_value]</i>.
+Example: HTTP_COOKIE=melike:cookies
 
 </body>
 </html>

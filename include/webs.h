@@ -25,6 +25,19 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ORG_SERVER_NAME "Cornelia"
 #define SOCKET unsigned int
 
+#define MAX_WWW_ROOT		256
+#define MAX_WORK_DIR		1024
+#define MAX_DEFAULT_PAGE 	64
+#define MAX_CGI_BIN		256
+#define MAX_EXEC_DEF		64
+#define MAX_LOG_FILE		64
+#define MAX_AUTH_REALMS		64
+#define MAX_CONTENT_TYPES	64
+#define MAX_VIRTUAL_HOSTS	64
+#define MAX_VIRTUAL_PATH	256
+#define MAX_HTTP_HEADERS	256
+#define MAX_ENV_VARS		256
+
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
 typedef struct virtual_host_t {
@@ -63,12 +76,12 @@ typedef struct http_request_t {
         char  query_string[1024];
         char  httpv[12];
         char  clientIP[16];
-        char* headers[256];
+        char* headers[MAX_HTTP_HEADERS];
         int   headers_len;
         unsigned char* post_data;
 	void* cSSL;
 	char connection[65];
-	char virtual_path[1024];
+	char virtual_path[MAX_VIRTUAL_PATH];
 
 } http_request;
 
@@ -78,7 +91,7 @@ typedef struct http_response_t {
         http_request* request;
         char  content_type[128];
         int   content_length;
-        char* envp[256];
+        char* envp[MAX_ENV_VARS];
 
 } http_response;
 
@@ -91,23 +104,24 @@ typedef struct server_conf_t {
 	unsigned int max_keep_alive;
 	char server_name[64];
         char www_root[256];
-	char workdir[1024];
-        char default_page[64];
-	char cgi_bin[256];
-        char execs[128];
-	char logfile[256];
+	char workdir[MAX_WORK_DIR];
+        char default_page[MAX_DEFAULT_PAGE];
+	char cgi_bin[MAX_CGI_BIN];
+        char execs[MAX_EXEC_DEF];
+	char logfile[MAX_LOG_FILE];
 	char allow_dir_listing[16];
-        auth_conf* auth[64];
-	content_type* content_types[64];
-	cgi_exec* exec_c[64];
+        auth_conf* auth[MAX_AUTH_REALMS];
+	content_type* content_types[MAX_CONTENT_TYPES];
+	cgi_exec* exec_c[MAX_EXEC_DEF];
 	char cert[1024];
 	char cert_key[1024];
 	char certcrt[1024];
 	char keycrt[1024];
 	int  max_keep_alive_requests;
 	int  keep_alive_timeout;
-	virtual_host* v_hosts[64];
+	virtual_host* v_hosts[MAX_VIRTUAL_HOSTS];
 
 } server_conf;
 
 #endif
+
