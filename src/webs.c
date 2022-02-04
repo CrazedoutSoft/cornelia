@@ -1,5 +1,4 @@
 
-
 /*
 Copyright (c) 2022 CrazedoutSoft / Fredrik Roos
 
@@ -776,7 +775,7 @@ int parse_http(char* buffer, http_request* request){
  return 0;
 }
 
-void dump_r(http_request* r){
+void dump_request(http_request* r){
 
 	printf("'%s' '%s' '%s' '%s'\n", &r->method[0], &r->path[0], &r->file[0], &r->httpv[0]);
 	int n = 0;
@@ -846,6 +845,7 @@ void parse_env(http_response* res){
 	  strcpy(tmp, res->request->headers[n]);
 	  res->envp[n]=(char*)malloc(strlen(tmp)+6);
 	  sprintf(res->envp[n],"HTTP_%s", toupperc(&cpy[0],tmp,'='));
+	  if(n>=MAX_ENV_VARS-10) break;
 	  n++;
 	}
 
@@ -991,6 +991,10 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	int parse_h = parse_http(buffer,&request);
 
 	while((r=readline(&request,buffer,1024))>0){
+	 if(request.headers_len>=MAX_HTTP_HEADERS) {
+		fprintf(stderr,"Header count greater than %d\n", MAX_HTTP_HEADERS);
+		break;
+	 }
 	 parse_headers(buffer,&request);
 	 n++;
 	}
