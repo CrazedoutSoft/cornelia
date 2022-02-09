@@ -194,9 +194,10 @@ void read_auth_conf(FILE* fd, server_conf *serv){
 
     while(fgets(buffer,1024,fd)!=NULL){
 
-	if(buffer[0]=='#') continue;
+	if(buffer[0]=='#' || strlen(buffer)==0) continue;
 
         if(strcmp(clip(buffer),AUTH_CONF)==0) break;
+	if(strlen(buffer)==0) continue;
 	else if((ptr=strstr(buffer, "auth.realms="))!=NULL){
 	 strcpy(realms,ptr+12);
 	 tptr=strtok(realms,",");

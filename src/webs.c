@@ -76,7 +76,7 @@ int   exec_request(SOCKET sockfd, char* clientIP, void* cSSL);
 char* bad_request;
 char* internal_server_error;
 char* forbidden;
-char* unathourized;
+char* unauthorized;
 char  conf_file[1024] = "conf/corny.conf";
 char  cip[16];
 
@@ -683,7 +683,7 @@ int handle_auth(http_request* request){
 	    sprintf(tmp,"WWW-Authenticate: Basic realm=%s\r\n\r\n",&serv_conf.auth[n]->realm[0]);
 	    socket_write(request,tmp,strlen(tmp));
 
-	    socket_write(request,unathourized,strlen(unathourized));
+	    socket_write(request,unauthorized,strlen(unauthorized));
 
 	    handled=AUTH_REQUEST_SENT;
 	  }
@@ -1120,8 +1120,8 @@ int read_http_responses(){
           fseek(fd,0L,SEEK_END);
           len = ftell(fd);
           fseek(fd,0L,SEEK_SET);
-          unathourized = (char*)malloc(len);
-          r=fread(unathourized,1,len,fd);
+          unauthorized = (char*)malloc(len);
+          r=fread(unauthorized,1,len,fd);
           do_nothing(r);
           fclose(fd);
         }else{
@@ -1277,6 +1277,7 @@ int main(int args, char* argv[]){
 	free(bad_request);
 	free(internal_server_error);
 	free(forbidden);
+	free(unauthorized);
 
  return 0;
 }
