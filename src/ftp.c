@@ -952,7 +952,7 @@ void usage(){
 	printf("Cornelia simple FTP Server\n");
 	printf("CrazedoutSoft (c) 2022\n\n");
 	printf("usage:\n");
-	printf("ftp_cornelia -bind <ip> -port <port> -lip [list availbale ip adresses]\n");
+	printf("ftp_cornelia -bind <ip> -port <port> -lip [list availbale ip adresses] -anonymous_allowed\n");
 	printf("Example:\n");
 	printf(">ftp_cornelia -lip\n");
 	printf("eth0 IP Address 169.254.255.169\nlo IP Address 127.0.0.1\nwifi0 IP Address 192.168.10.145\n");
@@ -982,6 +982,8 @@ int main(int args, char* argv[]){
 
 	for(int i = 0; i < args; i++){
 
+	puts(argv[i]);
+
 	  if(strcmp(argv[i],"-bind")==0){
 	   if(i<args-1) strcpy(bind,argv[i+1]);
 	  }
@@ -999,11 +1001,11 @@ int main(int args, char* argv[]){
 	    anonymous_allowed=1;
 	  }
 	  else if(strcmp(argv[i],"--help")==0){
-	    free(dir);
+	    usage();
+//	    free(dir);
 	    free(bind);
 	    free(port);
 	    free(root);
-	    usage();
 	    return 0;
 	  }
 	}
