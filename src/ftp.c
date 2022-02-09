@@ -982,8 +982,6 @@ int main(int args, char* argv[]){
 
 	for(int i = 0; i < args; i++){
 
-	puts(argv[i]);
-
 	  if(strcmp(argv[i],"-bind")==0){
 	   if(i<args-1) strcpy(bind,argv[i+1]);
 	  }
