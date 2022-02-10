@@ -25,9 +25,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <stdlib.h>
 
 
-l_node* list_init(){
+l_list* list_init(){
 
-	l_node* l = (l_node*)malloc(sizeof(l_node));
+	l_list* l = (l_list*)malloc(sizeof(l_list));
 	memset(l,0,sizeof(l_node));
 	l->data=(malloc)(5);
 	memcpy(l->data,"head",4);
@@ -37,7 +37,7 @@ l_node* list_init(){
   return l;
 }
 
-void list_add_item(l_node* list, void* data, int size){
+void list_add_item(l_list* list, void* data, int size){
 
 	l_node *ptr = list;
 	while((ptr->next)!=NULL){
@@ -52,7 +52,7 @@ void list_add_item(l_node* list, void* data, int size){
 	ptr->next=node;
 }
 
-void list_add(l_node* list, l_node* node){
+void list_add(l_list* list, l_node* node){
 
         l_node *ptr = list;
         while((ptr->next)!=NULL){
@@ -63,7 +63,7 @@ void list_add(l_node* list, l_node* node){
         ptr->next=node;
 }
 
-void list_free(l_node* list){
+void list_free(l_list* list){
 
         l_node *ptr = list;
 	l_node *tmp;
@@ -75,7 +75,7 @@ void list_free(l_node* list){
         }
 }
 
-void list_clean(l_node* list){
+void list_clean(l_list* list){
 
         l_node *ptr = list->next;
         l_node *tmp;
@@ -90,17 +90,7 @@ void list_clean(l_node* list){
 	ptr2->prev=NULL;
 }
 
-void list_print(FILE* fd, l_node* list){
-
-	l_node *ptr = list;
-	while((ptr->next)!=NULL){
-	  ptr=ptr->next;
-	  fprintf(fd,"%s\n", (char*)ptr->data);
-	}
-
-}
-
-l_node* list_remove(l_node* list, int index){
+l_node* list_remove(l_list* list, int index){
 
 	l_node *ptr = list;
 	l_node *item = NULL;
@@ -119,7 +109,7 @@ l_node* list_remove(l_node* list, int index){
  return item;
 }
 
-void list_insert(l_node* list, l_node* item, int index){
+void list_insert(l_list* list, l_node* item, int index){
 
         l_node *ptr = list;
 	l_node *tmp;
@@ -139,7 +129,24 @@ void list_insert(l_node* list, l_node* item, int index){
 
 }
 
-int list_size(l_node* list){
+int list_compare(l_list* list, COMPARE_FUNC callback){
+
+	int n = 0;
+	int ret = 0;
+	l_node* ptr=list;
+	while((ptr->next)!=NULL){
+	  ptr=ptr->next;
+	  if(callback(ptr->data, n)) {
+	   ret=1;
+	   break;
+	  };
+ 	  n++;
+	}
+
+ return ret;
+}
+
+int list_size(l_list* list){
 
 	int n = 0;
 	l_node* ptr=list;
