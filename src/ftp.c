@@ -871,9 +871,9 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 	  r=parse_request(sockfd, buffer, session);
 	  if(r<1) loop=0;
 	}
+
 	shutdown(sockfd, SHUT_RDWR);
-	/* TODO */
-//	free(buffer); causes "free(): double free detected in tcache 2" why?
+	free(buffer);
 }
 
 char* parse_pasv_ip(char* ip){
@@ -967,7 +967,8 @@ int main(int args, char* argv[]){
 	char* port = (char*)malloc(20);
 	char* root = (char*)malloc(2048);
 
-	get_work_dir(dir,1024);
+	dir = getcwd(dir,1024);
+	puts(dir);
 
 	if(getenv("CORNELIA_HOME")==NULL){
 	  printf("env CORNELIA_HOME should be set to cornelia_d workdir\n");
@@ -1001,7 +1002,6 @@ int main(int args, char* argv[]){
 	  }
 	  else if(strcmp(argv[i],"--help")==0){
 	    usage();
-//	    free(dir);
 	    free(bind);
 	    free(port);
 	    free(root);
@@ -1025,7 +1025,6 @@ int main(int args, char* argv[]){
 	init_server(bind, atoi(port), root);
 
 	free(root);
-	free(dir);
 	free(bind);
 	free(port);
 
