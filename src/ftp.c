@@ -872,7 +872,8 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 	  if(r<1) loop=0;
 	}
 	shutdown(sockfd, SHUT_RDWR);
-	free(buffer);
+	/* TODO */
+//	free(buffer); causes "free(): double free detected in tcache 2" why?
 }
 
 char* parse_pasv_ip(char* ip){
