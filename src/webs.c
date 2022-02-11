@@ -55,6 +55,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define HTTP_POST		"POST"
 #define HTTP_GET		"GET"
 #define HTTP_PUT		"PUT"
+#define AUTHORIZATION 		"Authorization="
+
 
 server_conf serv_conf;
 auth_conf   a_conf;
@@ -653,7 +655,7 @@ int handle_auth(http_request* request){
 	while(1){
 	 if(serv_conf.auth[n]==NULL) break;
 	 if(!startsw(&request->path[0], &serv_conf.auth[n]->path[0])){
-	  if((basic=get_header(request,"Authorization="))!=NULL){
+	  if((basic=get_header(request,AUTHORIZATION))!=NULL){
 		decode=(char*)base64_decode((unsigned char*)basic+6, strlen(basic+6), &len);
 	 	decode[len]='\0';
 		user=get_user(decode, tmp);

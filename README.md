@@ -36,7 +36,7 @@ to /usr/lib<br/>
 test if you have php-cgi installed<br/>
 >which php-cgi
 <p/>
-otherwise download and install php-cgi like so:<br/>
+otherwise download and install php-cgi like so (Ubuntu):<br/>
 
 >sudo apt install php<br/>
 >sudo apt install php-cgi<br/>
