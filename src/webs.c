@@ -636,6 +636,7 @@ int get_user_pass_from_file(const char* file, const char* base64){
  	 }
 	 fclose(fd);
 	}
+	free(buffer);
 
  return ret;
 }
