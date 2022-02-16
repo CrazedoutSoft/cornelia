@@ -33,7 +33,7 @@ Supported JSP directives are:<p/>
 %&gt;
 <p/>
 
-The JSP action tag (&ltjsp:useBean...&gt) is NOT supported at this time.<br/>
+The JSP action tag (&lt;jsp:useBean...&gt;) is NOT supported at this time.<br/>
 <p/>
 The jspz engine is located at bin/jspz and can be run out side the server with jspz file as argument (bin/jspz myjspz.jspz).<br/>
 File extension should be *.jspz or *.jsp
