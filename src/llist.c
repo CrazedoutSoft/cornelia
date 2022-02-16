@@ -137,8 +137,7 @@ int list_compare(l_list* list, COMPARE_FUNC callback){
 	while((ptr->next)!=NULL){
 	  ptr=ptr->next;
 	  if(callback(ptr->data, n)) {
-	   ret=1;
-	   break;
+	   ret=1;	   break;
 	  };
  	  n++;
 	}

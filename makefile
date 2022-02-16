@@ -7,6 +7,7 @@ all:
 	$(CC) -o bin/mkpasswd -Wall -Wextra -O3 src/mkpasswd.c -lcrypt
 	$(CC) -o bin/ftp_cornelia -std=c99 -Wall -Wextra -O3 src/misc.c src/ftp.c -lcrypt
 	$(CC) -o bin/findip src/findlip.c
+	$(CC) -o bin/jspz -Wall -O3 src/jspz.c
 
 
 clean:
@@ -14,7 +15,6 @@ clean:
 	rm bin/ftp_cornelia
 	rm bin/cornelia_d
 	rm log/*.log
-
 
 
 

@@ -1,8 +1,7 @@
-#!/usr/bin/php-cgi
 
 
-www
-
+<h1>
 <?php
  echo $_SERVER["SCRIPT_FILENAME"];
 ?>
+</h1>
