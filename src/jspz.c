@@ -129,7 +129,7 @@ void create_head(const char* file_name){
 	strcat(head,tmp);
 	sprintf(tmp,"public class %s {\n", file_name);
 	strcat(head,tmp);
-	sprintf(tmp,"private String getEnv(String env){return getenv(env)!=null?getenv(env):\"\";}\n");
+	sprintf(tmp,"  private String getEnv(String env){return getenv(env)!=null?getenv(env):\"\";}\n");
 	strcat(head,tmp);
 	sprintf(tmp,"  public static void main(String argv[]) throws Exception {\n");
 	strcat(head,tmp);

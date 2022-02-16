@@ -1,9 +1,26 @@
+<%@ page import = "java.io.*" %>
+
 <%@ page contentType="text/html" %>
+
+
 <%
 	String name = "Hello from JSPZ";
 	String title = "Jspz page";
+	byte[] buffer = null;
 %>
 
+
+<%
+
+ if(getEnv("REQUEST_METHOD").equals("POST")){
+
+   buffer = new byte[Integer.parseInt(getEnv("CONTENT_LENGTH"))];
+   DataInputStream inp = new DataInputStream(System.in);
+   inp.read(buffer);
+   inp.close();
+ }
+
+%>
 
 <html>
 <head>
@@ -11,8 +28,9 @@
 </head>
 <body>
 
-<h1><%=name%></h1>
+<h1><%=getEnv("REQUEST_METHOD")%></h1>
 
+<%= "CL:" + buffer.length %>
 </body>
 </html>
 
