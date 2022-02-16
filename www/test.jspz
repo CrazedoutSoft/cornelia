@@ -1,0 +1,18 @@
+<%@ page contentType="text/html" %>
+<%
+	String name = "Hello from JSPZ";
+	String title = "Jspz page";
+%>
+
+
+<html>
+<head>
+<title><%=title%></title>
+</head>
+<body>
+
+<h1><%=name%></h1>
+
+</body>
+</html>
+
