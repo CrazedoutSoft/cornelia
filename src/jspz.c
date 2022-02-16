@@ -137,7 +137,7 @@ void create_head(const char* file_name){
 	strcat(head,tmp);
 	sprintf(tmp,"  }\n");
 	strcat(head,tmp);
-	sprintf(tmp,"  public %s() {\n", file_name);
+	sprintf(tmp,"  public %s() throws Exception {\n", file_name);
 	strcat(head,tmp);
 
 }
@@ -146,8 +146,9 @@ void parse_directives(FILE* fd){
 
 	char* buffer = (char*)malloc(1024);
 	while((fgets(buffer,1024,fd))!=NULL){
+
 	  if(strstr(buffer,"<%@ ")!=NULL){
-	    if(strstr(buffer," page import ")!=NULL){
+	    if(strstr(buffer," page import")!=NULL){
 	      parse_page_import(buffer);
 	    }
 	    else if(strstr(buffer," page contentType")!=NULL){
@@ -304,6 +305,8 @@ int main(int args, char* argv[]){
 	char class_file[1024];
 	char work_dir[256];
 	char exec[2048];
+	char java[64];
+	char javac[64];
 	int frecomp = 0;
 
 	strcpy(in_file,argv[args-1]);
@@ -323,6 +326,20 @@ int main(int args, char* argv[]){
 	 strcpy(work_dir,"JSPZWD");
 	}else{
 	  strcpy(work_dir, wptr);
+	}
+
+	memset(java,0,64);
+	memset(javac,0,64);
+	if((wptr=getenv("JSPZ_JAVA"))!=NULL){
+	  strcpy(java,wptr);
+	}else{
+	  strcpy(java,"java");
+	}
+
+	if((wptr=getenv("JSPZ_JAVAC"))!=NULL){
+	  strcpy(javac,wptr);
+	}else{
+	  strcpy(javac,"javac");
 	}
 
 	mkdir(work_dir,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -350,7 +367,7 @@ int main(int args, char* argv[]){
 	   fclose(fd);
 	  }else printf("Error: can't make file:%s\r\n\r\n", java_file);
 
-	  sprintf(exec,"javac -d %s %s\n", work_dir, java_file);
+	  sprintf(exec,"%s -d %s %s\n", javac, work_dir, java_file);
 	  if((ci=popen(exec,"r"))!=NULL){
 	    while((fgets(buffer,1024,ci))!=NULL){
 		printf("%s", buffer);
@@ -360,7 +377,7 @@ int main(int args, char* argv[]){
 	// End recompile,,,
 	}
 
-	sprintf(exec,"java -cp %s %s", work_dir, file_name);
+	sprintf(exec,"%s -cp %s %s", java, work_dir, file_name);
 	if((ci = popen(exec,"r"))!=NULL){
 	  while((fgets(buffer,1024,ci))!=NULL){
 	    printf("%s", buffer);
