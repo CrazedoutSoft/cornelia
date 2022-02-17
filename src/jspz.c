@@ -30,6 +30,9 @@ char imports[1024];
 char head[2048];
 char globals[4096];
 
+char request_code[] = "\r\nJspzHttpRequest request = new JspzHttpRequest();\r\n\r\nclass JspzHttpRequest {\r\n\r\n  String getParameter(String param){\r\n    String query = System.getenv(\"QUERY_STRING\")!=null?System.getenv(\"QUERY_STRING\"):\"\";\r\n    java.util.StringTokenizer t = new java.util.StringTokenizer(query,\"&\");\r\n    while(t.hasMoreTokens()){\r\n      String tok = t.nextToken();\r\n      int i = tok.indexOf(\"=\");\r\n      String key = tok.substring(0,i).trim();\r\n      String val = tok.substring(i+1).trim();\r\n      if(key.equals(param)) return val;\r\n    }\r\n   return null;\r\n }\r\n\r\n  String getQueryString(){\r\n    return System.getenv(\"QUERY_STRING\")!=null?System.getenv(\"QUERY_STRING\"):\"\";\r\n  }\r\n\r\n  String getRequestMethod(){\r\n    return System.getenv(\"REQUEST_METHOD\")!=null?System.getenv(\"REQUEST_METHOD\"):\"\";\r\n  }\r\n\r\n  int getContentLength(){\r\n    return Integer.parseInt(System.getenv(\"CONTENT_LENGTH\")!=null?System.getenv(\"CONTENT_LENGTH\"):\"0\");\r\n  }\r\n\r\n  byte[] getPostData(){\r\n\r\n   byte[] buffer = null;\r\n   try{\r\nint n=getContentLength();\n\n     if(n==0) return null;\r\n     buffer = new byte[n];\r\n     java.io.DataInputStream din = new java.io.DataInputStream(System.in);\r\n     din.read(buffer);\r\n     din.close();\r\n    }catch(Exception ex){\r\n      ex.printStackTrace();\r\n    }\r\n    return buffer;\r\n  }\r\n}\r\n\r\n";
+
+
 int recompile(const char *jspz_file, const char* class_file) {
 
     struct stat attr1, attr2;
@@ -129,6 +132,7 @@ void create_head(const char* file_name){
 	strcat(head,tmp);
 	sprintf(tmp,"public class %s {\n", file_name);
 	strcat(head,tmp);
+	sprintf(tmp,"JspzHttpResquest request = new JspzHttpRequest();\n");
 	sprintf(tmp,"  private String getEnv(String env){return getenv(env)!=null?getenv(env):\"\";}\n");
 	strcat(head,tmp);
 	sprintf(tmp,"  public static void main(String argv[]) throws Exception {\n");
@@ -290,6 +294,15 @@ void parse_jspz(FILE* in, FILE* out){
 
 }
 
+void read_jspz_include(char* buffer, int len){
+
+	int l = (int)strlen(request_code);
+	if(l<len){
+	  strcpy(buffer, request_code);
+	}
+
+}
+
 int main(int args, char* argv[]){
 
 	FILE* fd;
@@ -303,6 +316,7 @@ int main(int args, char* argv[]){
 	char file_name[128];
 	char java_file[1024];
 	char class_file[1024];
+	char jspz_import[8192];
 	char work_dir[256];
 	char exec[2048];
 	char java[64];
@@ -361,13 +375,14 @@ int main(int args, char* argv[]){
 	      create_head(file_name);
 	      fprintf(fi,"%s\n", head);
 	      parse_jspz(fd,fi);
-	      fprintf(fi,"  }\n%s\n}\n", globals);
+	      read_jspz_include(jspz_import, 8192);
+	      fprintf(fi,"  }\n%s\n\n%s\n\n}\n", globals, jspz_import);
 	      fclose(fi);
 	    }
 	   fclose(fd);
 	  }else printf("Error: can't make file:%s\r\n\r\n", java_file);
 
-	  sprintf(exec,"%s -d %s %s\n", javac, work_dir, java_file);
+	  sprintf(exec,"%s -d %s %s 2>&1", javac, work_dir, java_file);
 	  if((ci=popen(exec,"r"))!=NULL){
 	    while((fgets(buffer,1024,ci))!=NULL){
 		printf("%s", buffer);
@@ -377,7 +392,7 @@ int main(int args, char* argv[]){
 	// End recompile,,,
 	}
 
-	sprintf(exec,"%s -cp %s %s", java, work_dir, file_name);
+	sprintf(exec,"%s -cp %s %s 2>&1", java, work_dir, file_name);
 	if((ci = popen(exec,"r"))!=NULL){
 	  while((fgets(buffer,1024,ci))!=NULL){
 	    printf("%s", buffer);
