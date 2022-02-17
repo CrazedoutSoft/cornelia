@@ -49,7 +49,8 @@ https://github.com/openssl
 <br/>
 <p>
 Cornelia handles all default CGI such as plain c binaries, shell script, perl and so on.<br/>
-PHP is handled by php-cgi and *.jgazm by jGazm.
+PHP is handled by php-cgi and *.jgazm by jGazm.<br>
+Cornelia also includes a home brewed simple version of JSP <a href="JSPZ.md">JSPZ.md</a>.
 <p/>
 <p/>
 jGazm:<br/>
