@@ -1,24 +1,14 @@
-<%@ page import = "java.io.*" %>
-
+<%@ page import = "java.util.*" %>
 <%@ page contentType="text/html" %>
-
 
 <%
 	String name = "Hello from JSPZ";
 	String title = "Jspz page";
 	byte[] buffer = null;
-%>
 
-
-<%
-
- if(getEnv("REQUEST_METHOD").equals("POST")){
-
-   buffer = new byte[Integer.parseInt(getEnv("CONTENT_LENGTH"))];
-   DataInputStream inp = new DataInputStream(System.in);
-   inp.read(buffer);
-   inp.close();
- }
+	if(request.getRequestMethod().equals("POST")){
+	  buffer = request.getPostData();
+	}
 
 %>
 
@@ -27,10 +17,21 @@
 <title><%=title%></title>
 </head>
 <body>
+<pre>
 
-<h1><%=getEnv("REQUEST_METHOD")%></h1>
+<%
+        Map <String, String> map = System.getenv();
+        for (Map.Entry <String, String> entry: map.entrySet()) {
+            out.println(entry.getKey() + "=" + entry.getValue());
+        }
 
-<%= "CL:" + buffer.length %>
+%>
+
+</pre>
+<%=request.getQueryString()%>
+
+Hej
+
 </body>
 </html>
 
