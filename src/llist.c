@@ -90,6 +90,27 @@ void list_clean(l_list* list){
 	ptr2->prev=NULL;
 }
 
+l_node* list_get(l_list* list, int index){
+
+        l_node *ptr = list;
+        l_node *item = NULL;
+
+	if(index > list_size(list)-1) return NULL;
+
+        int n = 0;
+        while((ptr->next)!=NULL){
+          ptr=ptr->next;
+          if(n==index){
+	   return ptr;
+          }
+         n++;
+        }
+
+ return item;
+
+
+}
+
 l_node* list_remove(l_list* list, int index){
 
 	l_node *ptr = list;
@@ -137,7 +158,8 @@ int list_compare(l_list* list, COMPARE_FUNC callback){
 	while((ptr->next)!=NULL){
 	  ptr=ptr->next;
 	  if(callback(ptr->data, n)) {
-	   ret=1;	   break;
+	   ret=1;
+	   break;
 	  };
  	  n++;
 	}
@@ -157,3 +179,37 @@ int list_size(l_list* list){
  return n;
 }
 
+void list_store(l_list* list, const char* file){
+
+	FILE* fd;
+	int size = list_size(list);
+
+	if((fd=fopen(file,"wb"))!=NULL){
+	  fwrite(&size,1,sizeof(int),fd);
+	  for(int i = 0; i < size; i++){
+	    l_node* n = list_get(list,i);
+	    fwrite(n,1,sizeof(l_node),fd);
+	  }
+	  fclose(fd);
+	}
+
+}
+
+l_list* list_restore(l_list* list, const char* file){
+
+	FILE* fd;
+	int size=0;
+	l_node* n;
+
+	if((fd=fopen(file,"rb"))!=NULL){
+	 fread(&size,1,sizeof(int),fd);
+	 for(int i = 0; i < size; i++){
+	  n = (l_node*)malloc(sizeof(l_node));
+	  fread(n,1,sizeof(l_node),fd);
+	  list_add(list,n);
+	 }
+	 fclose(fd);
+	}
+
+ return list;
+}

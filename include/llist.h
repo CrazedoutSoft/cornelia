@@ -43,5 +43,6 @@ void    list_clean(l_list* list);
 void    list_insert(l_list* list, l_node* item, int index);
 int     list_size(l_list* list);
 int 	list_compare(l_list* list, COMPARE_FUNC);
+l_node* list_get(l_list* list, int index);
 
 #endif
