@@ -11,6 +11,7 @@ all:
 
 
 clean:
+	rm bin/jspz
 	rm bin/findip
 	rm bin/ftp_cornelia
 	rm bin/cornelia_d

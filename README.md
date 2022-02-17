@@ -54,7 +54,11 @@ PHP is handled by php-cgi and *.jgazm by jGazm.
 <p/>
 jGazm:<br/>
  1) Java JDK 1.7 or above must be installed. Some JRE's may work but no guarantee.<br/>
- 2) Run ./setup_linux (you may have to chmod 755 on "setup_linux")<br/>
+ 2) Run ./setup_linux (you may have to chmod 755 on "setup_linux")<p/>
+
+>cd jgazm<br/>
+>./setup_linux</p>
+
  3) JAVA_HOME must be set to current JVM 1.7 (or above) in file jgazm. Setup script will try to get it right but may fail.<br/>
 
  Good Luck / Fredrik. 

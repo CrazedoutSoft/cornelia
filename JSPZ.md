@@ -33,7 +33,21 @@ Supported JSP directives are:<p/>
 %&gt;
 <p/>
 
+Jspz has an static import for java.lang.System.*
+<p/>
+
 The JSP action tag (&lt;jsp:useBean...&gt;) is NOT supported at this time.<br/>
+<p/>
+Java files generated has an inner class JszpHttpRequest wich has theese methods:<b/>
+
+<ul>
+<li>String getParameter(String param)</li>
+<li>String getContentType()</li>
+<li>String getQueryString()</li>
+<li>String getRequestMethod()</li>
+<li>int getContentLength()</li>
+<li>byte[] getPostData()</li>
+</ul>
 <p/>
 The jspz engine is located at bin/jspz and can be run out side the server with jspz file as argument (bin/jspz myjspz.jspz).<br/>
 File extension should be *.jspz or *.jsp
