@@ -28,12 +28,10 @@ If you start bin/startup.sh from cornelia directory CORNELIA_HOME is set to pwd.
 
 The same applies to bin/shutdown.<p/>
 
-<br>
 If you want to be able to start Cornelia without the <i>bin/startup.sh</i> script<br/>
 and the openssl libs are not in /usr/lib, then LD_LIBRARY_PATH need to be set.<p/>
 
 >export LD_LIBRARY_PATH=$CORNELIA_HOME/openssl<br/>
-
 
 If lib errors appears in make process or runtime you may have to copy: <br/>
  openssl/libcrypto.so, openssl/libcrypto.so.3, openssl/libssl.so and openssl/libssl.so.3 <br/>
@@ -67,5 +65,10 @@ jGazm:<br/>
 >./setup_linux</p>
 
  3) JAVA_HOME must be set to current JVM 1.7 (or above) in file jgazm. Setup script will try to get it right but may fail.<br/>
+
+ <p/>
+ Root directory by default is set to $CORNELIA_HOME/www. In "www" there are a numbers of test files for various stuff.</br>
+ Delete these files at your own discretion. Please leave "www/res" as the icons for dir listing resides there - by default.<br/> 
+ If you change the root directory, Cornelia will still look for these icons in /res so a sym link or actual move is recommended.<p/>
 
  Good Luck / Fredrik. 
