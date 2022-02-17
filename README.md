@@ -21,7 +21,13 @@ set env CORNELIA_HOME to cornelia install dir.
 If you start bin/startup.sh from cornelia directory CORNELIA_HOME is set to pwd.
 
 >make<br/>
->bin/startup.sh (may have to chmod 755 on *.sh files in /bin)
+>bin/startup.sh (may have to chmod 755 on *.sh files in /bin) starts http,ssl and tls.
+>bin/startup.sh http starts http server only
+>bin/startup.sh ssl starts ssl server only
+>bin/startup.sh tls starts tls server only
+<br>
+The same applies to bin/shutdown.<p/>
+
 <br>
 If you want to be able to start Cornelia without the <i>bin/startup.sh</i> script<br/>
 and the openssl libs are not in /usr/lib, then LD_LIBRARY_PATH need to be set.<p/>
