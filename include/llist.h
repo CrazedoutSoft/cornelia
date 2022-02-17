@@ -36,6 +36,8 @@ typedef int (*COMPARE_FUNC)(void* data, int l_index);
 
 l_list* list_init();
 l_node* list_remove(l_list* list, int index);
+l_node* list_get(l_list* list, int index);
+l_list* list_restore(l_list* list, const char* file);
 void    list_add_item(l_list* list, void* data, int size);
 void    list_add(l_node* list, l_node* node);
 void    list_free(l_list* list);
@@ -43,5 +45,6 @@ void    list_clean(l_list* list);
 void    list_insert(l_list* list, l_node* item, int index);
 int     list_size(l_list* list);
 int 	list_compare(l_list* list, COMPARE_FUNC);
+void    list_store(l_list* list, const char* file);
 
 #endif
