@@ -7,6 +7,8 @@ Default .cgi exec.<p/>
 .pl=&lt;shell&gt;<br/>
 .php=/usr/bin/php-cgi<br/>
 .jgazm=jgazm/jgazm<br/>
+.jsp=bin/jspz
+.jspz=bin/jspz
 [cgi_exec_conf]<br/>
 
 
