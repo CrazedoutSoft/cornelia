@@ -18,9 +18,9 @@ The jspz engine uses ./JSPZWD as default working directory. Change this by setti
 
 Supported JSP directives are:<p/>
 
-&lt;@ page import %&gt;
+&lt;%@ page import %&gt;
 <p/>
-&lt;@ page contentType %&gt;
+&lt;%@ page contentType %&gt;
 <p/>
 &lt;%=java statement %&gt;
 <p/>
