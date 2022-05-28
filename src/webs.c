@@ -323,15 +323,22 @@ char* list_dir (const char* dir, char* buffer) {
         }
       }
 
+
+
       if(strlen(buffer)+strlen(fold)>MAX_ALLOC){
 	 int size=strlen(buffer)+strlen(fold)+1;
 	 buffer=(char*)realloc(buffer, size);
          strcat(buffer, fold);
+      }else{
+	strcat(buffer,fold);
       }
+
       if(strlen(buffer)+strlen(reg)>MAX_ALLOC){
 	 int size=strlen(buffer)+strlen(reg)+1;
 	 buffer=(char*)realloc(buffer, size);
          strcat(buffer, reg);
+      }else{
+	strcat(buffer,reg);
       }
 
       (void) closedir (dp);
@@ -347,7 +354,7 @@ char* list_dir (const char* dir, char* buffer) {
 return buffer;
 }
 
-void send_list_dir(const http_request* request){
+void send_list_dir(http_request* request){
 
 	char* buffer = (char*)malloc(MAX_ALLOC);
 	char* dir = (char*)malloc(MAX_ALLOC);
@@ -886,7 +893,7 @@ void parse_env(http_response* res){
 	strcpy(res->envp[n], tmp);
 	n++;
 
-	sprintf(tmp,"SCRIPT_FILENAME=%s/%s%s%s", &serv_conf.workdir[0], &res->request->virtual_path[0], &res->request->path[0],&res->request->file[0]);
+	sprintf(tmp,"SCRIPT_FILENAME=%s%s%s", &res->request->virtual_path[0], &res->request->path[0],&res->request->file[0]);
 	res->envp[n] = (char*)malloc(strlen(tmp)+1);
 	strcpy(res->envp[n], tmp);
 	n++;
@@ -1268,6 +1275,7 @@ int main(int args, char* argv[]){
 	  else {
 	   check_conf(use_ssl, use_tls);
            if(use_ssl==0 && use_tls==0){
+		printf("%s\n", serv_conf.www_root);
                 init_server();
            }else if(use_ssl){
 	        init_ssl_server(&serv_conf);
