@@ -30,7 +30,7 @@
 </pre>
 <%=request.getQueryString()%>
 
-Hej
+Hello World - JSPZ awakening...
 
 </body>
 </html>
