@@ -160,11 +160,11 @@ void split(const char* buffer, char* path, char* file, char* qs){
          strcpy(qs,ptr+1);
         }
 }
-
+/*
 void do_nothing(int r){
 	(void)(r);
 }
-
+*/
 int startsw(const char* str, const char* str2){
         int n=0;
         for(int i = 0; i < (int)strlen(str2); i++){

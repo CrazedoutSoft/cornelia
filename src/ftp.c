@@ -697,7 +697,7 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session){
           r=sock_write(sockfd,buffer,strlen(buffer));
           ftp_retr(sockfd, file, session);
 	}
-	do_nothing(r);
+	(void)(r);
         free(buffer);
         free(file);
 
@@ -715,7 +715,7 @@ int list(SOCKET sockfd, ftp_session* session){
 
 	r=ftp_list(sockfd, session);
 
-	do_nothing(r);
+	(void)(r);
 	free(buffer);
 
  return 1;
@@ -775,7 +775,7 @@ int quit(SOCKET sockfd, const char* value){
         char* buffer = (char*)malloc(256);
         strcpy(buffer,"200 Goodbye.\r\n");
         r=sock_write(sockfd, buffer, strlen(buffer));
-	do_nothing(r);
+	(void)(r);
         free(buffer);
 	(void)(value);
 

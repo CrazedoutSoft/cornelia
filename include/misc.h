@@ -29,7 +29,6 @@ char* clip(char* buffer);
 char* toupperc(char* upper, const char* buffer, char stop);
 char* get_work_dir(char* cwd, int len);
 void  split(const char* buffer, char* path, char* file, char* qs);
-void  do_nothing(int r);
 int   startsw(const char* str, const char* str2);
 char* trim(char* buffer);
 void  url_encoder_rfc_tables_init(char* html5, char* rfc3986, int len);

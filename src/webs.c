@@ -539,7 +539,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
               n=socket_write(response->request, buffer, r);
 	    }
 	  }
-	  do_nothing(r);
+	  (void)(r);
 	  close(pipefd[0]);
 	  close(pin[0]);
 	  close(pin[1]);
@@ -1046,7 +1046,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	if(strcmp(&request.connection[0],"keep-alive")==0) ret = CONN_KEEP_ALIVE;
 
-	do_nothing(r);
+	(void)(r);
 	free_request(&request);
 	free(buffer);
 	free(tmp);
@@ -1087,7 +1087,7 @@ int read_http_responses(){
    	  fseek(fd,0L,SEEK_SET);
    	  bad_request = (char*)malloc(len);
    	  r=fread(bad_request,1,len,fd);
-   	  do_nothing(r);
+   	  (void)(r);
    	  fclose(fd);
   	}else {
 	  printf("Bad file: missing conf/404.txt\n");
@@ -1102,7 +1102,7 @@ int read_http_responses(){
           fseek(fd,0L,SEEK_SET);
           internal_server_error = (char*)malloc(len);
           r=fread(internal_server_error,1,len,fd);
-          do_nothing(r);
+          (void)(r);
           fclose(fd);
         }else{
 	  fprintf(stderr,"Bad file: missing conf/500.txt\n");
@@ -1117,7 +1117,7 @@ int read_http_responses(){
           fseek(fd,0L,SEEK_SET);
           forbidden = (char*)malloc(len);
           r=fread(forbidden,1,len,fd);
-          do_nothing(r);
+          (void)(r);
           fclose(fd);
         }else{
           fprintf(stderr,"Bad file: missing conf/403.txt\n");
@@ -1132,7 +1132,7 @@ int read_http_responses(){
           fseek(fd,0L,SEEK_SET);
           unauthorized = (char*)malloc(len);
           r=fread(unauthorized,1,len,fd);
-          do_nothing(r);
+          (void)(r);
           fclose(fd);
         }else{
           fprintf(stderr,"Bad file: missing conf/401.txt\n");
