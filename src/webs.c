@@ -1159,7 +1159,7 @@ int setenv(const char *name, const char *value, int overwrite);
 
 void usage(){
 
-	printf("Cornelia Wweb Server (c) CrazedoutSoft 2022\n\n");
+	printf("Cornelia Web Server (c) CrazedoutSoft 2022\n\n");
 	printf("usage: cornelia_d [OPTION]\n");
 	printf("example: cornelia -c myconf.conf -p 8080\n\n");
 	printf("-http   Use HTTP (Default)\n");
