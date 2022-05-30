@@ -2,6 +2,6 @@
 
 <h1>
 <?php
- echo $_SERVER["SCRIPT_FILENAME"];
+ echo "PHP Up and runnin'"
 ?>
 </h1>

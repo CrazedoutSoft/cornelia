@@ -1,10 +1,31 @@
-<html>
- <head>
-  <title>Cornelia Webserver</title>
-  <style>
-	body {font-family: courier, serif;}
-  </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+     function exec(action) {
+       var xhttp = new XMLHttpRequest();
+       xhttp.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+           document.getElementById("console").innerHTML = this.responseText;
+         }
+       };
+       xhttp.open("GET", action, true);
+       xhttp.send();
+     }
+</script>
+
 </head>
+
 <body>
 <center>
 <p>&nbsp;</p>
@@ -14,9 +35,18 @@
 <h1>Cornelia Web Server</h1>
 (she's small, fast and furious..)
 -->
-
+<p>&nbsp;</p>
+<div>
+<ul align="right">
+<li><a href="javascript:exec('/cgi-bin/test.cgi')">test.cgi</a></li>
+<li><a href="javascript:exec('python.py')">test.py</a></li>
+<li><a href="javascript:exec('test.php')">test.php</a></li>
+<li><a href="javascript:exec('test.jgazm')">test.jgazm</a></li>
+<li><a href="javascript:exec('test.jspz')">test.jspz</a></li>
+<li><a href="upload.html">test file upload</a></li>
+</div>
+<span id="console">NaN</span>
 </center>
-
 </body>
 </html>
 
