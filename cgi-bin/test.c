@@ -11,7 +11,7 @@ int main(int args, char* argv[]){
    printf("Set-Cookie: fredrik=roos\n");
    printf("Content-Type: text/html\r\n\r\n");
 
-   printf("<h2>Hello from C CGI</h2>");
+   printf("<h2>Hello from C CGI -  where the rubber hits the road</h2>");
 
 
  return 0;
