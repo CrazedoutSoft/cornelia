@@ -72,8 +72,8 @@ typedef struct http_request_t {
         SOCKET sockfd;
         char  method[5];
         char  file[256];
-        char  path[1024];
-        char  query_string[1024];
+        char  path[2048];
+        char  query_string[2048];
         char  httpv[12];
         char  clientIP[16];
         char* headers[MAX_HTTP_HEADERS];
@@ -122,6 +122,22 @@ typedef struct server_conf_t {
 	virtual_host* v_hosts[MAX_VIRTUAL_HOSTS];
 
 } server_conf;
+
+int   readline(const http_request* request, char* buffer, int len);
+void  send_bad_request(http_response* response, char* code);
+/* Not very pretty but it will do for now...*/
+void  send_bad_request2(http_request* request);
+void  send_internal_error(http_response* response);
+char* get_head(http_response* response, char* head, char* code);
+void  free_request(http_request* r);
+void  free_response(http_response* r);
+void  parse_env(http_response* res);
+void  dump_r(http_request* r);
+char* get_header(const http_request* request, const char* header);
+char* encode_url(unsigned char* url, char* url_enc);
+int   socket_read(const http_request* request, char* buffer, int len);
+int   socket_write(const http_request* request, const char* buffer, int len);
+int   exec_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
 #endif
 

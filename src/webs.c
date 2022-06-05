@@ -61,20 +61,6 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 server_conf serv_conf;
 auth_conf   a_conf;
 
-int   readline(const http_request* request, char* buffer, int len);
-void  send_bad_request(http_response* response, char* code);
-void  send_internal_error(http_response* response);
-char* get_head(http_response* response, char* head, char* code);
-void  free_request(http_request* r);
-void  free_response(http_response* r);
-void  parse_env(http_response* res);
-void  dump_r(http_request* r);
-char* get_header(const http_request* request, const char* header);
-char* encode_url(unsigned char* url, char* url_enc);
-int   socket_read(const http_request* request, char* buffer, int len);
-int   socket_write(const http_request* request, const char* buffer, int len);
-int   exec_request(SOCKET sockfd, char* clientIP, void* cSSL);
-
 char* bad_request;
 char* internal_server_error;
 char* forbidden;
@@ -264,6 +250,22 @@ void send_bad_request(http_response* response, char* code){
 	free(buffer);
 }
 
+void send_bad_request2(http_request* request){
+
+        char* buffer=(char*)malloc(4000);
+        http_response response;
+        response.request=request;
+        response.content_length=strlen(bad_request);
+        strcpy(&response.content_type[0],"text/html");
+        get_head(&response, &buffer[0], "404 Not found");
+
+        socket_write(request, &buffer[0], strlen(&buffer[0]));
+        socket_write(request,"\r\n",2);
+        socket_write(request, bad_request, strlen(bad_request));
+
+        free(buffer);
+}
+
 void send_forbidden(http_request* request){
 
      	char* buffer=(char*)malloc(4000);
@@ -323,8 +325,6 @@ char* list_dir (const char* dir, char* buffer) {
         }
       }
 
-
-
       if(strlen(buffer)+strlen(fold)>MAX_ALLOC){
 	 int size=strlen(buffer)+strlen(fold)+1;
 	 buffer=(char*)realloc(buffer, size);
@@ -366,18 +366,22 @@ void send_list_dir(http_request* request){
 	memset(tmp,0,MAX_ALLOC);
 
 	sprintf(dir,"%s/%s%s%s", &serv_conf.workdir[0], &request->virtual_path[0], &request->path[0], &request->file[0]);
-	list_dir(dir,buffer);
-	sprintf(tmp,"<!DOCTYPE html>\n<html><head><title>%s</title></head><body><h1>Index of %s</h1>\n",
+	if(file_exists(dir)){
+	  list_dir(dir,buffer);
+	  sprintf(tmp,"<!DOCTYPE html>\n<html><head><title>%s</title></head><body><h1>Index of %s</h1>\n",
 		&request->path[0], &request->path[0]);
 
-	memset(dir,0,1024);
-	sprintf(dir,"%sContent-Length: %d\r\n", &head[0], (int)strlen(buffer)+(int)strlen(tmp)+14);
+	  memset(dir,0,1024);
+	  sprintf(dir,"%sContent-Length: %d\r\n", &head[0], (int)strlen(buffer)+(int)strlen(tmp)+14);
 
-	socket_write(request,dir,strlen(dir));
-        socket_write(request,"\r\n",2);
-	socket_write(request,tmp,strlen(tmp));
-        socket_write(request, buffer, strlen(buffer));
-	socket_write(request, "</body></html>", 14);
+	  socket_write(request,dir,strlen(dir));
+          socket_write(request,"\r\n",2);
+	  socket_write(request,tmp,strlen(tmp));
+          socket_write(request, buffer, strlen(buffer));
+	  socket_write(request, "</body></html>", 14);
+	}else {
+	  send_bad_request2(request);
+	}
 
 	free(tmp);
 	free(buffer);
@@ -766,6 +770,7 @@ int parse_http(char* buffer, http_request* request){
 	if(ptr==NULL) return -1;
 	strcpy(&request->method[0],ptr);
 
+
 	ptr=strtok(NULL," ");
 	if(ptr==NULL) return -1;
 	split(ptr, &request->path[0], &request->file[0], &request->query_string[0]);
@@ -846,7 +851,7 @@ void parse_env(http_response* res){
 	char buff[1024];
 	char cpy[1024];
 
-	tmp = (char*)malloc(4048);
+	tmp = (char*)malloc(6048);
 
 	while(1){
 	  memset(&buff[0],0,1024);
