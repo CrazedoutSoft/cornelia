@@ -58,6 +58,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define AUTHORIZATION 		"Authorization="
 
 
+int c_debug = 0;
 server_conf serv_conf;
 auth_conf   a_conf;
 
@@ -137,10 +138,10 @@ int get_file_size(const http_request* request){
         sprintf(tmp,"%s%s%s",&request->virtual_path[0],&request->path[0],&request->file[0]);
 
 	 if((fd=fopen(tmp,"rb"))!=NULL){
-         fseek(fd,0L,SEEK_END);
-         size = ftell(fd);
-         fseek(fd,0L,SEEK_SET);
-         fclose(fd);
+           fseek(fd,0L,SEEK_END);
+           size = ftell(fd);
+           fseek(fd,0L,SEEK_SET);
+           fclose(fd);
         }
         free(tmp);
 
@@ -195,7 +196,7 @@ int readline(const http_request* request, char* buffer, int len){
 	  case 0:
           return -1; // Socket timed out.
       	default:
-	//--
+
           while((r=socket_read(request,&sb[0],1))>0 && n<len-1){
 	   if(r==-1) return -1;
            c = sb[0];
@@ -207,7 +208,7 @@ int readline(const http_request* request, char* buffer, int len){
             buffer[n++] = c;
           }
 	  if(n==0) buffer[0]='\0';
-	//--
+
           break;
 	}
 
@@ -294,7 +295,7 @@ void send_internal_error(http_response* response){
 	free(buffer);
 }
 
-char* list_dir (const char* dir, char* buffer) {
+void list_dir (const char* dir, char* buffer) {
 
    DIR *dp;
    struct dirent *ep;
@@ -351,7 +352,6 @@ char* list_dir (const char* dir, char* buffer) {
   free(fold);
   free(tmp);
 
-return buffer;
 }
 
 void send_list_dir(http_request* request){
@@ -726,6 +726,7 @@ void doGetPost(http_request *request){
 	response.envp[0]=NULL;
 	response.request=request;
 
+	if(c_debug) printf("[doGetPost]\n");
 
 	auth_mode=handle_auth(request);
 	switch(auth_mode){
@@ -765,6 +766,8 @@ void doGetPost(http_request *request){
 int parse_http(char* buffer, http_request* request){
 
         char* ptr;
+
+	if(c_debug) printf("[parse_http]\n");
 
 	ptr=strtok(&buffer[0]," ");
 	if(ptr==NULL) return -1;
@@ -963,6 +966,8 @@ void handle_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	int r=CONN_CLOSE;
 
+	if(c_debug) printf("[handle_request]\n");
+
 	for(int i = 0; i < serv_conf.max_keep_alive_requests; i++){
 	  r = exec_request(sockfd, clientIP, cSSL);
 	  if(r!=CONN_KEEP_ALIVE) {
@@ -981,6 +986,8 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	char* host;
 	int ret = CONN_CLOSE;
 	FILE* logfd;
+
+	if(c_debug) printf("[exec_request]\n");
 
 	http_request request;
 	memset(&request,0,sizeof(http_request));
