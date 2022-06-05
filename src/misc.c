@@ -144,21 +144,29 @@ char* get_work_dir(char* cwd, int len){
    return getcwd(cwd, len);
 }
 
-void split(const char* buffer, char* path, char* file, char* qs){
+void split(const char* buff, char* path, char* file, char* qs){
 
-        char *ptr;
-        strcpy(path, buffer);
-        for(int i = strlen(buffer)-1; i>-1; i--){
-         if(buffer[i]=='/'){
-          strcpy(file, &buffer[i+1]);
-          path[i+1]='\0';
-          break;
-         }
+	char* buffer = (char*)malloc(strlen(buff));
+	strcpy(buffer, buff);
+
+        for(int i = strlen(buffer); i>-1; i--){
+          if(buffer[i]=='?') {
+            strcpy(&qs[0], &buffer[i+1]);
+            buffer[i]='\0';
+          }
         }
-        if((ptr=strstr(file,"?"))!=NULL){
-         file[ptr-file]='\0';
-         strcpy(qs,ptr+1);
+
+        for(int i = strlen(buffer); i>-1; i--){
+          if(buffer[i]=='/') {
+            strcpy(&file[0], &buffer[i+1]);
+            buffer[i]='\0';
+            strcpy(&path[0], &buffer[0]);
+            strcat(&path[0],"/");
+            break;
+          }
         }
+
+	free(buffer);
 }
 
 int startsw(const char* str, const char* str2){
