@@ -81,7 +81,7 @@ int copy_file(const char* orig, const char* newf){
 
 int file_exists(const char* file){
 
-   FILE *fd;
+    FILE *fd;
     if ((fd = fopen(file, "r")))
     {
         fclose(fd);
@@ -144,14 +144,19 @@ char* get_work_dir(char* cwd, int len){
    return getcwd(cwd, len);
 }
 
-void split(const char* buff, char* path, char* file, char* qs){
+void split(const char* buff, char* path, char* file, char* qs, unsigned int maxqs){
 
 	char* buffer = (char*)malloc(strlen(buff));
 	strcpy(buffer, buff);
 
+	memset(qs,0,maxqs);
         for(int i = strlen(buffer); i>-1; i--){
           if(buffer[i]=='?') {
-            strcpy(&qs[0], &buffer[i+1]);
+            if(strlen(&buffer[i+1])<maxqs){
+	      strcpy(qs, &buffer[i+1]);
+	    }else{
+	      memcpy(qs,&buffer[i+1],maxqs);
+	    }
             buffer[i]='\0';
           }
         }

@@ -776,7 +776,7 @@ int parse_http(char* buffer, http_request* request){
 
 	ptr=strtok(NULL," ");
 	if(ptr==NULL) return -1;
-	split(ptr, &request->path[0], &request->file[0], &request->query_string[0]);
+	split(ptr, &request->path[0], &request->file[0], &request->query_string[0], MAX_QUERYSTRING);
 
 	ptr=strtok(NULL," ");
 	if(ptr==NULL) return -1;
