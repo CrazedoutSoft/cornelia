@@ -37,6 +37,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MAX_VIRTUAL_PATH	256
 #define MAX_HTTP_HEADERS	256
 #define MAX_ENV_VARS		256
+#define MAX_QUERYSTRING	 	2048
 
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
