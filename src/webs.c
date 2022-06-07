@@ -133,8 +133,8 @@ void init_server() {
 int get_file_size(const http_request* request){
 
         FILE *fd;
-        int size=-1;
-        char*tmp = (char*)malloc(MAX_ALLOC);
+        int   size=-1;
+        char  *tmp = (char*)malloc(MAX_ALLOC);
         sprintf(tmp,"%s%s%s",&request->virtual_path[0],&request->path[0],&request->file[0]);
 
 	 if((fd=fopen(tmp,"rb"))!=NULL){
@@ -1171,17 +1171,17 @@ int setenv(const char *name, const char *value, int overwrite);
 
 void usage(){
 
-	printf("Cornelia Web Server (c) CrazedoutSoft 2022\n\n");
-	printf("usage: cornelia_d [OPTION]\n");
-	printf("example: cornelia -c myconf.conf -p 8080\n\n");
-	printf("-http   Use HTTP (Default)\n");
-	printf("-ssl    Use HTTP/SSL\n");
-	printf("-tls    Use HTTP/TLS\n");
-	printf("-c     <conf_file>\n");
-	printf("-p     <server_port>\n");
-	printf("-ssl_p <server_ssl_port>\n");
-	printf("-tsl_p <server_tsl_port>\n");
-	printf("-i prints config\n");
+	printf("\nCornelia Web Server (c) CrazedoutSoft 2022\n\n");
+	printf("usage:\tcornelia_d [OPTION]\n");
+	printf("example:cornelia -c myconf.conf -p 8080\n\n");
+	printf("-http\tHTTP (Default)\n");
+	printf("-ssl\tHTTP/SSL\n");
+	printf("-tls\tHTTP/TLS\n");
+	printf("-c\t<conf_file>\n");
+	printf("-p\t<server_port>\n");
+	printf("-ssl\t<server_ssl_port>\n");
+	printf("-tsl\t<server_tsl_port>\n");
+	printf("-i \tprints config\n");
 	printf("--help prints this message\n\n");
 
 }
