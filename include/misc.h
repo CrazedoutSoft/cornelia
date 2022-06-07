@@ -35,5 +35,6 @@ void  url_encoder_rfc_tables_init(char* html5, char* rfc3986, int len);
 char* url_encode( char *table, unsigned char *s, char *enc);
 int   file_exists(const char* file);
 int   copy_file(const char* orig, const char* new);
+int   decode(const char *s, char *dec);
 
 #endif
