@@ -1287,7 +1287,6 @@ int main(int args, char* argv[]){
 	  else {
 	   check_conf(use_ssl, use_tls);
            if(use_ssl==0 && use_tls==0){
-		printf("%s\n", serv_conf.www_root);
                 init_server();
            }else if(use_ssl){
 	        init_ssl_server(&serv_conf);
