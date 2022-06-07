@@ -227,3 +227,26 @@ int decode(const char *s, char *dec){
         return o - dec;
 }
 
+char* get_http_param(const char* qs, char* buffer, char* name){
+
+        char* ptr;
+        char* tok;
+        char* tmp = (char*)malloc(strlen(qs));
+
+        strcpy(tmp,qs);
+        ptr = strstr(tmp,name);
+        if(ptr!=NULL){
+          tok = strtok(ptr,"=");
+          if(tok!=NULL) {
+           tok=strtok(NULL,"&");
+           if(tok!=NULL) {
+	    strcpy(buffer,tok);
+	    free(tmp);
+	    return buffer;
+	   }
+          }
+        }
+        free(tmp);
+
+  return NULL;
+}

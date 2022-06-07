@@ -36,5 +36,6 @@ char* url_encode( char *table, unsigned char *s, char *enc);
 int   file_exists(const char* file);
 int   copy_file(const char* orig, const char* new);
 int   decode(const char *s, char *dec);
+char* get_http_param(const char* qs, char* buffer, char* name);
 
 #endif
