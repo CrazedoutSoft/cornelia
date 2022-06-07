@@ -543,6 +543,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
               n=socket_write(response->request, buffer, r);
 	    }
 	  }
+
 	  (void)(r);
 	  close(pipefd[0]);
 	  close(pin[0]);
@@ -726,7 +727,7 @@ void doGetPost(http_request *request){
 	response.envp[0]=NULL;
 	response.request=request;
 
-	if(c_debug) printf("[doGetPost]\n");
+	//printf("[doGetPost]\n");
 
 	auth_mode=handle_auth(request);
 	switch(auth_mode){
@@ -827,8 +828,8 @@ void parse_headers(char* buffer, http_request* request){
 	char* ptr;
 	int  index;
 	char* name=(char*)malloc(128);
-	char* value=(char*)malloc(256);
-	char* tmp=(char*)malloc(256+128);
+	char* value=(char*)malloc(1024);
+	char* tmp=(char*)malloc(MAX_ALLOC);
 
 	if((ptr=strstr(buffer,":"))!=NULL){
 	  index=ptr-buffer;
@@ -987,8 +988,6 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	int ret = CONN_CLOSE;
 	FILE* logfd;
 
-	if(c_debug) printf("[exec_request]\n");
-
 	http_request request;
 	memset(&request,0,sizeof(http_request));
 
@@ -1007,6 +1006,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	    fclose(logfd);
 	  }
 	}
+
 	strcpy(&request.virtual_path[0],&serv_conf.www_root[0]);
 	memset(tmp,0,4048);
 
