@@ -146,7 +146,7 @@ char* get_work_dir(char* cwd, int len){
 
 void split(const char* buff, char* path, char* file, char* qs, unsigned int maxqs){
 
-	char* buffer = (char*)malloc(strlen(buff));
+	char* buffer = (char*)malloc(strlen(buff)+1);
 	strcpy(buffer, buff);
 
 	memset(qs,0,maxqs);
@@ -231,7 +231,7 @@ char* get_http_param(const char* qs, char* buffer, char* name){
 
         char* ptr;
         char* tok;
-        char* tmp = (char*)malloc(strlen(qs));
+        char* tmp = (char*)malloc(strlen(qs)+1);
 
         strcpy(tmp,qs);
         ptr = strstr(tmp,name);
