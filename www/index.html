@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
     <title>Cornelia Web Server</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> 
+    <style>
+                body {
+                        background-color: #000000;
+                        color: #E79F3A;
+                        font-family: Trebuchet MS;
+                }
+                a {
+                        color: #E79F3A;
+                        font-family: Trebuchet MS;
+                        font-size: 18px;
+                }
+        </style>
     <script>
      function exec(action) {
        var xhttp = new XMLHttpRequest();
@@ -23,21 +32,23 @@
 <body>
 <center>
 <p>&nbsp;</p>
-<p><b>CrazedoutSoft (c) 2022</b><p/>
-<img src="corny_logo.png" />
-<p>&nbsp;</p>
-<span><a href="mailto:cornelia@crazedout.com">cornelia@crazedout.com</a></span>
-<p>&nbsp;</p>
+<div>
+<img src="cos.png" width="80"/>
+<div>
+<img src="corn2.png"/>
+<p>
 <div>
 <p>If you have followed the <a href="https://github.com/CrazedoutSoft/cornelia/blob/main/README.md">README</a> instructions - all of this should work.</p>
 <table>
-<tr><td><a href="javascript:exec('/cgi-bin/test.cgi')">test.cgi</a></td>
-<tr><td><a href="javascript:exec('python.py')">test.py</a></td>
-<tr><td><a href="javascript:exec('test.php')">test.php</a></td>
-<tr><td><a href="javascript:exec('test.jspz')">test.jspz</a></td>
-<tr><td><a href="javascript:exec('test.jgazm')">test.jgazm</a></td>
-<tr><td><a href="upload.html">test file upload</a></td>
+<tr><td><a href="javascript:exec('/cgi-bin/test.cgi')">test.cgi</a></td></tr>
+<tr><td><a href="javascript:exec('python.py')">test.py</a></td></tr>
+<tr><td><a href="javascript:exec('test.php')">test.php</a></td></tr>
+<tr><td><a href="javascript:exec('test.jspz')">test.jspz</a></td></tr>
+<tr><td><a href="javascript:exec('test.jgazm')">test.jgazm</a></td></tr>
+<tr><td><a href="jgaz/">code jgazm online!</a></td></tr>
+<tr><td><a href="upload.html">test file upload</a></td></tr>
 </table>
+<p>
 <span id="console"></span>
 </center>
 </body>
