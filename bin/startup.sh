@@ -3,6 +3,7 @@
 
 if [[ -z "${CORNELIA_HOME}" ]]; then
   export CORNELIA_HOME=$(pwd)
+  echo env 'CORNELIA_HOME' missing. Setting CORNELIA_HOME to $(pwd)
 fi
 
 export LD_LIBRARY_PATH=$CORNELIA_HOME/openssl
@@ -24,6 +25,13 @@ fi
 
 if [[ $1 == "tls" ]];
 then
+$CORNELIA_HOME/bin/cornelia_d -tls -c $CORNELIA_HOME/conf/corny.conf 2> $CORNELIA_HOME/log/error.log &
+fi
+
+if [[ $1 == "all" ]];
+then
+$CORNELIA_HOME/bin/cornelia_d -http -c $CORNELIA_HOME/conf/corny.conf 2> $CORNELIA_HOME/log/error.log &
+$CORNELIA_HOME/bin/cornelia_d -ssl -c $CORNELIA_HOME/conf/corny.conf 2> $CORNELIA_HOME/log/error.log &
 $CORNELIA_HOME/bin/cornelia_d -tls -c $CORNELIA_HOME/conf/corny.conf 2> $CORNELIA_HOME/log/error.log &
 fi
 

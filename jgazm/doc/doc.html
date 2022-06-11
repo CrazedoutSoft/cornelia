@@ -1,14 +1,23 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>jGazm 1.0</title>
-<style>
- body{
-	font-family: verdana;
-	font-size: 12px;
- }
-</style>
+    <style>
+		body {
+			background-color: #040406;
+			color: #E79F3A;
+			font-family: Trebuchet MS;
+			color: #E79F3A;
+		}
+		a{
+			color: #E79F3A;
+			font-family: Trebuchet MS;
+			font-size: 14px;
+		}
+	</style>
 </head>
-<body>
+<body style="text-align: center">
+<img src="../cos.png" width="10%"/>
 <span name="field">
 <a name="flags"/>
 <h3>@flags</h3>
@@ -17,6 +26,7 @@
 	Flags set in this operation will override <a href="usage.html#allflags">flags</a> given on the command line.<br>
 	<i>-stdin, -version, -showapi, -java and -help</i> does nothing here.
 </span>
+<div style="text-align: left; margin-left: 200px;">
 <hr>
 <span name="field">
 <a name="import"/>
@@ -49,6 +59,7 @@ Use -noimport to turn this off.
 	@include "c:/path/to/myscript.jgazm"<br>
 	If included file path is not absolute the <b><i>jgazm.home</i></b> path will we used as base directory.
 </span>
+</a>
 <hr>
 <span name="field">
 <a name="global"/>
@@ -62,6 +73,7 @@ Use -noimport to turn this off.
 	&nbsp;&nbsp;"George",<br>
 	&nbsp;&nbsp;"Ringo"};<br>
 	&nbsp;}<br>
+</a>
 </span>
 <hr>
 <span name="field">
@@ -81,6 +93,7 @@ Use -noimport to turn this off.
 	</pre>
 	</code>
 </span>
+</a>
 <hr>
 <span name="field">
 <a name="method"/>
@@ -95,6 +108,7 @@ Use -noimport to turn this off.
 	</pre>
 	</code>
 </span>
+</a>
 <hr>
 <span name="field">
 <a name="catch"/>
@@ -113,6 +127,7 @@ try{
 </pre></code>
 Mostly used inside methods otherwise not worth while...
 <hr>
+</a>
 </span>
 <span name="field">
 <a name="thread"/>
@@ -127,6 +142,7 @@ Mostly used inside methods otherwise not worth while...
 	</pre>
 	</code>
 </span>
+</a>
 <hr>
 <span name="field">
 <a name="string"/>
@@ -145,6 +161,7 @@ Mostly used inside methods otherwise not worth while...
 	</pre>
 	</code>
 </span>
+</a>
 <hr>
 <span name="field">
 <a name="exception"/>
@@ -168,6 +185,8 @@ Mostly used inside methods otherwise not worth while...
 		
 	</pre>
 	</code>
+</a>
+</div>
 	<hr>
 </span>
 </body>

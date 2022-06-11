@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 if [[ $1 == "" ]];
 then
 ps -ef | grep './cornelia_d' | grep -v grep | awk '{print $2}' | xargs -r kill -9
@@ -20,4 +19,5 @@ if [[ $1 == "tls" ]];
 then
 ps -ef | grep './cornelia_d -tls' | grep -v grep | awk '{print $2}' | xargs -r kill -9
 fi
+
 

@@ -17,6 +17,8 @@ clean:
 	-rm bin/cornelia_d
 	-rm log/*.log
 	-rm -rf JSPZWD 
+	-cd jgazm
+	-./clean
 
 
 
