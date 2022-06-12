@@ -537,7 +537,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	      clen = response->content_length;
 	      r=write(pin[1], response->request->post_data, clen);
 	    }
-            sprintf(headb,"HTTP/1.1 200 OK\r\nConnection: %s\r\n", &response->request->connection[0]);
+            sprintf(headb,"HTTP/1.1 200 OK\nConnection: %s\n", &response->request->connection[0]);
 	    n=socket_write(response->request, headb, strlen(headb));
             while((r=read(pipefd[0], buffer, 1024))){
               n=socket_write(response->request, buffer, r);
