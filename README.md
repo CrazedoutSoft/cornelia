@@ -64,6 +64,7 @@ Cornelia also includes a home brewed simple version of JSP <a href="JSPZ.md">JSP
 jGazm:<br/>
  1) Java JDK 1.7 or above must be installed. Some JRE's may work but no guarantee.<br/>
  2) Run ./setup_linux (you may have to chmod 755 on "setup_linux")<p/>
+ 3) For 'Online jGazm' to work $CORNELIA_HOME/jgazm needs to be in PATH.<p/>
 
 >cd jgazm<br/>
 >./setup_linux</p>
