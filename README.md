@@ -1,7 +1,7 @@
 
 <div >
 <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="www/corny_logo.png" alt="Logo" width="600" >
+    <img src="www/corn2.png" alt="Logo" width="600" >
   </a>
  
 </div>
