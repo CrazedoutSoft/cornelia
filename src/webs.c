@@ -122,6 +122,7 @@ void init_server() {
 	    handle_request(connfd,cip,NULL);
 	    shutdown(connfd,SHUT_RDWR);
 	    loop=0;
+	    if(c_debug) printf("exit\n");
 	  }
         }
         if (connfd < 0) {
@@ -502,12 +503,11 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	  argv[1]=(char*)malloc(strlen(file_path)+1);
  	  strcpy(argv[1],file_path);
 	  argv[2]=NULL;
-	}
-	else if(strcmp(exe_ptr,"<shell>")!=0){
+	}else if(strcmp(exe_ptr,"<shell>")!=0){
 	  strcpy(executable, exe_ptr);
 	  argv[0]=(char*)malloc(strlen(file_path)+1);
  	  strcpy(argv[0],file_path);
-	  argv[2]=NULL;
+	  argv[1]=NULL;
 	}else{
 	  strcpy(executable, file_path);
 	  argv[0]=(char*)malloc(strlen(&file_path[0]));
@@ -727,7 +727,7 @@ void doGetPost(http_request *request){
 	response.envp[0]=NULL;
 	response.request=request;
 
-	//printf("[doGetPost]\n");
+	if(c_debug) printf("[doGetPost]\n");
 
 	auth_mode=handle_auth(request);
 	switch(auth_mode){
@@ -740,6 +740,8 @@ void doGetPost(http_request *request){
 
   	response.content_length = get_file_size(request);
 	strcpy(&response.content_type[0],get_content_type(&request->file[0], &ext[0]));
+
+	if(c_debug) printf("[content-length read]\n");
 
 	if(response.content_length<1){
 	  send_bad_request(&response,"404 Not Found");
@@ -810,6 +812,7 @@ char* get_header(const http_request *request, const char* header){
 	int n=0;
 	char *ptr;
 
+	if(c_debug) printf("[get_header]\n");
 	while(1){
 	 if(request->headers[n]==NULL) break;
 	 if(!startsw(request->headers[n], header)){
@@ -819,6 +822,8 @@ char* get_header(const http_request *request, const char* header){
 	 }
   	 n++;
 	}
+
+	if(c_debug) printf("[exit get_header]\n");
 
  return NULL;
 }
@@ -975,6 +980,8 @@ void handle_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	   return;
 	  }
 	}
+	if(c_debug) printf("[exit handle_request]\n");
+
 }
 
 int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
@@ -999,6 +1006,8 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	r=readline(&request, buffer, 2048);
 	if(r<1) return CONN_CLOSE;
 
+	if(c_debug) printf("[readline]\n");
+
 	if(strlen(&serv_conf.logfile[0])>0){
 	  sprintf(tmp, "%s/%s", &serv_conf.workdir[0], &serv_conf.logfile[0]);
 	  if((logfd=fopen(tmp,"a"))!=NULL){
@@ -1012,6 +1021,8 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	int parse_h = parse_http(buffer,&request);
 
+	if(c_debug) printf("[exit parse_http]\n");
+
 	while((r=readline(&request,buffer,1024))>0){
 	 if(request.headers_len>=MAX_HTTP_HEADERS) {
 		fprintf(stderr,"Header count greater than %d\n", MAX_HTTP_HEADERS);
@@ -1020,6 +1031,8 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	 parse_headers(buffer,&request);
 	 n++;
 	}
+
+	if(c_debug) printf("[exit read_headers]\n");
 
 	// Set virtual path if Host header matches.
 	if((host=get_header(&request,"Host="))!=NULL){
@@ -1033,7 +1046,10 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	  }
 	}
 
+	if(c_debug) printf("exit [read virtual_path]\n");
+
 	if(parse_h<0 && find_default_page(&request)==0){
+	 if(c_debug) printf("[no default page]\n");
 	  if((strcmp(&serv_conf.allow_dir_listing[0],"=yes"))==0){
 	    send_list_dir(&request);
 	  }else {
@@ -1044,8 +1060,15 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	  free(tmp);
 	 return CONN_CLOSE;
 	}
+	if(c_debug) printf("[exit default page]\n");
 
-	strcpy(&request.connection[0],get_header(&request, "Connection="));
+	if(get_header(&request, "Connection=")!=NULL){
+		strcpy(&request.connection[0],get_header(&request, "Connection="));
+	}else{
+		strcpy(&request.connection[0],"Close");
+	}
+
+	if(c_debug) printf("[exit connection]\n");
 
 	if(strcmp(&request.method[0],HTTP_POST)==0 || strcmp(&request.method[0],HTTP_PUT)==0){
 	 if((ptr = get_header(&request,"Content-Length="))!=NULL){
@@ -1053,8 +1076,11 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	 }else request.post_data=NULL;
 	}
 
+	if(c_debug) printf("exit [content-length]\n");
+
 	request.headers_len=n-1;
 	doGetPost(&request);
+	if(c_debug) printf("exit [dogetpost]\n");
 
 	if(strcmp(&request.connection[0],"keep-alive")==0) ret = CONN_KEEP_ALIVE;
 
