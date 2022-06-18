@@ -1293,6 +1293,7 @@ int main(int args, char* argv[]){
 	  else if(strcmp(argv[i],"-ssl")==0) use_ssl=1;
 	  else if(strcmp(argv[i],"-tls")==0) use_tls=1;
 	  else if(strcmp(argv[i],"-i")==0) dump_c=1;
+	  else if(strcmp(argv[i],"-d")==0) c_debug=1;
 	  else if(strcmp(argv[i],"--help")==0) {
 		usage();
 		return 0;
