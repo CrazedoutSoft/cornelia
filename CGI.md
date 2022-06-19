@@ -3,9 +3,9 @@
 Default .cgi exec.<p/>
 
 [cgi_exec_conf]<br/>
-.cgi=&lt;shell&gt;<br/>
-.pl=&lt;shell&gt;<br/>
-.py=&lt;shell&gt;<br/>
+.cgi=[shell]<br/>
+.pl=[shell]<br/>
+.py=[shell]<br/>
 .php=/usr/bin/php-cgi<br/>
 .jgazm=jgazm/jgazm<br/>
 .jsp=bin/jspz
