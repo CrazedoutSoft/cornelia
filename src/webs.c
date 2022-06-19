@@ -1320,12 +1320,12 @@ int main(int args, char* argv[]){
 	  if(dump_c) {print_server_conf(&serv_conf);}
 	  else {
 	   check_conf(use_ssl, use_tls);
-           if(use_ssl==0 && use_tls==0){
-                init_server();
-           }else if(use_ssl){
-	        init_ssl_server(&serv_conf);
-           }else if(use_tls){
-	        init_tls_server(&serv_conf);
+	   if(use_ssl==0 && use_tls==0){
+		init_server();
+	   }else if(use_ssl){
+		init_ssl_server(&serv_conf);
+	   }else if(use_tls){
+		init_tls_server(&serv_conf);
 	   }
           }
 	}
