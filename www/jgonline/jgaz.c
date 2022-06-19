@@ -14,9 +14,9 @@ void exec(const char* code){
 	fputs(code, fd);
 	fclose(fd);
 
-	fd = popen("jgazm -f  /tmp/jgaz.jg 2>&1","r");
+	fd = popen("jgazm /tmp/jgaz.jg 2>&1","r");
 	printf("<div style='color: white'><pre><code>\n");
-	
+
 	while((fgets(buffer,1024,fd))!=NULL){
 	  printf("%s", buffer);
 	}

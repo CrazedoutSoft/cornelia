@@ -121,6 +121,7 @@ typedef struct server_conf_t {
 	int  max_keep_alive_requests;
 	int  keep_alive_timeout;
 	virtual_host* v_hosts[MAX_VIRTUAL_HOSTS];
+	unsigned int max_post_data;
 
 } server_conf;
 

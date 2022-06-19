@@ -55,6 +55,7 @@ void print_server_conf(server_conf* serv){
 	printf("#microseconds 1 sec = 1000000\n");
 	printf("#this value should be as short as possible as long it works. try 250000\n");
 	printf("server.keep_alive.timeout=%d\n", serv->keep_alive_timeout);
+	printf("server.max_post_data=%d\n", serv->max_post_data);
 	printf("[server_conf]\n\n");
 
 
@@ -172,6 +173,9 @@ void read_server_conf(FILE* fd, server_conf* serv){
 	}
 	else if((ptr=strstr(buffer, "server.name="))!=NULL){
 	 sprintf(&serv->server_name[0],"%s", ptr+12);
+	}
+	else if((ptr=strstr(buffer, "server.max_post_data="))!=NULL){
+	 serv->max_post_data=atoi(ptr+21);
 	}
     }
 

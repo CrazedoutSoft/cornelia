@@ -925,16 +925,23 @@ void parse_env(http_response* res){
 	free(tmp);
 }
 
-void read_post_data(http_request *request, int len){
+void read_post_data(http_request *request, unsigned int len){
 
 	int r = 0;
-	int n = 0;
+	unsigned int n = 0;
+	unsigned int m_len = len<serv_conf.max_post_data?len:serv_conf.max_post_data;
 	char buff[2];
-	request->post_data = malloc(len);
-	memset(request->post_data, 0, len);
+
+	if(len>serv_conf.max_post_data){
+	  send_forbidden(request);
+	  return;
+	}
+
+	request->post_data = malloc(m_len);
+	memset(request->post_data, 0, m_len);
 	while((r=socket_read(request, &buff[0], 1))){
 	  request->post_data[n++]=buff[0];
-	  if(n>=len) break;
+	  if(n>=m_len) break;
 	}
 }
 
