@@ -503,7 +503,7 @@ int exec_cgi(http_response* response, const char* exe_ptr){
 	  argv[1]=(char*)malloc(strlen(file_path)+1);
  	  strcpy(argv[1],file_path);
 	  argv[2]=NULL;
-	}else if(strcmp(exe_ptr,"<shell>")!=0){
+	}else if(strcmp(exe_ptr,"[shell]")!=0){
 	  strcpy(executable, exe_ptr);
 	  argv[0]=(char*)malloc(strlen(file_path)+1);
  	  strcpy(argv[0],file_path);
