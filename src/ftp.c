@@ -22,38 +22,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 unsigned int anonymous_allowed = 0;
 
-int setenv(const char *name, const char *value, int overwrite);
+int create_socket(int port) {
 
-typedef struct clientAddr_ {
-
-	char ip[20];
-	unsigned int port;
-	unsigned int sockfd;
-
-} clientAddr;
-
-
-typedef struct _ftp_session_ {
-
-	int mode;
- 	clientAddr cAddr;
-	char type;
-	char clientIP[20];
-	char workdir[256];
-	struct sockaddr_in addr;
-	char pasv_ip[20];
-	int pasv_port;
-	int pasv_sockfd;
-	char* tmp_value;
-	char user[64];
-	char pass[64];
-	unsigned int cred;
-
-} ftp_session;
-
-
-int create_socket(int port)
-{
     int s;
     struct sockaddr_in addr;
 

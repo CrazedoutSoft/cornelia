@@ -74,4 +74,32 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define ANONYMOUS       "anonymous"
 
+int setenv(const char *name, const char *value, int overwrite);
+
+typedef struct clientAddr_ {
+
+        char ip[20];
+        unsigned int port;
+        unsigned int sockfd;
+
+} clientAddr;
+
+typedef struct _ftp_session_ {
+
+        int mode;
+        clientAddr cAddr;
+        char type;
+        char clientIP[20];
+        char workdir[256];
+        struct sockaddr_in addr;
+        char pasv_ip[20];
+        int pasv_port;
+        int pasv_sockfd;
+        char* tmp_value;
+        char user[64];
+        char pass[64];
+        unsigned int cred;
+
+} ftp_session;
+
 #endif
