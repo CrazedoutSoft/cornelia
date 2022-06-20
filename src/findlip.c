@@ -94,7 +94,7 @@ int create_socket(int port){
             pV4Addr = (struct sockaddr_in*)&cli;
             ipAddr = pV4Addr->sin_addr;
             inet_ntop(AF_INET, &ipAddr, &cip[0], INET_ADDRSTRLEN );
-     	printf("%s\n", &cip[0]);
+     	    printf("%s\n", &cip[0]);
 
     return s;
 }
@@ -120,6 +120,11 @@ int open_socket_by_ip(const char* ip, int port){
         }else{
          return -1;
         }
+
+}
+
+int get_remote_ip(){
+
 
 }
 

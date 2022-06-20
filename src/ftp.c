@@ -151,6 +151,8 @@ int sock_read(unsigned int sockfd, char* buffer, int len){
 	return read(sockfd, buffer, len);
 }
 
+FILE* popen(const char* cmd, const char* mode);
+
 char* ftp_resolve_pasv(struct sockaddr_in* sockAddr, char* ipaddr);
 
 int pass(SOCKET sockfd, ftp_session* session, const char* value);
