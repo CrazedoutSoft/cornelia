@@ -897,7 +897,7 @@ void init_server(char* pasv_ip, int port, const char* root) {
     	sock = create_socket(port);
 	int connections=0;
 
-	printf("Cornelia FTP Server listening on %s:%d at %s\n", pasv_ip, port, root);
+	printf("*** Cornelia FTP Server listening on %s:%d at %s ***\n", pasv_ip, port, root);
 
 	while(loop){
           int client = accept(sock, (struct sockaddr*)&addr, &len);
@@ -996,6 +996,10 @@ int main(int args, char* argv[]){
 	  }
 	  else if(strcmp(argv[i],"-root")==0){
 	   if(i<args-1) strcpy(root,argv[i+1]);
+	   if(strstr(root,"../")!=NULL){
+	     printf("Root is not allowed to be relative '%s'. Defaulting to 'ftp'\n", root);
+	     strcpy(root,"ftp");
+	   }
 	  }
 	  else if(strcmp(argv[i],"-anonymous_allowed")==0){
 	    anonymous_allowed=1;
@@ -1016,7 +1020,6 @@ int main(int args, char* argv[]){
 	 pd = popen("bin/findip","r");
 	 if(pd!=NULL){
 	   while(fgets(&ip[0],128,pd)!=NULL) {
-	     printf("%s", &ip[0]);
 	     if(nr==1) {
 	        ip[strlen(&ip[0])-1] = '\0';
 		strcpy(bind,&ip[0]);
