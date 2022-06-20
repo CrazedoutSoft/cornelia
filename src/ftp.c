@@ -163,7 +163,7 @@ int syst(SOCKET sockfd, const char* value);
 int list(SOCKET sockfd, ftp_session* session);
 int port(SOCKET sockfd, char* value, ftp_session* session);
 int pwd(SOCKET sockfd, ftp_session* session);
-int cwd(SOCKET sockfd, const char* value);
+int cwd(SOCKET sockfd, const char* value, ftp_session* session);
 int retr(SOCKET sockfd, const char* value, ftp_session* session);
 int type(SOCKET sockfd, const char* value, ftp_session* session);
 int pasv(SOCKET sockfd, ftp_session* session);
@@ -441,7 +441,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],RETR)==0) r=retr(sockfd, value, session);
 	else if(strcmp(&verb[0],STOR)==0) r=stor(sockfd, value, session);
 	else if(strcmp(&verb[0],PWD)==0) r=pwd(sockfd,session);
-	else if(strcmp(&verb[0],CWD)==0) r=cwd(sockfd, value);
+	else if(strcmp(&verb[0],CWD)==0) r=cwd(sockfd, value,session);
 	else if(strcmp(&verb[0],TYPE)==0) r=type(sockfd,value,session);
 	else if(strcmp(&verb[0],PASV)==0) r=pasv(sockfd,session);
 	else if(strcmp(&verb[0],RNFR)==0) r=rnfr(sockfd,session,value);
@@ -603,22 +603,33 @@ int type(SOCKET sockfd, const char* value, ftp_session* session){
  return r;
 }
 
-int cwd(SOCKET sockfd, const char* value){
+int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         int r;
         char* buffer = (char*)malloc(1024);
+        char* tmp = (char*)malloc(1024);
+	char* t;
 
-	if(strstr(value,"../")!=NULL){
-	 strcpy(buffer,"501 Syntax error in parameters or argument.\r\n");
-	 r=sock_write(sockfd, buffer, strlen(buffer));
+	t=getcwd(tmp,1024);
+	memset(buffer,0,1024);
+	r=chdir(value);
+	t=getcwd(buffer,1024);
+	(void)(t);
+	r=chdir(tmp);
+	(void)(r);
+	if(strlen(buffer) < strlen(&session->workdir[0])){
+	  r=chdir(tmp);
+	  strcpy(buffer,"501 Invalid directory.\r\n");
+	  r=sock_write(sockfd, buffer, strlen(buffer));
 	}else{
+	  memset(buffer,0,1024);
 	  r=chdir(value);
           if(r>-1) strcpy(buffer,"250 Okay.\r\n");
-	  else sprintf(buffer,"550 %s: No such file or directory..\r\n",value);
+	  else sprintf(buffer,"550 %s %d: No such file or directory..\r\n",value,r);
           r=sock_write(sockfd,buffer,strlen(buffer));
 	}
 
-
+	free(tmp);
         free(buffer);
 
   return r;
@@ -633,7 +644,6 @@ int pwd(SOCKET sockfd, ftp_session* session){
 	if(getcwd(dir,1024)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
-	  printf("%ld|%s", strlen(&session->workdir[0]), &session->workdir[0]);
 	  sprintf(buffer,"257 %s/\r\n",&dir[strlen(&session->workdir[0])]);
 	}
 	r=sock_write(sockfd,buffer,strlen(buffer));
