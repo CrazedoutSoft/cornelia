@@ -21,13 +21,13 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../include/mkpasswd.h"
 #include "../include/misc.h"
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <sys/stat.h>
@@ -631,6 +631,7 @@ int pwd(SOCKET sockfd, ftp_session* session){
 	if(getcwd(dir,1024)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
+	  printf("%ld|%s", strlen(&session->workdir[0]), &session->workdir[0]);
 	  sprintf(buffer,"257 %s/\r\n",&dir[strlen(&session->workdir[0])]);
 	}
 	r=sock_write(sockfd,buffer,strlen(buffer));
@@ -1008,10 +1009,28 @@ int main(int args, char* argv[]){
 	  }
 	}
 
+	char ip[128];
+	FILE* pd;
+	int nr = 0;
 	if(strlen(bind)==0){
-	 strcpy(bind, "127.0.0.1");
-	 printf("Bind adress missing - defaulting to 127.0.0.1\n");
+	 pd = popen("bin/findip","r");
+	 if(pd!=NULL){
+	   while(fgets(&ip[0],128,pd)!=NULL) {
+	     printf("%s", &ip[0]);
+	     if(nr==1) {
+	        ip[strlen(&ip[0])-1] = '\0';
+		strcpy(bind,&ip[0]);
+	        break;
+	     }
+	     nr++;
+	   }
+	   fclose(pd);
+	 }else{
+	   strcpy(bind,"127.0.0.1");
+	 }
+	 printf("Bind adress missing - defaulting to %s\n", bind);
 	}
+
 	if(strlen(port)==0){
 	 strcpy(port, "8021");
 	 printf("Port missing - defaulting to 8021\n");
