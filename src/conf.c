@@ -52,7 +52,7 @@ void print_server_conf(server_conf* serv){
 	printf("server.cgi-bin=%s\n", &serv->cgi_bin[0]);
 	printf("server.allow_dir_listning=%s\n", &serv->allow_dir_listing[0]);
 	printf("server.max.keep_alive.requests=%d\n", serv->max_keep_alive_requests);
-	printf("#microseconds 1 sec = 1000000\n");
+	printf("#microseconds 1 sec=1000000\n");
 	printf("#this value should be as short as possible as long it works. try 250000\n");
 	printf("server.keep_alive.timeout=%d\n", serv->keep_alive_timeout);
 	printf("server.max_post_data=%d\n", serv->max_post_data);
@@ -157,7 +157,7 @@ void read_server_conf(FILE* fd, server_conf* serv){
 	 strcpy(&serv->logfile[0],ptr+15);
 	}
 	else if((ptr=strstr(buffer,"server.allow_dir_listning="))!=NULL){
-	 strcpy(&serv->allow_dir_listing[0],ptr+25);
+	 strcpy(&serv->allow_dir_listing[0],ptr+26);
 	}
 	else if((ptr=strstr(buffer,"server.ssl.certpm="))!=NULL){
 	 sprintf(&serv->cert[0],"%s/%s", chome, ptr+18);

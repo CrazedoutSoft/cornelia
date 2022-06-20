@@ -1,14 +1,37 @@
-
 <!DOCTYPE html>
 <html>
+<head>
+    <title>Cornelia Web Server</title>
+    <style>
+                body {
+                        background-color: #000000;
+                        color: #E79F3A;
+                        font-family: Trebuchet MS;
+                }
+                a {
+                        color: #E79F3A;
+                        font-family: Trebuchet MS;
+                        font-size: 18px;
+                }
+        </style>
+</head>
 <body>
-
+<center>
+<div style="text-align: center>
+<div>
+<a href="http://crazedout.com"><img src="cos.png" width="100" border="0"/></a>
+<div>
+<p>
+File will be uploaded to www/uploads. Config <i>server.max_post_data</i> handles max file size.
+</p>
+<p>&nbsp;</p>
 <form action="uploader.php" method="post" enctype="multipart/form-data">
   Select image to upload:
-  <input type="file" name="fileToUpload" id="fileToUpload">
+  <input type="file" name="fileToUpload" id="fileToUpload"><p>&nbsp;</p>
   <input type="submit" value="Upload Image" name="submit">
 </form>
-
+</div>
+</center>
 </body>
 </html>
 
