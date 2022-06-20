@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2022 CrazedoutSoft / Fredrik Roos
 
@@ -73,6 +72,7 @@ void usleep(unsigned long);
 
 void init_server() {
 
+	int loop=1;
 	int connfd;
 	SOCKET port = serv_conf.port;
         int sockfd;
@@ -83,8 +83,8 @@ void init_server() {
 
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd == -1) {
-                perror("Fatal: Socket creation failed.\n");
-                exit(-1);
+	  perror("Fatal: Socket creation failed.\n");
+	  exit(-1);
         }
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sin_family = AF_INET;
@@ -92,43 +92,44 @@ void init_server() {
         servaddr.sin_port = htons(port);
 
         if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
-                perror("Fatal: Socket bind failed.\n\nTry bin/restart.sh\n\n");
-                exit(-1);
+	  perror("Fatal: Socket bind failed.\n\nTry bin/restart.sh\n\n");
+	  exit(-1);
         }
 
         if ((listen(sockfd, 5)) != 0) {
-                perror("Fatal: sock listen failed.\n\nTry bin/restart.sh\n\n");
-                exit(-1);
+	  perror("Fatal: sock listen failed.\n\nTry bin/restart.sh\n\n");
+	  exit(-1);
         }
-        len = sizeof(cli);
 
+        len = sizeof(cli);
         printf("\nCornelia listening on %d [HTTP]\n", serv_conf.port);
 
-	int loop=1;
         while(loop){
-
 	  connfd = accept(sockfd, (SA*)&cli, &len);
-
 	  int pid = fork();
 	  if(pid>0){
+
 	    memset(&cip[0],0,16);
             pV4Addr = (struct sockaddr_in*)&cli;
             ipAddr = pV4Addr->sin_addr;
             inet_ntop(AF_INET, &ipAddr, &cip[0], INET_ADDRSTRLEN );
+
 	    struct timeval tv;
 	    tv.tv_sec = 0;
 	    tv.tv_usec = serv_conf.keep_alive_timeout;
 	    setsockopt(connfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 	    handle_request(connfd,cip,NULL);
 	    shutdown(connfd,SHUT_RDWR);
+
 	    loop=0;
 	    if(c_debug) printf("exit\n");
 	  }
         }
         if (connfd < 0) {
-                perror("Fatal:Server accept failed.\n");
-                exit(-1);
+	  perror("Fatal:Server accept failed.\n");
+	  exit(-1);
         }
+
 }
 
 int get_file_size(const http_request* request){
