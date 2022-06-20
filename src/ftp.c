@@ -18,59 +18,7 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
-#include "../include/mkpasswd.h"
-#include "../include/misc.h"
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <stdlib.h>
-#include <ifaddrs.h>
-#include <netinet/in.h>
-#include <sys/stat.h>
-#include <crypt.h>
-
-#define SOCKET int
-
-#define USER "USER"
-#define PASS "PASS"
-#define STAT "STAT"
-#define NOOP "NOOP"
-#define QUIT "QUIT"
-#define SYST "SYST"
-#define PORT "PORT"
-#define LIST "LIST"
-#define PWD  "PWD"
-#define CWD  "CWD"
-#define RETR "RETR"
-#define TYPE "TYPE"
-#define PASV "PASV"
-#define STOR "STOR"
-#define QUIT "QUIT"
-#define MKD  "MKD"
-#define RNFR "RNFR"
-#define RNTO "RNTO"
-#define DELE "DELE"
-
-#define BINARY 'I'
-#define ASCII  'A'
-
-#define MODE_PASV	0
-#define MODE_ACTIVE  	1
-
-#define LOBYTE(w)       ((BYTE)(w))
-#define HIBYTE(w)       ((BYTE)(((WORD)(w)>>8)&0xFF))
-
-#define WORD	unsigned int
-#define MAX_ALLOC	65536
-
-#define READ    	1
-#define WRITE   	2
-
-#define ANONYMOUS	"anonymous"
+#include "../include/ftp.h"
 
 unsigned int anonymous_allowed = 0;
 
