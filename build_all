@@ -1,0 +1,8 @@
+#!/bin/bash
+
+make
+cd jgazm
+setup_linux
+cd ..
+
+
