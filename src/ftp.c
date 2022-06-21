@@ -521,12 +521,28 @@ int type(SOCKET sockfd, const char* value, ftp_session* session){
  return r;
 }
 
+char* get_leaf(const char* path, char* leaf, int len){
+
+	memset(leaf,0,len);
+	strcpy(leaf,path);
+	for(int i = strlen(path); i>0; i--){
+	  if(path[i]=='/'){
+	   strcpy(leaf,&path[i+1]);
+	   break;
+	  }
+	}
+
+  return leaf;
+}
+
 int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         int r;
         char* buffer = (char*)malloc(1024);
         char* tmp = (char*)malloc(1024);
 	char* t;
+
+	get_leaf(value,tmp,1024);
 
 	t=getcwd(tmp,1024);
 	memset(buffer,0,1024);
