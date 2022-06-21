@@ -521,47 +521,27 @@ int type(SOCKET sockfd, const char* value, ftp_session* session){
  return r;
 }
 
-char* get_leaf(const char* path, char* leaf, int len){
-
-	memset(leaf,0,len);
-	strcpy(leaf,path);
-	for(int i = strlen(path); i>0; i--){
-	  if(path[i]=='/'){
-	   strcpy(leaf,&path[i+1]);
-	   break;
-	  }
-	}
-
-  return leaf;
-}
-
 int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         int r;
         char* buffer = (char*)malloc(1024);
         char* tmp = (char*)malloc(1024);
 	char* t;
-
-	get_leaf(value,tmp,1024);
-
-	t=getcwd(tmp,1024);
 	memset(buffer,0,1024);
+	memset(tmp,0,1024);
+	t=getcwd(tmp,1024);
 	r=chdir(value);
-	t=getcwd(buffer,1024);
 	(void)(t);
-	r=chdir(tmp);
-	(void)(r);
-	if(strlen(buffer) < strlen(&session->workdir[0])){
-	  r=chdir(tmp);
-	  strcpy(buffer,"501 Invalid directory.\r\n");
-	  r=sock_write(sockfd, buffer, strlen(buffer));
-	}else{
-	  memset(buffer,0,1024);
-	  r=chdir(value);
-          if(r>-1) strcpy(buffer,"250 Okay.\r\n");
-	  else sprintf(buffer,"550 %s %d: No such file or directory..\r\n",value,r);
-          r=sock_write(sockfd,buffer,strlen(buffer));
+	if(strlen(getcwd(buffer,1024)) < strlen(&session->workdir[0])) {
+	  r=chdir(&session->workdir[0]);
+	  r=-1;
 	}
+
+        if(r>-1) strcpy(buffer,"250 Okay.\r\n");
+	else sprintf(buffer,"550 %s: No such file or directory..\r\n",value);
+        r=sock_write(sockfd,buffer,strlen(buffer));
+
+//	printf("%s %s %s\n", value, getcwd(tmp,1024), &session->workdir[0]);
 
 	free(tmp);
         free(buffer);
