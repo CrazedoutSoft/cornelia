@@ -381,7 +381,8 @@ int main(int args, char* argv[]){
 	   fclose(fd);
 	  }else printf("Error: can't make file:%s\r\n\r\n", java_file);
 
-	  sprintf(exec,"%s -d %s %s 2>&1", javac, work_dir, java_file);
+	  sprintf(exec,"%s -classpath %s -d %s %s 2>&1", javac, work_dir, work_dir, java_file);
+
 	  if((ci=popen(exec,"r"))!=NULL){
 	    while((fgets(buffer,1024,ci))!=NULL){
 		printf("%s", buffer);
