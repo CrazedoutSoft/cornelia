@@ -14,7 +14,7 @@ The jspz engine uses "java" and "javac" for its operations. If you with to use o
 The jspz engine uses ./JSPZWD as default working directory. Change this by setting:
 <p/>
 
->export JSPZ_WORKDIR=myworkdir <br/>
+>export JSPZ_WORKDIR=myworkdir (user jars goes here)<br/>
 
 Supported JSP directives are:<p/>
 
