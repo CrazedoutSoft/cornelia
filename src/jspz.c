@@ -25,10 +25,14 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <dirent.h>
 
 char imports[1024];
 char head[2048];
 char globals[4096];
+
+FILE *popen(const char *command, const char *type);
+int pclose(FILE *stream);
 
 char request_code[] = "JspzHttpRequest request = new JspzHttpRequest();\r\n\r\nclass JspzHttpRequest {\r\n\r\n  String getParameter(String param){\r\n    String query = System.getenv(\"QUERY_STRING\")!=null?System.getenv(\"QUERY_STRING\"):\"\";\r\n    java.util.StringTokenizer t = new java.util.StringTokenizer(query,\"&\");\r\n    while(t.hasMoreTokens()){\r\n      String tok = t.nextToken();\r\n      int i = tok.indexOf(\"=\");\r\n      String key = tok.substring(0,i).trim();\r\n      String val = tok.substring(i+1).trim();\r\n      if(key.equals(param)) return val;\r\n    }\r\n   return null;\r\n }\r\n\r\n  String getContentType(){\r\n    return System.getenv(\"CONTENT_TYPE\")!=null?System.getenv(\"CONTENT_TYPE\"):\"\";\r\n  }\r\n\r\n  String getQueryString(){\r\n    return System.getenv(\"QUERY_STRING\")!=null?System.getenv(\"QUERY_STRING\"):\"\";\r\n  }\r\n\r\n  String getRequestMethod(){\r\n    return System.getenv(\"REQUEST_METHOD\")!=null?System.getenv(\"REQUEST_METHOD\"):\"\";\r\n  }\r\n\r\n  int getContentLength(){\r\n    return Integer.parseInt(System.getenv(\"CONTENT_LENGTH\")!=null?System.getenv(\"CONTENT_LENGTH\"):\"0\");\r\n  }\r\n\r\n  byte[] getPostData(){\r\n\r\n   byte[] buffer = null;\r\n   try{\r\n     int n=getContentLength();\r\n     if(n==0) return null;\r\n     buffer = new byte[n];\r\n     java.io.DataInputStream din = new java.io.DataInputStream(System.in);\r\n     din.read(buffer);\r\n     din.close();\r\n    }catch(Exception ex){\r\n      ex.printStackTrace();\r\n    }\r\n    return buffer;\r\n  }\r\n}\r\n\r\n";
 
@@ -293,6 +297,25 @@ void parse_jspz(FILE* in, FILE* out){
 
 }
 
+void find_jars(const char* workdir, char* cp, int lencp){
+
+  DIR *dp;
+  struct dirent *ep;
+
+  dp=opendir(workdir);
+  if(dp!=NULL){
+   while((ep = readdir(dp))){
+    if(strstr(ep->d_name,".jar")>0 || strstr(ep->d_name,".zip")>0) {
+	strcat(cp,workdir);
+	strcat(cp,"/");
+	strcat(cp,ep->d_name);
+	strcat(cp,":");
+    }
+   }
+   (void)closedir(dp);
+  }
+}
+
 void read_jspz_include(char* buffer, int len){
 
 	int l = (int)strlen(request_code);
@@ -317,10 +340,11 @@ int main(int args, char* argv[]){
 	char class_file[1024];
 	char jspz_import[8192];
 	char work_dir[256];
-	char exec[2048];
+	char exec[3072];
 	char java[64];
 	char javac[64];
-	int frecomp = 0;
+	char classpath[1024];
+	int  frecomp = 0;
 
 	strcpy(in_file,argv[args-1]);
 
@@ -333,6 +357,7 @@ int main(int args, char* argv[]){
 	memset(head,0,2048);
 	memset(globals,0,4096);
 	memset(in_file_path,0,1024);
+	memset(classpath,0,1024);
 
 	char* wptr = getenv("JSPZ_WORKDIR");
 	if(wptr==NULL){
@@ -367,6 +392,8 @@ int main(int args, char* argv[]){
 	sprintf(java_file,"%s/%s.java", work_dir, file_name);
 	sprintf(class_file,"%s/%s.class", work_dir, file_name);
 
+	find_jars(&work_dir[0],&classpath[0],1024);
+
 	if((recompile(in_file,class_file) || frecomp) || !file_exists(java_file)){
 	  if((fd=fopen(in_file,"r"))!=NULL){
 	    if((fi=fopen(java_file,"w"))!=NULL){
@@ -381,7 +408,7 @@ int main(int args, char* argv[]){
 	   fclose(fd);
 	  }else printf("Error: can't make file:%s\r\n\r\n", java_file);
 
-	  sprintf(exec,"%s -classpath %s -d %s %s 2>&1", javac, work_dir, work_dir, java_file);
+	  sprintf(exec,"%s -classpath %s%s -d %s %s 2>&1", javac, classpath, work_dir, work_dir, java_file);
 
 	  if((ci=popen(exec,"r"))!=NULL){
 	    while((fgets(buffer,1024,ci))!=NULL){
@@ -392,13 +419,14 @@ int main(int args, char* argv[]){
 	// End recompile,,,
 	}
 
-	sprintf(exec,"%s -cp %s %s 2>&1", java, work_dir, file_name);
+	sprintf(exec,"%s -cp %s%s %s 2>&1", java, classpath, work_dir, file_name);
 	if((ci = popen(exec,"r"))!=NULL){
 	  while((fgets(buffer,1024,ci))!=NULL){
 	    printf("%s", buffer);
 	  }
 	 pclose(ci);
 	}else printf("Bad java:%s\r\n\r\n", exec);
+
 
 
  return 0;

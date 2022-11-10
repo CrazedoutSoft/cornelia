@@ -1,8 +1,11 @@
 #!/bin/bash
 
+clear
 make
 cd jgazm
-setup_linux
+./setup_linux
 cd ..
+
+
 
 
