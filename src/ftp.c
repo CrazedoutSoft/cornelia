@@ -347,9 +347,11 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	   value=clip(value2);
 	  }
 	}
-
-	//printf("%s %s %s\n", &verb[0], value, value2);
-
+	/*
+	char wd[256];
+	getcwd(&wd[0],256);
+	printf("%s %s %s %s\n", &verb[0], value, value2, &wd[0]);
+	*/
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
 	else if(strcmp(&verb[0],QUIT)==0) r=quit(sockfd, value);
@@ -525,12 +527,16 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         int r;
         char* buffer = (char*)malloc(1024);
-        char* tmp = (char*)malloc(1024);
+        char* path = (char*)malloc(4096);
+        //char* tmp = (char*)malloc(1024);
 	char* t;
 	memset(buffer,0,1024);
-	memset(tmp,0,1024);
-	t=getcwd(tmp,1024);
-	r=chdir(value);
+	//memset(tmp,0,1024);
+	//t=getcwd(tmp,1024);
+	if(value[0]=='/') sprintf(path,"%s%s", &session->workdir[0], value);
+	else strcpy(path, value);
+	r=chdir(path);
+	//printf("%d %s\n",r,tmp);
 	(void)(t);
 	if(strlen(getcwd(buffer,1024)) < strlen(&session->workdir[0])) {
 	  r=chdir(&session->workdir[0]);
@@ -543,7 +549,7 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
 //	printf("%s %s %s\n", value, getcwd(tmp,1024), &session->workdir[0]);
 
-	free(tmp);
+	free(path);
         free(buffer);
 
   return r;
@@ -938,12 +944,12 @@ int main(int args, char* argv[]){
 	    return 0;
 	  }
 	}
-
+	/*
 	char ip[128];
 	FILE* pd;
 	int nr = 0;
 	if(strlen(bind)==0){
-	 pd = popen("bin/findip","r");
+	 pd = popen("bin/findip 8031","r");
 	 if(pd!=NULL){
 	   while(fgets(&ip[0],128,pd)!=NULL) {
 	     if(nr==1) {
@@ -958,7 +964,7 @@ int main(int args, char* argv[]){
 	   strcpy(bind,"127.0.0.1");
 	 }
 	 printf("Bind adress missing - defaulting to %s\n", bind);
-	}
+	}*/
 
 	if(strlen(port)==0){
 	 strcpy(port, "8021");
