@@ -1,10 +1,18 @@
 #!/bin/bash
 
-
 if [[ -z "${CORNELIA_HOME}" ]]; then
   export CORNELIA_HOME=$(pwd)
   echo env 'CORNELIA_HOME' missing. Setting CORNELIA_HOME to $(pwd)
 fi
+
+FILE=$CORNELIA_HOME/bin/cornelia_d
+if test -f "$FILE"; then
+    echo "$FILE exists."
+else
+    echo "$FILE does not exist. Run 'build_all' or 'make'"
+    exit
+fi
+
 
 export LD_LIBRARY_PATH=$CORNELIA_HOME/openssl
 

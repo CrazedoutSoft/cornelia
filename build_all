@@ -3,9 +3,11 @@
 clear
 cat conf/head.txt
 make
+
+echo Please set CORNELIA_HOME to cornelia base dir. export CORNELIA_HOME=$(pwd) 
+
 cd jgazm
 ./setup_linux
 cd ..
-
 
 
