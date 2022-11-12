@@ -1,11 +1,11 @@
 #!/bin/bash
 
 clear
+cat conf/head.txt
 make
 cd jgazm
 ./setup_linux
 cd ..
-
 
 
 
