@@ -18,6 +18,9 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+// Do to: Handle file names with spaces.
+
 #include "../include/ftp.h"
 
 unsigned int anonymous_allowed = 0;
@@ -324,6 +327,8 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *value2 = NULL;
 	int r = 0;
 
+	printf("%s\n", buffer);
+
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
 	if(ptr!=NULL){
@@ -347,11 +352,9 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	   value=clip(value2);
 	  }
 	}
-	/*
-	char wd[256];
-	getcwd(&wd[0],256);
-	printf("%s %s %s %s\n", &verb[0], value, value2, &wd[0]);
-	*/
+
+	printf("%s %s %s\n", &verb[0], value, value2);
+
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
 	else if(strcmp(&verb[0],QUIT)==0) r=quit(sockfd, value);
