@@ -470,7 +470,7 @@ char* get_head(http_response* response, char* head, char* code){
 	strcat(head,tmp);
 	sprintf(tmp,"Server: %s\r\n", &serv_conf.server_name[0]);
 	strcat(head,tmp);
-	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", ACAOrigin);
+	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", "*");
 	strcat(head,tmp);
 	sprintf(tmp,"%s: %s\r\n", "Content-Type", &response->content_type[0]);
 	strcat(head,tmp);
