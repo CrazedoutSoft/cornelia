@@ -67,6 +67,7 @@ char* internal_server_error;
 char* forbidden;
 char* unauthorized;
 char* http_options;
+char* ACAOrigin;
 char  conf_file[1024] = "conf/corny.conf";
 char  cip[16];
 void dump_request(http_request* r);
@@ -246,7 +247,6 @@ int socket_write(const http_request* request, const char* buffer, int len){
 
 void send_options_reply(http_request* request){
 
-//	char reply[] = "HTTP/1.1 204 No Content\nAllow: POST, GET, OPTIONS\nAccess-Control-Allow-Headers:Origin, X-Requested-With, Content-Type, Accept\nAccess-Control-Allow-Origin: *\n\n";
 	socket_write(request, http_options, strlen(http_options));
 
 }
@@ -470,7 +470,7 @@ char* get_head(http_response* response, char* head, char* code){
 	strcat(head,tmp);
 	sprintf(tmp,"Server: %s\r\n", &serv_conf.server_name[0]);
 	strcat(head,tmp);
-	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", "*");
+	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", ACAOrigin);
 	strcat(head,tmp);
 	sprintf(tmp,"%s: %s\r\n", "Content-Type", &response->content_type[0]);
 	strcat(head,tmp);
@@ -507,8 +507,6 @@ int exec_cgi(http_response* response, const char* exe_ptr){
         sprintf(file_path,"%s%s%s",
 		&response->request->virtual_path[0],&response->request->path[0],&response->request->file[0]);
 
-
-	/* FIX */
 	if(strstr(exe_ptr,"jgazm")!=NULL){
 	  strcpy(executable, exe_ptr);
 	  argv[0]=(char*)malloc(strlen(file_path)+1);
@@ -1217,6 +1215,21 @@ int read_http_responses(){
         }else{
           fprintf(stderr,"Bad file: missing conf/http_options.txt\n");
           printf("Bad file: missing conf/http_options.txt\n");
+          return -1;
+        }
+
+       sprintf(file,"%s/conf/Access-Control-Allow-Origin.txt", getenv("CORNELIA_HOME"));
+       if((fd=fopen(file,"r"))!=NULL){
+          fseek(fd,0L,SEEK_END);
+          len = ftell(fd);
+          fseek(fd,0L,SEEK_SET);
+          ACAOrigin = (char*)malloc(len);
+          r=fread(ACAOrigin,1,len,fd);
+          (void)(r);
+          fclose(fd);
+        }else{
+          fprintf(stderr,"Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
+          printf("Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
           return -1;
         }
 
