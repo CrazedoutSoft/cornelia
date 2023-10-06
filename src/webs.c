@@ -54,6 +54,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define HTTP_POST		"POST"
 #define HTTP_GET		"GET"
 #define HTTP_PUT		"PUT"
+#define HTTP_OPTIONS		"OPTIONS"
 #define AUTHORIZATION 		"Authorization="
 
 
@@ -65,8 +66,10 @@ char* bad_request;
 char* internal_server_error;
 char* forbidden;
 char* unauthorized;
+char* http_options;
 char  conf_file[1024] = "conf/corny.conf";
 char  cip[16];
+void dump_request(http_request* r);
 
 void usleep(unsigned long);
 
@@ -239,6 +242,13 @@ int socket_write(const http_request* request, const char* buffer, int len){
 	}
 
   return r;
+}
+
+void send_options_reply(http_request* request){
+
+//	char reply[] = "HTTP/1.1 204 No Content\nAllow: POST, GET, OPTIONS\nAccess-Control-Allow-Headers:Origin, X-Requested-With, Content-Type, Accept\nAccess-Control-Allow-Origin: *\n\n";
+	socket_write(request, http_options, strlen(http_options));
+
 }
 
 void send_bad_request(http_response* response, char* code){
@@ -459,6 +469,8 @@ char* get_head(http_response* response, char* head, char* code){
 	sprintf(tmp,"%s %s\r\n", response->request->httpv, code);
 	strcat(head,tmp);
 	sprintf(tmp,"Server: %s\r\n", &serv_conf.server_name[0]);
+	strcat(head,tmp);
+	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", "*");
 	strcat(head,tmp);
 	sprintf(tmp,"%s: %s\r\n", "Content-Type", &response->content_type[0]);
 	strcat(head,tmp);
@@ -717,6 +729,7 @@ void doPut(http_request* request){
 	(void)(request);
 }
 
+
 void doGetPost(http_request *request){
 
 	char tmp[1024];
@@ -729,6 +742,11 @@ void doGetPost(http_request *request){
 	response.request=request;
 
 	if(c_debug) printf("[doGetPost]\n");
+	if(strcmp(&request->method[0],HTTP_OPTIONS)==0){
+	 if(c_debug) printf("[send_options_reply]\n");
+	 send_options_reply(request);
+	 return;
+	}
 
 	auth_mode=handle_auth(request);
 	switch(auth_mode){
@@ -741,6 +759,7 @@ void doGetPost(http_request *request){
 
   	response.content_length = get_file_size(request);
 	strcpy(&response.content_type[0],get_content_type(&request->file[0], &ext[0]));
+
 
 	if(c_debug) printf("[content-length read]\n");
 
@@ -1183,6 +1202,21 @@ int read_http_responses(){
         }else{
           fprintf(stderr,"Bad file: missing conf/401.txt\n");
           printf("Bad file: missing conf/401.txt\n");
+          return -1;
+        }
+
+       sprintf(file,"%s/conf/http_options.txt", getenv("CORNELIA_HOME"));
+       if((fd=fopen(file,"r"))!=NULL){
+          fseek(fd,0L,SEEK_END);
+          len = ftell(fd);
+          fseek(fd,0L,SEEK_SET);
+          http_options = (char*)malloc(len);
+          r=fread(http_options,1,len,fd);
+          (void)(r);
+          fclose(fd);
+        }else{
+          fprintf(stderr,"Bad file: missing conf/http_options.txt\n");
+          printf("Bad file: missing conf/http_options.txt\n");
           return -1;
         }
 
