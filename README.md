@@ -52,8 +52,8 @@ Delete these files at your own discretion. Please leave "www/res" as the icons f
 If you change the root directory, Cornelia will still look for these icons in /res so a sym link or actual move is recommended.<p/>
 <p/>
 
-Warning: Since Cornelias primary purpose is for development the header 'Access-Control-Allow-Origin' is set to '*'.<br>
-This is dangerous in a open context. On HTTP OPTIONS request this can be changed in conf/http_options.txt.<p>
+<b>Warning: Since Cornelias primary purpose is for development the header 'Access-Control-Allow-Origin' is set to '*'.<br>
+This is dangerous in a open context. On HTTP OPTIONS request this can be changed in conf/http_options.txt.</b><p>
 
 OpenSSL:<br/>
 If you can't build Cornelia with the OpenSSL headers and libs provided you <br/>
