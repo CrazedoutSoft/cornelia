@@ -784,6 +784,26 @@ void doGetPost(http_request *request){
 
 }
 
+void handle_virtual_files(http_request* request){
+
+	char* virt;
+	int n = 0;
+
+	while(1){
+	  if(serv_conf.v_files[n]!=NULL){
+	    virt = (char*)malloc(strlen(&request->path[0])+strlen(&request->file[0])+2);
+	    sprintf(virt,"%s%s",&request->path[0],&request->file[0]);
+	    if(strcmp(virt,&serv_conf.v_files[n]->name[0])==0){
+	      sprintf(&request->path[0],"%s",&serv_conf.v_files[n]->path[0]);
+	      sprintf(&request->file[0],"%s",&serv_conf.v_files[n]->file[0]);
+	    }
+	   free(virt);
+	  }else break;
+	 n++;
+	}
+
+}
+
 int parse_http(char* buffer, http_request* request){
 
         char* ptr;
@@ -806,6 +826,10 @@ int parse_http(char* buffer, http_request* request){
 	if(strcmp(&request->path[0], CGI_BIN)==0){
 	  strcpy(&request->path[0], &serv_conf.cgi_bin[0]);
 	}
+
+	if(c_debug) printf("[start virtual_files]%s %s\n", &request->path[0], &request->file[0]);
+	handle_virtual_files(request);
+	if(c_debug) printf("[end virtual_files]%s %s\n", &request->path[0], &request->file[0]);
 
 	if(strlen(&request->file[0])==0) {
 	    return -1;

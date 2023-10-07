@@ -30,6 +30,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CONTENT_TYPE_CONF   	"[content_type_conf]"
 #define CGI_BIN_CONF		"[cgi_exec_conf]"
 #define VHOSTS_CONF		"[virtual_hosts]"
+#define VHOSTS_FILES		"[virtual_files]"
 
 void print_server_conf(server_conf* serv){
 
@@ -113,6 +114,14 @@ void print_server_conf(server_conf* serv){
         }
 	printf("[virtual_hosts]\n\n");
 
+        printf("[virtual_files]\n");
+        n=0;
+        while(1){
+          if(serv->v_files[n]==NULL) break;
+          printf("%s %s %s\n", &serv->v_files[n]->name[0], &serv->v_files[n]->path[0],&serv->v_files[n]->file[0]);
+          n++;
+        }
+        printf("[virtual_files]\n\n");
 
 }
 
@@ -342,6 +351,41 @@ void read_vhosts(FILE* fd, server_conf* serv){
 	free(tmp);
 }
 
+void read_vfiles(FILE* fd, server_conf* serv){
+
+        int n = 0;
+        char* buffer = (char*)malloc(1024);
+        char* mem = (char*)malloc(1024);
+        char* tmp = (char*)malloc(256);
+        char* ptr;
+
+        while(fgets(buffer,1024,fd)!=NULL){
+
+          if(strcmp(clip(buffer),VHOSTS_FILES)==0) break;
+          if(buffer[0]=='#') continue;
+          if(strlen(buffer)==0) continue;
+
+          strcpy(mem, buffer);
+          serv->v_files[n] = (virtual_files*)malloc(sizeof(virtual_files));
+          memset(serv->v_files[n],0,sizeof(virtual_files));
+           if((ptr=strtok(mem," "))!=NULL){
+             strcpy(&serv->v_files[n]->name[0],ptr);
+             if((ptr=strtok(NULL," "))!=NULL){
+                strcpy(&serv->v_files[n]->path[0],ptr);
+             }
+             if((ptr=strtok(NULL," "))!=NULL){
+                strcpy(&serv->v_files[n]->file[0],ptr);
+             }
+           }
+        n++;
+        }
+        serv->v_files[n]=NULL;
+
+        free(mem);
+        free(buffer);
+        free(tmp);
+}
+
 int init_conf(const char* conf_file, server_conf *serv){
 
     char* buffer = (char*)malloc(1024);
@@ -353,6 +397,7 @@ int init_conf(const char* conf_file, server_conf *serv){
 	  else if(strcmp(clip(buffer),CONTENT_TYPE_CONF)==0) read_content_types(fd,serv);
 	  else if(strcmp(clip(buffer),CGI_BIN_CONF)==0) read_cgi_bin(fd,serv);
 	  else if(strcmp(clip(buffer),VHOSTS_CONF)==0) read_vhosts(fd,serv);
+	  else if(strcmp(clip(buffer),VHOSTS_FILES)==0) read_vfiles(fd,serv);
 	}
      fclose(fd);
     }else{

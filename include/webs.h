@@ -35,11 +35,20 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MAX_CONTENT_TYPES	64
 #define MAX_VIRTUAL_HOSTS	64
 #define MAX_VIRTUAL_PATH	256
+#define MAX_VIRTUAL_FILE	256
 #define MAX_HTTP_HEADERS	256
 #define MAX_ENV_VARS		256
 #define MAX_QUERYSTRING	 	2048
 
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
+
+typedef struct virtual_files_t {
+
+        char name[128];
+        char path[1024];
+	char file[255];
+
+} virtual_files;
 
 typedef struct virtual_host_t {
 
@@ -121,6 +130,7 @@ typedef struct server_conf_t {
 	int  max_keep_alive_requests;
 	int  keep_alive_timeout;
 	virtual_host* v_hosts[MAX_VIRTUAL_HOSTS];
+	virtual_files* v_files[MAX_VIRTUAL_FILE];
 	unsigned int max_post_data;
 
 } server_conf;
