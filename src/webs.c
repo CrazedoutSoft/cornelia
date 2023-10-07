@@ -1103,7 +1103,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 
 	if(parse_h<0 && find_default_page(&request)==0){
 	 if(c_debug) printf("[no default page]\n");
-	  if((strcmp(&serv_conf.allow_dir_listing[0],"=yes"))==0){
+	  if((strcmp(&serv_conf.allow_dir_listing[0],"yes"))==0){
 	    send_list_dir(&request);
 	  }else {
 	    send_forbidden(&request);
