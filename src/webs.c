@@ -260,6 +260,7 @@ void send_bad_request(http_response* response, char* code){
 	socket_write(response->request, &buffer[0], strlen(&buffer[0]));
 	socket_write(response->request,"\r\n",2);
         socket_write(response->request, bad_request, strlen(bad_request));
+	socket_write(response->request, "\n\n",2);
 	free(buffer);
 }
 
@@ -275,6 +276,7 @@ void send_bad_request2(http_request* request){
         socket_write(request, &buffer[0], strlen(&buffer[0]));
         socket_write(request,"\r\n",2);
         socket_write(request, bad_request, strlen(bad_request));
+	socket_write(request, "\n\n",2);
 
         free(buffer);
 }
@@ -291,6 +293,7 @@ void send_forbidden(http_request* request){
 	socket_write(request, &buffer[0], strlen(&buffer[0]));
         socket_write(request,"\r\n",2);
         socket_write(request, forbidden, strlen(forbidden));
+	socket_write(request, "\n\n",2);
 
 	free(buffer);
 }
@@ -304,6 +307,7 @@ void send_internal_error(http_response* response){
         socket_write(response->request, &buffer[0], strlen(&buffer[0]));
         socket_write(response->request,"\r\n",2);
         socket_write(response->request, internal_server_error, strlen(internal_server_error));
+	socket_write(response->request, "\n\n",2);
 	free(buffer);
 }
 
@@ -1107,7 +1111,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	  close(sockfd);
 	  free(buffer);
 	  free(tmp);
-	 return CONN_CLOSE;
+	 //return CONN_CLOSE;
 	}
 	if(c_debug) printf("[exit default page]\n");
 
