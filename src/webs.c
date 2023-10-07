@@ -384,7 +384,7 @@ void send_list_dir(http_request* request){
 	sprintf(dir,"%s/%s%s%s", &serv_conf.workdir[0], &request->virtual_path[0], &request->path[0], &request->file[0]);
 	if(file_exists(dir)){
 	  list_dir(dir,buffer);
-	  sprintf(tmp,"<!DOCTYPE html>\n<html><head><title>%s</title></head><body><h1>Index of %s</h1>\n",
+	  sprintf(tmp,"<!DOCTYPE html>\n<html><head><title>%s</title></head><body><b><i>Cornelia Web Server by CrazedoutSoft (c)</i></b><br><h1>Index of %s</h1>\n",
 		&request->path[0], &request->path[0]);
 
 	  memset(dir,0,1024);
