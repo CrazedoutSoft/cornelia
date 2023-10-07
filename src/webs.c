@@ -74,6 +74,7 @@ void dump_request(http_request* r);
 
 void usleep(unsigned long);
 
+
 void init_server() {
 
 	int loop=1;
@@ -227,7 +228,9 @@ int socket_read(const http_request* request, char* buffer, int len){
 	if(request->cSSL==NULL){
 	  r=read(request->sockfd, buffer, len);
 	}else{
+	  #ifndef NO_SSL
 	  r=ssl_read(request->cSSL, buffer, len);
+	  #endif
 	}
 
   return r;
@@ -239,7 +242,9 @@ int socket_write(const http_request* request, const char* buffer, int len){
 	if(request->cSSL==NULL){
 	  r=write(request->sockfd, buffer, len);
 	}else{
+	 #ifndef NO_SSL
 	 r=ssl_write(request->cSSL, buffer, len);
+	 #endif
 	}
 
   return r;
@@ -1399,9 +1404,19 @@ int main(int args, char* argv[]){
 	   if(use_ssl==0 && use_tls==0){
 		init_server();
 	   }else if(use_ssl){
+		#ifndef NO_SSL
 		init_ssl_server(&serv_conf);
+		#endif
+		#ifdef NO_SSL
+		printf("This Cornelia Web Server was compiled without SSL.(make no_ssl)\n");
+		#endif
 	   }else if(use_tls){
+		#ifndef NO_SSL
 		init_tls_server(&serv_conf);
+		#endif
+		#ifdef NO_SSL
+		printf("This Cornelia Web Server was compiled without TLS. (make no_ssl)\n");
+		#endif
 	   }
           }
 	}
