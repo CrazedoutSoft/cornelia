@@ -22,7 +22,7 @@ If you start bin/startup.sh from cornelia directory CORNELIA_HOME is set to pwd.
 
 Default HTTP port is 8080, SSL 8081, TLS 8082. Edit this in conf/corny.conf
 
->make (or 'make nossl' for http only)<br/>
+><b>make (or 'make nossl' for http only)</b><br/>
 >bin/startup.sh (may have to chmod 755 on *.sh files in /bin) starts http,ssl and tls.<br/>
 >bin/startup.sh http starts http server only<br/>
 >bin/startup.sh ssl starts ssl server only<br/>
