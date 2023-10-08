@@ -62,7 +62,7 @@ For the http <i>OPTIONS</i> request the response is set in conf/http_options.
 Set up virtual endpoints:<br>
 In conf/corny:<br>
 [virtual_files]<br>
-#endpoint path file
+#endpoint path file<br>
 /myendpoint / my_repsponse_file.pl<br>
 [virtual_files]<p>
 
