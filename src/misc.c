@@ -29,6 +29,16 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include <stdio.h>
 
+int ends_with(char *string, char* end){
+
+  string = strrchr(string, '.');
+
+  if (string != NULL)
+    return strcmp(string, end);
+
+  return -1;
+}
+
 char* get_date_time(char* buffer){
 
     time_t current_time;

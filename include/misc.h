@@ -24,6 +24,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 typedef unsigned char BYTE;
 
+int   ends_with(char* string, char* end);
 char* get_date_time(char* buffer);
 char* clip(char* buffer);
 char* toupperc(char* upper, const char* buffer, char stop);

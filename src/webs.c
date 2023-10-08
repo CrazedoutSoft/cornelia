@@ -469,7 +469,7 @@ char* get_content_type(char* file, char* ct){
 	}
 
 	// TODO: Bad fix for type="module"
-	if(strstr(file,".js")!=NULL){
+	if(ends_with(file,".js")==0){
 	  strcpy(ct,"text/javascript");
 	}
 
