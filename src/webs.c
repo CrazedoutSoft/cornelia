@@ -468,6 +468,11 @@ char* get_content_type(char* file, char* ct){
 	  strcpy(ct,"text/text");
 	}
 
+	// TODO: Bad fix for type="module"
+	if(strstr(file,".js")!=NULL){
+	  strcpy(ct,"text/javascript");
+	}
+
  return ct;
 }
 
@@ -767,6 +772,7 @@ void doGetPost(http_request *request){
   	response.content_length = get_file_size(request);
 	strcpy(&response.content_type[0],get_content_type(&request->file[0], &ext[0]));
 
+	//dump_request(request);
 
 	if(c_debug) printf("[content-length read]\n");
 
