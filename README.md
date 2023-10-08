@@ -58,6 +58,18 @@ This is dangerous in a open context. Change this in conf/Access-Control-Allow-Or
 For the http <i>OPTIONS</i> request the response is set in conf/http_options.
 </b><p>
 
+<b>User enpoints</b><br>
+Set up virtual endpoints:<br>
+In conf/corny:<br>
+[virtual_files]<br>
+#endpoint path file
+/myendpoint / my_repsponse_file.pl<br>
+[virtual_files]<p>
+
+Set up custum endpoints on cmd line:<br>
+bin/cornelia_d -uep:/myendpoint%{"my","answer"}%application/json
+<p>
+
 OpenSSL:<br/>
 If you can't build Cornelia with the OpenSSL headers and libs provided you <br/>
 must compile your own OpenSLL libs and replace them in dir openssl<br/>
