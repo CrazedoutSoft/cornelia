@@ -58,7 +58,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define AUTHORIZATION 		"Authorization="
 
 
-int c_debug = 0;
+int c_debug = 1;
 server_conf serv_conf;
 auth_conf   a_conf;
 
@@ -71,6 +71,7 @@ char* ACAOrigin;
 char  conf_file[1024] = "conf/corny.conf";
 char  cip[16];
 void dump_request(http_request* r);
+user_endpoint* uep = NULL;
 
 void usleep(unsigned long);
 
@@ -799,10 +800,12 @@ void doGetPost(http_request *request){
 
 }
 
-void handle_virtual_files(http_request* request){
+int handle_virtual_files(http_request* request){
 
 	char* virt;
 	int n = 0;
+	int res=0;
+	char* tmp;
 
 	while(1){
 	  if(serv_conf.v_files[n]!=NULL){
@@ -817,11 +820,39 @@ void handle_virtual_files(http_request* request){
 	 n++;
 	}
 
+	tmp = (char*)malloc(strlen(&request->path[0])+strlen(&request->file[0])+2);
+	sprintf(tmp,"%s%s", &request->path[0],&request->file[0]);
+	printf("eup:%s %s\n", tmp, uep->endpoint);
+	if(uep!=NULL && strcmp(tmp,uep->endpoint)==0){
+	  socket_write(request,"HTTP/1.1 200 OK\n",16);
+	  socket_write(request,"Server: Cornelia\n",17);
+	  socket_write(request,"Connection: close\n",18);
+	  tmp = (char*)realloc(tmp,255);
+	  if(uep->content_type!=NULL){
+	   sprintf(tmp,"Content-Type: %s\n", uep->content_type);
+	  }else sprintf(tmp,"Content-Type: application/json\n");
+
+	  socket_write(request, tmp, strlen(tmp));
+
+	  if(uep->response!=NULL) {
+	    tmp = realloc(tmp,64);
+	    sprintf(tmp,"Content-Length: %d\n\n", (int)strlen(uep->response));
+	    socket_write(request, tmp, strlen(tmp));
+	    tmp = realloc(tmp,strlen(uep->response)+2);
+ 	    sprintf(tmp,"%s", uep->response);
+	    socket_write(request, tmp, strlen(tmp));
+	  }
+  	 free(tmp);
+ 	 res=1;
+	}
+
+ return res;
 }
 
 int parse_http(char* buffer, http_request* request){
 
         char* ptr;
+	int res = 0;
 
 	if(c_debug) printf("[parse_http]\n");
 
@@ -843,14 +874,14 @@ int parse_http(char* buffer, http_request* request){
 	}
 
 	if(c_debug) printf("[start virtual_files]%s %s\n", &request->path[0], &request->file[0]);
-	handle_virtual_files(request);
+	res = handle_virtual_files(request);
 	if(c_debug) printf("[end virtual_files]%s %s\n", &request->path[0], &request->file[0]);
 
 	if(strlen(&request->file[0])==0) {
 	    return -1;
 	}
 
- return 0;
+ return res;
 }
 
 void dump_request(http_request* r){
@@ -1084,6 +1115,12 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	memset(tmp,0,4048);
 
 	int parse_h = parse_http(buffer,&request);
+
+	if(parse_h==1) {
+         free(buffer);
+         free(tmp);
+	 return ret;
+	}
 
 	if(c_debug) printf("[exit parse_http]\n");
 
@@ -1332,6 +1369,45 @@ void check_conf(int use_ssl, int use_tls){
 
 }
 
+user_endpoint* get_user_endpoint(char* argstr){
+
+  int n = 0;
+  char* token;
+  char* arg = (char*)malloc(strlen(argstr));
+  strcpy(arg, argstr);
+
+  user_endpoint* uep = (user_endpoint*)malloc(sizeof(user_endpoint));
+  memset(uep,0,sizeof(user_endpoint));
+
+  token = strtok(arg, ":");
+
+   while((token = strtok(NULL, "%"))!=NULL){
+    if(n==0){
+      uep->endpoint = (char*)malloc(strlen(token));
+      strcpy(uep->endpoint, token);
+    }else if(n==1){
+      uep->response = (char*)malloc(strlen(token));
+      strcpy(uep->response, token);
+    }else if(n==2){
+      uep->content_type = (char*)malloc(strlen(token));
+      strcpy(uep->content_type, token);
+    }
+    n++;
+   }
+
+  if(uep->endpoint==NULL || uep->response==NULL){
+        printf("User enpoint must have at least 'enpoint' and 'response' defined.\n");
+        printf("Format: -uep:/myendpoint\%%{\"name\":\"value\"}\%%application/json\n");
+        printf("Supplied: -uep:%s %s %s\n", uep->endpoint, uep->response, uep->content_type);
+        printf("No correct eup defined\n");
+  }
+
+  free(arg);
+
+ return uep;
+}
+
+
 int main(int args, char* argv[]){
 
 	int  user_port = 0;
@@ -1388,6 +1464,9 @@ int main(int args, char* argv[]){
 	  else if(strcmp(argv[i],"-tls")==0) use_tls=1;
 	  else if(strcmp(argv[i],"-i")==0) dump_c=1;
 	  else if(strcmp(argv[i],"-d")==0) c_debug=1;
+	  else if(strstr(argv[i],"-uep")!=NULL){
+	    uep = get_user_endpoint(strstr(argv[i],"-uep"));
+	  }
 	  else if(strcmp(argv[i],"--help")==0) {
 		usage();
 		return 0;

@@ -42,6 +42,14 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
+typedef struct user_endpoint_t {
+
+        char* endpoint;
+        char* response;
+        char* content_type;
+
+} user_endpoint;
+
 typedef struct virtual_files_t {
 
         char name[128];
