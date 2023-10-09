@@ -820,10 +820,12 @@ int handle_virtual_files(http_request* request){
 	 n++;
 	}
 
+	if(c_debug) printf("[start uep %d]\n", uep==NULL);
 	tmp = (char*)malloc(strlen(&request->path[0])+strlen(&request->file[0])+2);
 	sprintf(tmp,"%s%s", &request->path[0],&request->file[0]);
-	printf("eup:%s %s\n", tmp, uep->endpoint);
 	if(uep!=NULL && strcmp(tmp,uep->endpoint)==0){
+	  if(c_debug) printf("[start uep]\n");
+	  printf("eup:%s %s\n", tmp, uep->endpoint);
 	  socket_write(request,"HTTP/1.1 200 OK\n",16);
 	  socket_write(request,"Server: Cornelia\n",17);
 	  socket_write(request,"Connection: close\n",18);
@@ -831,7 +833,6 @@ int handle_virtual_files(http_request* request){
 	  if(uep->content_type!=NULL){
 	   sprintf(tmp,"Content-Type: %s\n", uep->content_type);
 	  }else sprintf(tmp,"Content-Type: application/json\n");
-
 	  socket_write(request, tmp, strlen(tmp));
 
 	  if(uep->response!=NULL) {
@@ -842,9 +843,10 @@ int handle_virtual_files(http_request* request){
  	    sprintf(tmp,"%s", uep->response);
 	    socket_write(request, tmp, strlen(tmp));
 	  }
-  	 free(tmp);
  	 res=1;
+	 if(c_debug) printf("[end uep]\n");
 	}
+  	free(tmp);
 
  return res;
 }
@@ -1339,6 +1341,8 @@ void usage(){
 	printf("-ssl\t<server_ssl_port>\n");
 	printf("-tsl\t<server_tsl_port>\n");
 	printf("-i \tprints config\n");
+	printf("-uep\tset up endpoint [-uep:/myendpoint%%{\"my\":\"content\"}%%application/json\n");
+	printf("\tContent-Type can default to 'application/json' if omitted.\n");
 	printf("--help prints this message\n\n");
 
 }
