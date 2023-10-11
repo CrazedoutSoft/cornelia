@@ -38,7 +38,9 @@ and the openssl libs are not in /usr/lib, then LD_LIBRARY_PATH need to be set.<p
 
 If lib errors appears in make process or runtime you may have to copy: <br/>
  openssl/libcrypto.so, openssl/libcrypto.so.3, openssl/libssl.so and openssl/libssl.so.3 <br/>
-to /usr/lib<br/>
+to /usr/lib<p/>
+
+<b><i>Quick start:</i>:in cornelia dir - ./build_add nossl then bin/startup.sh<b><p>
 
 test if you have php-cgi installed<br/>
 >which php-cgi
