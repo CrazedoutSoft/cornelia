@@ -829,6 +829,7 @@ int handle_virtual_files(http_request* request){
 	  socket_write(request,"HTTP/1.1 200 OK\n",16);
 	  socket_write(request,"Server: Cornelia\n",17);
 	  socket_write(request,"Connection: close\n",18);
+	  socket_write(request,"Access-Control-Allow-Origin: *\n",31);
 	  tmp = (char*)realloc(tmp,255);
 	  if(uep->content_type!=NULL){
 	   sprintf(tmp,"Content-Type: %s\n", uep->content_type);
