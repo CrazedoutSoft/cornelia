@@ -57,8 +57,11 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define HTTP_OPTIONS		"OPTIONS"
 #define AUTHORIZATION 		"Authorization="
 
+#define D_404_NOT_FOUND		"404 Not Found"
+#define D_200_OK		"200 OK"
 
-int c_debug = 1;
+
+int c_debug = 0;
 server_conf serv_conf;
 auth_conf   a_conf;
 
@@ -72,6 +75,7 @@ char  conf_file[1024] = "conf/corny.conf";
 char  cip[16];
 void dump_request(http_request* r);
 user_endpoint* uep = NULL;
+
 
 void usleep(unsigned long);
 
@@ -277,7 +281,7 @@ void send_bad_request2(http_request* request){
         response.request=request;
         response.content_length=strlen(bad_request);
         strcpy(&response.content_type[0],"text/html");
-        get_head(&response, &buffer[0], "404 Not found");
+        get_head(&response, &buffer[0], D_404_NOT_FOUND);
 
         socket_write(request, &buffer[0], strlen(&buffer[0]));
         socket_write(request,"\r\n",2);
@@ -481,17 +485,19 @@ char* get_head(http_response* response, char* head, char* code){
 
 	char* tmp = (char*)malloc(1024);
 	memset(head,0,1024);
-	sprintf(tmp,"%s %s\r\n", response->request->httpv, code);
+	sprintf(tmp,"%s %s\n", response->request->httpv, code);
 	strcat(head,tmp);
-	sprintf(tmp,"Server: %s\r\n", &serv_conf.server_name[0]);
+	sprintf(tmp,"Server: %s\n", &serv_conf.server_name[0]);
 	strcat(head,tmp);
-	sprintf(tmp,"%s: %s\r\n", "Access-Control-Allow-Origin", "*");
+ 	if(strlen(ACAOrigin)>0){
+	  sprintf(tmp,"%s: %s\n", "Access-Control-Allow-Origin", ACAOrigin);
+	  strcat(head,tmp);
+	}
+	sprintf(tmp,"%s: %s\n", "Content-Type", &response->content_type[0]);
 	strcat(head,tmp);
-	sprintf(tmp,"%s: %s\r\n", "Content-Type", &response->content_type[0]);
+	sprintf(tmp,"%s: %d\n", "Content-Length", response->content_length);
 	strcat(head,tmp);
-	sprintf(tmp,"%s: %d\r\n", "Content-Length", response->content_length);
-	strcat(head,tmp);
-	sprintf(tmp,"%s: %s\r\n", "Connection", &response->request->connection[0]);
+	sprintf(tmp,"%s: %s\n", "Connection", &response->request->connection[0]);
 	strcat(head,tmp);
 	free(tmp);
 
@@ -778,7 +784,7 @@ void doGetPost(http_request *request){
 	if(c_debug) printf("[content-length read]\n");
 
 	if(response.content_length<1){
-	  send_bad_request(&response,"404 Not Found");
+	  send_bad_request(&response, D_404_NOT_FOUND);
 	}else{
 	  parse_env(&response);
 	  if(strcmp(&response.request->method[0],HTTP_PUT)==0){
@@ -787,12 +793,12 @@ void doGetPost(http_request *request){
 	  else if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],HTTP_POST)==0){
 	    exec_cgi(&response, exe_ptr);
 	  }else{
-	    get_head(&response,&tmp[0],"200 OK");
+	    get_head(&response,&tmp[0], D_200_OK);
 	    socket_write(request,&tmp[0],strlen(&tmp[0]));
 	    socket_write(request,"\r\n",2);
 	    if(write_plain_file(&response, response.content_length,
 	        &request->path[0], &request->file[0])==-1){
-	      send_bad_request(&response,"404 Not Found");
+	      send_bad_request(&response, D_404_NOT_FOUND);
 	    }
 	  }
 	}
@@ -806,6 +812,7 @@ int handle_virtual_files(http_request* request){
 	int n = 0;
 	int res=0;
 	char* tmp;
+	char* origins = (char*)malloc(128);
 
 	while(1){
 	  if(serv_conf.v_files[n]!=NULL){
@@ -829,7 +836,12 @@ int handle_virtual_files(http_request* request){
 	  socket_write(request,"HTTP/1.1 200 OK\n",16);
 	  socket_write(request,"Server: Cornelia\n",17);
 	  socket_write(request,"Connection: close\n",18);
-	  socket_write(request,"Access-Control-Allow-Origin: *\n",31);
+
+	  if(strlen(ACAOrigin)>0){
+	  	sprintf(origins,"Access-Control-Allow-Origin: %s", ACAOrigin);
+		socket_write(request,origins,(int)strlen(origins));
+	  }
+
 	  tmp = (char*)realloc(tmp,255);
 	  if(uep->content_type!=NULL){
 	   sprintf(tmp,"Content-Type: %s\n", uep->content_type);
@@ -847,6 +859,7 @@ int handle_virtual_files(http_request* request){
  	 res=1;
 	 if(c_debug) printf("[end uep]\n");
 	}
+	free(origins);
   	free(tmp);
 
  return res;
@@ -1109,7 +1122,7 @@ int exec_request(SOCKET sockfd, char* clientIP, void* cSSL){
 	if(strlen(&serv_conf.logfile[0])>0){
 	  sprintf(tmp, "%s/%s", &serv_conf.workdir[0], &serv_conf.logfile[0]);
 	  if((logfd=fopen(tmp,"a"))!=NULL){
-	    fprintf(logfd,"%s|%s|%s\n", buffer, clientIP, clip(get_date_time(tmp)));
+	    fprintf(logfd,"%s|%s|%d|%s\n", buffer, clientIP, serv_conf.port, clip(get_date_time(tmp)));
 	    fclose(logfd);
 	  }
 	}
@@ -1303,9 +1316,10 @@ int read_http_responses(){
           len = ftell(fd);
           fseek(fd,0L,SEEK_SET);
           ACAOrigin = (char*)malloc(len);
-          r=fread(ACAOrigin,1,len,fd);
+          r=fread(ACAOrigin,len,1,fd);
           (void)(r);
           fclose(fd);
+	  clip(ACAOrigin);
         }else{
           fprintf(stderr,"Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
           printf("Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
@@ -1373,6 +1387,7 @@ void check_conf(int use_ssl, int use_tls){
 	}
 
 }
+
 
 user_endpoint* get_user_endpoint(char* argstr){
 
