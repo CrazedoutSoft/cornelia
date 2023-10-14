@@ -838,7 +838,7 @@ int handle_virtual_files(http_request* request){
 	  socket_write(request,"Connection: close\n",18);
 
 	  if(strlen(ACAOrigin)>0){
-	  	sprintf(origins,"Access-Control-Allow-Origin: %s", ACAOrigin);
+	  	sprintf(origins,"Access-Control-Allow-Origin: %s\n", ACAOrigin);
 		socket_write(request,origins,(int)strlen(origins));
 	  }
 
@@ -1295,6 +1295,7 @@ int read_http_responses(){
           return -1;
         }
 
+
        sprintf(file,"%s/conf/http_options.txt", getenv("CORNELIA_HOME"));
        if((fd=fopen(file,"r"))!=NULL){
           fseek(fd,0L,SEEK_END);
@@ -1320,6 +1321,12 @@ int read_http_responses(){
           (void)(r);
           fclose(fd);
 	  clip(ACAOrigin);
+	  if(strchr(ACAOrigin,'#')){
+            fprintf(stderr,"Bad file content: conf/Access-Control-Allow-Origin.txt\n");
+            printf("Bad file content: conf/Access-Control-Allow-Origin.txt\n");
+	  return -1;
+          }
+
         }else{
           fprintf(stderr,"Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
           printf("Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
