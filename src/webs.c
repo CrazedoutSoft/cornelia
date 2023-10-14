@@ -1321,6 +1321,7 @@ int read_http_responses(){
           (void)(r);
           fclose(fd);
 	  clip(ACAOrigin);
+	  trim(ACAOrigin);
 	  if(strchr(ACAOrigin,'#')){
             fprintf(stderr,"Bad file content: conf/Access-Control-Allow-Origin.txt\n");
             printf("Bad file content: conf/Access-Control-Allow-Origin.txt\n");

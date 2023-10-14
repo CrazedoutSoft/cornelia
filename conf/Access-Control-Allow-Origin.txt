@@ -3,5 +3,6 @@ http://localhost:4200
 # The first row of this filer is what the "Access-Control-Allow-Origin" header will emit.
 # allowed origins here comma separated.
 # LEAVE NO TRALING comma.
+# If "Access-Control-Allow-Origin" header should be left out leave first row empty.
 
 
