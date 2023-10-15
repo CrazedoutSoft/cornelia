@@ -1329,7 +1329,6 @@ int read_http_responses(){
           printf("Bad file: missing conf/Access-Control-Allow-Origin\n");
           return -1;
         }
-	printf("[%s]\n",ACAOrigin);
 
 	free(buffer);
 	free(file);
