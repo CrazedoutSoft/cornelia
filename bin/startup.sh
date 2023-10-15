@@ -7,7 +7,7 @@ fi
 
 FILE=$CORNELIA_HOME/bin/cornelia_d
 if test -f "$FILE"; then
-    echo "$FILE exists."
+    echo ""
 else
     echo "$FILE does not exist. Run 'build_all' or 'make'"
     exit
@@ -15,6 +15,12 @@ fi
 
 
 export LD_LIBRARY_PATH=$CORNELIA_HOME/openssl
+
+clear
+echo "************************************"
+echo "* Starting Cornelia Web Server     *"
+echo "* (c) CrazedoutSoft 2022 / F.Roos  *"
+echo "************************************"
 
 if [[ $1 == "" ]];
 then
