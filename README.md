@@ -56,9 +56,10 @@ If you change the root directory, Cornelia will still look for these icons in /r
 <p/>
 
 <b>Warning: Since Cornelias primary purpose is for development the header 'Access-Control-Allow-Origin' is set to '*' by default.<br>
-This is dangerous in a open context. Change this in conf/Access-Control-Allow-Origin.txt<p/>
+This is dangerous in a open context. Change this in conf/Access-Control-Allow.txt<p/>
 For the http <i>OPTIONS</i> request the response is set in conf/http_options.
-</b><p>
+</b>
+<p />
 
 <b>User enpoints</b><br>
 Set up virtual endpoints:<br>
