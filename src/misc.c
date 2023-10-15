@@ -29,6 +29,44 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include <stdio.h>
 
+
+char* clipend(char* str){
+
+        for(int i = strlen(str)-1; i>-1; i--){
+          if(str[i]!='\n' && str[i]!='\r') {str[i+1]=0;break;}
+        }
+
+ return str;
+}
+
+char* trimpath(char* str){
+
+        char* buffer = (char*)malloc((int)strlen(str));
+        char* path = (char*)malloc((int)strlen(str));
+        char old_token[64];
+        char* token;
+
+        memset(path,0,strlen(str));
+        memset(old_token,0,64);
+        strcpy(buffer,str);
+        token = strtok(buffer,"/");
+        do{
+          if(strcmp(token,"..")!=0) {
+                strcat(path,old_token);
+                strcat(path,"/");
+           }
+         strcpy(&old_token[0],token);
+        }while((token=strtok(NULL,"/"))!=NULL);
+
+ 	if(strstr(old_token,"..")==NULL) strcat(path,old_token);
+        strcpy(str,path);
+
+        free(buffer);
+        free(path);
+
+ return str;
+}
+
 int ends_with(char *string, char* end){
 
   string = strrchr(string, '.');

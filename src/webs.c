@@ -490,7 +490,7 @@ char* get_head(http_response* response, char* head, char* code){
 	sprintf(tmp,"Server: %s\n", &serv_conf.server_name[0]);
 	strcat(head,tmp);
  	if(strlen(ACAOrigin)>0){
-	  sprintf(tmp,"%s: %s\n", "Access-Control-Allow-Origin", ACAOrigin);
+	  sprintf(tmp,"%s", ACAOrigin);
 	  strcat(head,tmp);
 	}
 	sprintf(tmp,"%s: %s\n", "Content-Type", &response->content_type[0]);
@@ -838,7 +838,7 @@ int handle_virtual_files(http_request* request){
 	  socket_write(request,"Connection: close\n",18);
 
 	  if(strlen(ACAOrigin)>0){
-	  	sprintf(origins,"Access-Control-Allow-Origin: %s\n", ACAOrigin);
+	  	sprintf(origins,"%s", ACAOrigin);
 		socket_write(request,origins,(int)strlen(origins));
 	  }
 
@@ -1234,6 +1234,7 @@ int read_http_responses(){
   	int r;
   	FILE* fd;
 	char* file = (char*)malloc(1024);
+	char* buffer = (char*)malloc(1024);
 
 	sprintf(file,"%s/conf/404.txt", getenv("CORNELIA_HOME"));
   	if((fd=fopen(file,"r"))!=NULL){
@@ -1311,29 +1312,27 @@ int read_http_responses(){
           return -1;
         }
 
-       sprintf(file,"%s/conf/Access-Control-Allow-Origin.txt", getenv("CORNELIA_HOME"));
-       if((fd=fopen(file,"r"))!=NULL){
-          fseek(fd,0L,SEEK_END);
-          len = ftell(fd);
-          fseek(fd,0L,SEEK_SET);
-          ACAOrigin = (char*)malloc(len);
-          r=fread(ACAOrigin,len,1,fd);
-          (void)(r);
-          fclose(fd);
-	  clip(ACAOrigin);
-	  trim(ACAOrigin);
-	  if(strchr(ACAOrigin,'#')){
-            fprintf(stderr,"Bad file content: conf/Access-Control-Allow-Origin.txt\n");
-            printf("Bad file content: conf/Access-Control-Allow-Origin.txt\n");
-	  return -1;
-          }
 
+       sprintf(file,"%s/conf/Access-Control-Allow.txt", getenv("CORNELIA_HOME"));
+        ACAOrigin = (char*)malloc(4096);
+	memset(ACAOrigin,0,4096);
+       if((fd=fopen(file,"r"))!=NULL){
+	 while((fgets(buffer,1024,fd))!=NULL){
+	   if(strstr(buffer,"#")!=NULL) continue;
+	   strcat(ACAOrigin,buffer);
+	 }
+	 clipend(ACAOrigin);
+	 if(ACAOrigin[strlen(ACAOrigin)-1]!='\n') strcat(ACAOrigin,"\n");
+  	 fclose(fd);
         }else{
-          fprintf(stderr,"Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
-          printf("Bad file: missing conf/Access-Control-Allow-Origin.txt\n");
+          fprintf(stderr,"Bad file: missing conf/Access-Control-Allow\n");
+          printf("Bad file: missing conf/Access-Control-Allow-Origin\n");
           return -1;
         }
+	printf("[%s]\n",ACAOrigin);
 
+	free(buffer);
+	free(file);
 
  return 0;
 }
