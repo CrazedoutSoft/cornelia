@@ -54,6 +54,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define HTTP_POST		"POST"
 #define HTTP_GET		"GET"
 #define HTTP_PUT		"PUT"
+#define HTTP_HEAD		"HEAD"
 #define HTTP_OPTIONS		"OPTIONS"
 #define AUTHORIZATION 		"Authorization="
 
@@ -743,11 +744,19 @@ int handle_auth(http_request* request){
  return handled;
 }
 
+
 void doPut(http_request* request){
 	printf("PUT %s\n", request->post_data);
 	(void)(request);
 }
+/*
+void doHead(http_request* request){
 
+	if(c_debug) printf("[do head]\n");
+	(void)(request);
+
+}
+*/
 
 void doGetPost(http_request *request){
 
@@ -789,7 +798,9 @@ void doGetPost(http_request *request){
 	  parse_env(&response);
 	  if(strcmp(&response.request->method[0],HTTP_PUT)==0){
 	   doPut(request);
-	  }
+	  }/*else if(strcmp(&response.request->method[0],HTTP_HEAD)==0){
+	   doHead(request);
+	  }*/
 	  else if((exe_ptr=getExecutable(&request->file[0])) || strcmp(&response.request->method[0],HTTP_POST)==0){
 	    exec_cgi(&response, exe_ptr);
 	  }else{
