@@ -19,6 +19,13 @@
 >./build_all (<b>alt. ./build_all no-ssl-no-warn</b>) -  <i><b>no_ssl-no-warn</i></b> excludes problems with ssl and compiler warnings.<br>
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
+>Result:<br>
+>************************************
+>* Starting Cornelia Web Server     *
+>* (c) CrazedoutSoft 2022 / F.Roos  *
+>************************************
+>Cornelia listening on 8080 [HTTP]
+
 <hr>
 <b>RECOMMENDED</b>
 <b>Full instructions:</b>
