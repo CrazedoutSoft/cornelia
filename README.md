@@ -13,16 +13,16 @@
 *  https://github.com/openssl                      
 ******************************************************
 
+<hr>
 <b>Quick start:</b><br>
 >git clone https://github.com/CrazedoutSoft/cornelia.git<br>
 >cd cornelia<br>
 >./build_all (alt. ./build_all no_ssl)<br>
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
+<hr>
 <p>
-
-<p>
-<b>Otherwise for full instructions:</b>
+<b>Otherwise for full instructions (RECOMMENDED):</b>
 </p>
 <br>
 goto cornelia install directory.<br/>
