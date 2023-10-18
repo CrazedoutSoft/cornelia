@@ -16,10 +16,10 @@
 <b>Quick start:</b><br>
 ><b>git clone https://github.com/CrazedoutSoft/cornelia.git</b><br>
 ><b>cd cornelia</b><br>
-><b>./build_all no-ssl-no-warn</b> - <i>no_ssl-no-warn</i> excludes problems with ssl/tls and compiler warnings.<br>
+><b>./build_all no-ssl-no-warn</b>  [<i>no_ssl-no-warn</i> excludes problems with ssl/tls and compiler warnings]<br>
 ><b>export CORNELIA_HOME=[current_dir]</b><br>
 ><b>bin/startup.sh</b><br>
->Result:<br>
+><b>Result in prompt:</b><br>
 ><b>Cornelia listening on 8080 [HTTP]</b><br>
 ><a href="http://localhost:8080">http://localhost:8080</a>
 
