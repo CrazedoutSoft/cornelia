@@ -21,6 +21,7 @@
 >bin/startup.sh<br>
 >Result:<br>
 ><b>Cornelia listening on 8080 [HTTP]</b>
+><a href="http://localhost:8080">http://localhost:8080</a>
 
 <hr>
 <b>RECOMMENDED</b>
