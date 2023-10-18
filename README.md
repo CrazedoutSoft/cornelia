@@ -24,9 +24,8 @@
 ><a href="http://localhost:8080">http://localhost:8080</a>
 
 <hr>
-<b>RECOMMENDED</b>
-<b>Full instructions:</b>
-</p>
+<b>RECOMMENDED: FULL INSTRCTIONS:</b>
+<p>
 
 goto cornelia install directory.<br/>
 
