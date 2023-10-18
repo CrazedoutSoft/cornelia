@@ -20,11 +20,7 @@
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
 >Result:<br>
->************************************
->* Starting Cornelia Web Server     *
->* (c) CrazedoutSoft 2022 / F.Roos  *
->************************************
->Cornelia listening on 8080 [HTTP]
+><b>Cornelia listening on 8080 [HTTP]</b>
 
 <hr>
 <b>RECOMMENDED</b>
