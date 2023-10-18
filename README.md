@@ -20,7 +20,7 @@
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
 >Result:<br>
-><b>Cornelia listening on 8080 [HTTP]</b>
+><b>Cornelia listening on 8080 [HTTP]</b><br>
 ><a href="http://localhost:8080">http://localhost:8080</a>
 
 <hr>
