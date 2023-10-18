@@ -13,7 +13,6 @@
 *  https://github.com/openssl                      
 ******************************************************
 
-<hr>
 <b>Quick start:</b><br>
 >git clone https://github.com/CrazedoutSoft/cornelia.git<br>
 >cd cornelia<br>
