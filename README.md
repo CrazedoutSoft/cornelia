@@ -13,6 +13,10 @@
 *  https://github.com/openssl                      
 ******************************************************
 
+<a href="#quickie">Super Fast Quick start</a>
+<br>
+orthewise:
+<p>
 goto cornelia install directory.<br/>
 
 set env CORNELIA_HOME to cornelia install dir.
@@ -40,6 +44,7 @@ If lib errors appears in make process or runtime you may have to copy: <br/>
  openssl/libcrypto.so, openssl/libcrypto.so.3, openssl/libssl.so and openssl/libssl.so.3 <br/>
 to /usr/lib<p/>
 
+#quickie
 <b>Quick start:</b><br>
 >git clone https://github.com/CrazedoutSoft/cornelia.git<br>
 >cd cornelia<br>
