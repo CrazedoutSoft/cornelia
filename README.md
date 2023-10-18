@@ -21,10 +21,10 @@
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
 <hr>
-<p>
-<b>Otherwise for full instructions (RECOMMENDED):</b>
+<b>RECOMMENDED</b>
+<b>Full instructions:</b>
 </p>
-<br>
+
 goto cornelia install directory.<br/>
 
 set env CORNELIA_HOME to cornelia install dir.
