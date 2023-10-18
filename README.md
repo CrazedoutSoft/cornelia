@@ -40,7 +40,14 @@ If lib errors appears in make process or runtime you may have to copy: <br/>
  openssl/libcrypto.so, openssl/libcrypto.so.3, openssl/libssl.so and openssl/libssl.so.3 <br/>
 to /usr/lib<p/>
 
-<b><i>Quick start:</i>:in cornelia dir - ./build_all nossl bin/startup.sh</b><p>
+<b>Quick start:</b><br>
+>git clone https://github.com/CrazedoutSoft/cornelia.git<br>
+>cd cornelia<br>
+>./build_all (alt. ./build_all no_ssl)<br>
+>export CORNELIA_HOME=<current_dir><br>
+>bin/startup.sh<br>
+<p>
+
 
 test if you have php-cgi installed<br/>
 >which php-cgi
