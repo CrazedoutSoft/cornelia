@@ -17,7 +17,7 @@
 <b>Quick start:</b><br>
 >git clone https://github.com/CrazedoutSoft/cornelia.git<br>
 >cd cornelia<br>
->./build_all (<b>alt. ./build_all no-ssl-no-warn</b>) -  <i><b>no_ssl-no-warn</i></b> excludes problems with ssl and compiler warnings (<i>NGF-No Girlfriend Style</i>)<br>
+>./build_all (<b>alt. ./build_all no-ssl-no-warn</b>) -  <i><b>no_ssl-no-warn</i></b> excludes problems with ssl and compiler warnings.<br>
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
 <hr>
