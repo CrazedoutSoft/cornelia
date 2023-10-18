@@ -1410,7 +1410,7 @@ user_endpoint* get_user_endpoint(char* argstr){
 
   int n = 0;
   char* token;
-  char* arg = (char*)malloc(strlen(argstr));
+  char* arg = (char*)malloc(strlen(argstr)+1);
   strcpy(arg, argstr);
 
   user_endpoint* uep = (user_endpoint*)malloc(sizeof(user_endpoint));

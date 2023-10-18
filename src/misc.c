@@ -41,7 +41,7 @@ char* clipend(char* str){
 
 char* trimpath(char* str){
 
-        char* buffer = (char*)malloc((int)strlen(str));
+        char* buffer = (char*)malloc((int)strlen(str)+1);
         char* path = (char*)malloc((int)strlen(str));
         char old_token[64];
         char* token;
