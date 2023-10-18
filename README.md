@@ -17,7 +17,7 @@
 <b>Quick start:</b><br>
 >git clone https://github.com/CrazedoutSoft/cornelia.git<br>
 >cd cornelia<br>
->./build_all (alt. ./build_all no_ssl) -  <i>no_ssl</i> switch will exclude problems with ssl/tls libs.<br>
+>./build_all (alt. ./build_all no-ssl-no-warn) -  <i>no_ssl-no-warn</i> switch will exclude problems with ssl and compiler warnings./tls libs.<br>
 >export CORNELIA_HOME=[current_dir]<br>
 >bin/startup.sh<br>
 <hr>
