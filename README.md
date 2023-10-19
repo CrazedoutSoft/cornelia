@@ -86,6 +86,7 @@ In conf/corny:<br>
 >bin/cornelia_d -uep:/myendpoint%file:myjson.js%application/json<br>
 >bin/cornelia_d -uep:/myendpoint%{"my","answer"}%application/json<br>
 >if <i>Content-Type</i> is omitted - application/json is default.
+><b>http://localhost:8080/myendpoint</b> will respond with applied response (or fraom file) with <i>Content-Type</i> or application/json if omitted.
 <p>
 
 OpenSSL:<br/>
