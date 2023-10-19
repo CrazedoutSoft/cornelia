@@ -823,7 +823,7 @@ int handle_virtual_files(http_request* request){
 	int n = 0;
 	int res=0;
 	char* tmp;
-	char* origins = (char*)malloc(128);
+	char* origins = (char*)malloc(4096);
 
 	while(1){
 	  if(serv_conf.v_files[n]!=NULL){
@@ -860,7 +860,7 @@ int handle_virtual_files(http_request* request){
 	  socket_write(request, tmp, strlen(tmp));
 
 	  if(uep->response!=NULL) {
-	    tmp = realloc(tmp,64);
+	    tmp = realloc(tmp,128);
 	    sprintf(tmp,"Content-Length: %d\n\n", (int)strlen(uep->response));
 	    socket_write(request, tmp, strlen(tmp));
 	    tmp = realloc(tmp,strlen(uep->response)+2);
@@ -1374,6 +1374,7 @@ void usage(){
 	printf("-tsl\t<server_tsl_port>\n");
 	printf("-i \tprints config\n");
 	printf("-uep\tset up endpoint [-uep:/myendpoint%%{\"my\":\"content\"}%%application/json\n");
+	printf("                       [-uep:/myendpoint%%file:myjson.js%%application/json\n");
 	printf("\tContent-Type can default to 'application/json' if omitted.\n");
 	printf("--help prints this message\n\n");
 
@@ -1410,7 +1411,11 @@ user_endpoint* get_user_endpoint(char* argstr){
 
   int n = 0;
   char* token;
+  char* ptr;
   char* arg = (char*)malloc(strlen(argstr)+1);
+  FILE* fd;
+  int r=0;
+  long fd_len=0;
   strcpy(arg, argstr);
 
   user_endpoint* uep = (user_endpoint*)malloc(sizeof(user_endpoint));
@@ -1423,8 +1428,23 @@ user_endpoint* get_user_endpoint(char* argstr){
       uep->endpoint = (char*)malloc(strlen(token));
       strcpy(uep->endpoint, token);
     }else if(n==1){
-      uep->response = (char*)malloc(strlen(token));
-      strcpy(uep->response, token);
+      if((ptr=strstr(token,"file:"))!=NULL){
+	if((fd=fopen(ptr+5,"r"))!=NULL){
+	  fseek(fd,0,SEEK_END);
+	  fd_len=ftell(fd);
+	  fseek(fd,0,SEEK_SET);
+	  ptr = (char*)malloc(fd_len+1);
+	  r=fread(ptr,fd_len,1,fd);
+	  (void)(r);
+	  fclose(fd);
+	  uep->response = (char*)malloc(strlen(ptr));
+	  strcpy(uep->response, ptr);
+	  free(ptr);
+	}else fprintf(stderr,"Bad uep file\n");
+      }else {
+        uep->response = (char*)malloc(strlen(token));
+	strcpy(uep->response, token);
+      }
     }else if(n==2){
       uep->content_type = (char*)malloc(strlen(token));
       strcpy(uep->content_type, token);
@@ -1435,8 +1455,11 @@ user_endpoint* get_user_endpoint(char* argstr){
   if(uep->endpoint==NULL || uep->response==NULL){
         printf("User enpoint must have at least 'enpoint' and 'response' defined.\n");
         printf("Format: -uep:/myendpoint\%%{\"name\":\"value\"}\%%application/json\n");
+        printf("Format: -uep:/myendpoint\%%file:myjson.js\%%application/json\n");
         printf("Supplied: -uep:%s %s %s\n", uep->endpoint, uep->response, uep->content_type);
         printf("No correct eup defined\n");
+  }else{
+	printf("Listening on endpoint:%s, reply %s\n", uep->endpoint, uep->content_type!=NULL?uep->content_type:"application/json");
   }
 
   free(arg);
