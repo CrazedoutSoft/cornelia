@@ -82,8 +82,10 @@ In conf/corny:<br>
 /myendpoint / my_repsponse_file.pl<br>
 [virtual_files]<p>
 
-Set up custum endpoints on cmd line:<br>
-bin/cornelia_d -uep:/myendpoint%{"my","answer"}%application/json
+><b>Set up custum endpoints on cmd line:</b><br>
+>bin/cornelia_d -uep:/myendpoint%file:myjson.js%application/json<br>
+>bin/cornelia_d -uep:/myendpoint%{"my","answer"}%application/json<br>
+>if <i>Content-Type</i> is omitted - application/json is default.
 <p>
 
 OpenSSL:<br/>
