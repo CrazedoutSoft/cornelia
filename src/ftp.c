@@ -537,10 +537,15 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
 	strcpy(tmp, &session->workdir[0]);
 
+	//printf("%s\n", value);
+	if(value[0]=='/'){
+		sprintf(path,"%s", value);
+	}else{
 	if(session->workdir[strlen(&session->workdir[0])-1] =='/'){
 	  sprintf(path,"%s%s", &session->workdir[0], value);
 	}else{
 	  sprintf(path,"%s/%s", &session->workdir[0], value);
+	}
 	}
 	strcpy(&session->workdir[0],trimpath(path));
 
@@ -597,7 +602,7 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session){
 
         FILE* fd;
 
-	sprintf(file,"%s/%s", &session->workdir[0], value);
+	sprintf(file,"%s", value);
         fd=fopen(file,"w");
         if(fd==NULL){
           strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
