@@ -327,8 +327,6 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *value2 = NULL;
 	int r = 0;
 
-	printf("%s\n", buffer);
-
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
 	if(ptr!=NULL){
