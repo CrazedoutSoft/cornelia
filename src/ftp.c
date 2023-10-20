@@ -353,7 +353,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	  }
 	}
 
-	printf("%s %s %s\n", &verb[0], value, value2);
+	//printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
@@ -364,7 +364,9 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],RETR)==0) r=retr(sockfd, value, session);
 	else if(strcmp(&verb[0],STOR)==0) r=stor(sockfd, value, session);
 	else if(strcmp(&verb[0],PWD)==0) r=pwd(sockfd,session);
+	else if(strcmp(&verb[0],XPWD)==0) r=pwd(sockfd,session);
 	else if(strcmp(&verb[0],CWD)==0) r=cwd(sockfd, value,session);
+	else if(strcmp(&verb[0],XCWD)==0) r=cwd(sockfd, value,session);
 	else if(strcmp(&verb[0],TYPE)==0) r=type(sockfd,value,session);
 	else if(strcmp(&verb[0],PASV)==0) r=pasv(sockfd,session);
 	else if(strcmp(&verb[0],RNFR)==0) r=rnfr(sockfd,session,value);
@@ -529,31 +531,32 @@ int type(SOCKET sockfd, const char* value, ftp_session* session){
 int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         int r;
-        char* buffer = (char*)malloc(1024);
-        char* path = (char*)malloc(4096);
-        //char* tmp = (char*)malloc(1024);
-	char* t;
-	memset(buffer,0,1024);
-	//memset(tmp,0,1024);
-	//t=getcwd(tmp,1024);
-	if(value[0]=='/') sprintf(path,"%s%s", &session->workdir[0], value);
-	else strcpy(path, value);
-	r=chdir(path);
-	//printf("%d %s\n",r,tmp);
-	(void)(t);
-	if(strlen(getcwd(buffer,1024)) < strlen(&session->workdir[0])) {
-	  r=chdir(&session->workdir[0]);
+        char* buffer = (char*)malloc(4097);
+        char* path = (char*)malloc(4097);
+        char* tmp = (char*)malloc(4097);
+
+	strcpy(tmp, &session->workdir[0]);
+
+	if(session->workdir[strlen(&session->workdir[0])-1] =='/'){
+	  sprintf(path,"%s%s", &session->workdir[0], value);
+	}else{
+	  sprintf(path,"%s/%s", &session->workdir[0], value);
+	}
+	strcpy(&session->workdir[0],trimpath(path));
+
+	if(strlen(&session->workdir[0]) < strlen(&session->root[0])) {
+	  strcpy(&session->workdir[0],tmp);
 	  r=-1;
 	}
+        else r=chdir(path);
 
         if(r>-1) strcpy(buffer,"250 Okay.\r\n");
 	else sprintf(buffer,"550 %s: No such file or directory..\r\n",value);
         r=sock_write(sockfd,buffer,strlen(buffer));
 
-//	printf("%s %s %s\n", value, getcwd(tmp,1024), &session->workdir[0]);
-
-	free(path);
         free(buffer);
+	free(path);
+	free(tmp);
 
   return r;
 }
@@ -561,14 +564,17 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 int pwd(SOCKET sockfd, ftp_session* session){
 
         int r;
-        char* buffer = (char*)malloc(1024);
-        char* dir = (char*)malloc(1024);
+        char* buffer = (char*)malloc(5000);
+        char* dir = (char*)malloc(4096);
 
-	if(getcwd(dir,1024)==NULL){
+	if(getcwd(dir,4096)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
-	  sprintf(buffer,"257 %s/\r\n",&dir[strlen(&session->workdir[0])]);
+	  sprintf(buffer,"257 %s/\r\n", dir);
 	}
+
+	(void)(session);
+
 	r=sock_write(sockfd,buffer,strlen(buffer));
 	free(buffer);
 	free(dir);
@@ -587,7 +593,7 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session){
 	if(!check_cred(sockfd,session, WRITE)) return 1;
 
 	buffer = (char*)malloc(256);
-	file=(char*)malloc(1024);
+	file=(char*)malloc(4097);
 
         FILE* fd;
 
@@ -618,13 +624,12 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session){
 	if(!check_cred(sockfd,session, READ)) return 1;
 
         buffer = (char*)malloc(256);
-	file = (char*)malloc(1024);
+	file = (char*)malloc(4097);
 	FILE* fd;
 
-	sprintf(file,"%s/%s", &session->workdir[0], value);
+	sprintf(file,"%s",value);
 	fd=fopen(file,"r");
 	if(fd==NULL){
-	  printf("file:%s\n", value);
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	  r=sock_write(sockfd,buffer,strlen(buffer));
 	}else{
@@ -850,6 +855,7 @@ void init_server(char* pasv_ip, int port, const char* root) {
 		}else{
 		  sprintf(&session.workdir[0], "%s/%s", getenv("CORNELIA_HOME"), root);
 		}
+		strcpy(&session.root[0], &session.workdir[0]);
 		strcpy(&session.pasv_ip[0], parse_pasv_ip(pasv_ip));
 		session.pasv_port=port_base + (connections*30);
 	        pV4Addr = (struct sockaddr_in*)&cli;

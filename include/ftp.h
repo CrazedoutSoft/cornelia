@@ -46,7 +46,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PORT "PORT"
 #define LIST "LIST"
 #define PWD  "PWD"
+#define XPWD "XPWD"
 #define CWD  "CWD"
+#define XCWD "XCWD"
 #define RETR "RETR"
 #define TYPE "TYPE"
 #define PASV "PASV"
@@ -90,7 +92,8 @@ typedef struct _ftp_session_ {
         clientAddr cAddr;
         char type;
         char clientIP[20];
-        char workdir[256];
+        char workdir[4096];
+        char root[1024];
         struct sockaddr_in addr;
         char pasv_ip[20];
         int pasv_port;
