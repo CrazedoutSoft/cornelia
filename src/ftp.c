@@ -502,7 +502,7 @@ int pasv(SOCKET sockfd, ftp_session* session){
 	char hilow[8];
 	session->pasv_port++;
 	session->mode=MODE_PASV;
-	//TODO: Need to fix pasv_port range.
+	// TO_DO: fix port range... TO DO: in one word fucks whith my eyes in nano.
 	sprintf(buffer,"227 Entering Passive Mode (%s,%s)\r\n", &session->pasv_ip[0], toHiLow(session->pasv_port,&hilow[0]));
 	r=sock_write(sockfd, buffer, strlen(buffer));
 	open_server_sock(session);
@@ -569,11 +569,12 @@ int pwd(SOCKET sockfd, ftp_session* session){
         int r;
         char* buffer = (char*)malloc(5000);
         char* dir = (char*)malloc(4096);
+	char* c_home = getenv("CORENLIA_HOME");
 
 	if(getcwd(dir,4096)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
-	  sprintf(buffer,"257 %s/\r\n", dir);
+	  sprintf(buffer,"257 %s/\r\n", &dir[(int)strlen(c_home)]);
 	}
 
 	(void)(session);
@@ -923,7 +924,7 @@ int main(int args, char* argv[]){
 	free(dir);
 
 	if(args<2) {
-	  printf("All default values. Try ftp_cornelia --help\r\n");
+	  printf("\nAll default values. Try ftp_cornelia --help\r\n");
 	}
 
 	for(int i = 0; i < args; i++){
@@ -956,7 +957,6 @@ int main(int args, char* argv[]){
 	    return 0;
 	  }
 	}
-	/*
 	char ip[128];
 	FILE* pd;
 	int nr = 0;
@@ -976,7 +976,7 @@ int main(int args, char* argv[]){
 	   strcpy(bind,"127.0.0.1");
 	 }
 	 printf("Bind adress missing - defaulting to %s\n", bind);
-	}*/
+	}
 
 	if(strlen(port)==0){
 	 strcpy(port, "8021");
