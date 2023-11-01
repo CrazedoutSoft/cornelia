@@ -918,8 +918,8 @@ int main(int args, char* argv[]){
 	dir = getcwd(dir,1024);
 
 	if(getenv("CORNELIA_HOME")==NULL){
-	  printf("env CORNELIA_HOME should be set to cornelia_d workdir\n");
-	  printf("export CORNELIA_HOME=<dir of cornelia_d>\n");
+	  printf("env CORNELIA_HOME should be set to cornelia workdir.\n");
+	  printf("export CORNELIA_HOME=<dir of cornelia>\n");
 	  printf("Asuming: %s - Lets's try it..\n", dir);
 	  setenv("CORNELIA_HOME",dir,1);
 	}
