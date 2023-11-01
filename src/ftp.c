@@ -354,7 +354,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	  }
 	}
 
-	printf("%s %s %s\n", &verb[0], value, value2);
+	//printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
@@ -538,9 +538,8 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
 	strcpy(tmp, &session->workdir[0]);
 
-	//printf("%s\n", value);
 	if(value[0]=='/'){
-		sprintf(path,"%s", value);
+		sprintf(path,"%s/%s", getenv("CORNELIA_HOME"), value);
 	}else{
 	if(session->workdir[strlen(&session->workdir[0])-1] =='/'){
 	  sprintf(path,"%s%s", &session->workdir[0], value);
@@ -572,12 +571,12 @@ int pwd(SOCKET sockfd, ftp_session* session){
         int r;
         char* buffer = (char*)malloc(5000);
         char* dir = (char*)malloc(4096);
-	//char* c_home = getenv("CORENLIA_HOME");
+	char* c_home = getenv("CORNELIA_HOME");
 
 	if(getcwd(dir,4096)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
-	  sprintf(buffer,"257 %s/\r\n", &dir[0]);
+	  sprintf(buffer,"257 %s\r\n", &dir[strlen(c_home)]);
 	}
 
 	(void)(session);
