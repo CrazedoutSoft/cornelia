@@ -130,6 +130,8 @@ int open_server_sock(ftp_session* session){
 	struct sockaddr_in cli_addr;
 	unsigned int clilen;
 
+	printf("serv\n");
+
 	session->pasv_sockfd=0;
 	servsock=create_socket(session->pasv_port);
          if((session->pasv_sockfd = accept(servsock, (struct sockaddr *) &cli_addr, &clilen))<0){
@@ -258,6 +260,7 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
         char* argv[5];
 	SOCKET s;
 
+
 	if(session->mode==MODE_ACTIVE){
 	  s = open_socket_by_ip(&session->cAddr.ip[0], session->cAddr.port);
 	}else{
@@ -351,7 +354,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	  }
 	}
 
-	//printf("%s %s %s\n", &verb[0], value, value2);
+	printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
@@ -569,12 +572,12 @@ int pwd(SOCKET sockfd, ftp_session* session){
         int r;
         char* buffer = (char*)malloc(5000);
         char* dir = (char*)malloc(4096);
-	char* c_home = getenv("CORENLIA_HOME");
+	//char* c_home = getenv("CORENLIA_HOME");
 
 	if(getcwd(dir,4096)==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
 	}else{
-	  sprintf(buffer,"257 %s/\r\n", &dir[(int)strlen(c_home)]);
+	  sprintf(buffer,"257 %s/\r\n", &dir[0]);
 	}
 
 	(void)(session);
@@ -957,6 +960,7 @@ int main(int args, char* argv[]){
 	    return 0;
 	  }
 	}
+
 	char ip[128];
 	FILE* pd;
 	int nr = 0;
