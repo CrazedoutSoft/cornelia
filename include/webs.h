@@ -143,21 +143,50 @@ typedef struct server_conf_t {
 
 } server_conf;
 
+void  init_server();
+int   get_file_size(const http_request* request);
+int   readline_ssl(const http_request* request, char* buffer, int len);
 int   readline(const http_request* request, char* buffer, int len);
+void  send_options_reply(http_request* request);
 void  send_bad_request(http_response* response, char* code);
 /* Not very pretty but it will do for now...*/
 void  send_bad_request2(http_request* request);
+void  send_forbidden(http_request* request);
 void  send_internal_error(http_response* response);
+void  list_dir (const char* dir, char* buffer);
+void  send_list_dir(http_request* request);
+int   find_default_page(http_request* request);
+char* get_content_type(char* file, char* ct);
 char* get_head(http_response* response, char* head, char* code);
+int   exec_cgi(http_response* response, const char* exe_ptr);
+int   write_plain_file(const http_response* response, int len, char*path, char* fil);
+char* getExecutable(const char* file);
+char* get_user(const char* basic, char* buff);
+int   get_user_pass_from_file(const char* file, const char* base64);
+int   handle_auth(http_request* request);
+void  doGetPost(http_request *request);
+int   handle_virtual_files(http_request* request);
+int   parse_http(char* buffer, http_request* request);
+void  dump_request(http_request* r);
+char* get_header(const http_request *request, const char* header);
+void  parse_headers(char* buffer, http_request* request);
+void  read_post_data(http_request *request, unsigned int len);
+void  handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
+int   exec_request(SOCKET sockfd, char* clientIP, void* cSSL);
 void  free_request(http_request* r);
 void  free_response(http_response* r);
 void  parse_env(http_response* res);
-void  dump_r(http_request* r);
+int   read_http_responses();
+char* encode_url(unsigned char* url, char* url_enc);
 char* get_header(const http_request* request, const char* header);
 char* encode_url(unsigned char* url, char* url_enc);
 int   socket_read(const http_request* request, char* buffer, int len);
 int   socket_write(const http_request* request, const char* buffer, int len);
 int   exec_request(SOCKET sockfd, char* clientIP, void* cSSL);
+void  check_conf(int use_ssl, int use_tls);
+
+user_endpoint* get_user_endpoint(char* argstr);
+virtual_host* get_virtual_host(char* host);
 
 #endif
 
