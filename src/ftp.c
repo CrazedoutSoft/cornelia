@@ -21,6 +21,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // Do to: Handle file names with spaces.
 
+#ifndef NO_SSL
+#include "../include/ftps.h"
+#endif
 #include "../include/ftp.h"
 
 unsigned int anonymous_allowed = 0;
@@ -64,12 +67,28 @@ void set_cred(ftp_session* session, unsigned int cred){
 	 session->cred |= 1UL << cred;
 }
 
-int sock_write(unsigned int sockfd, char* buffer, int len){
-	return write(sockfd, buffer, len);
+int sock_write(int sockfd, char* buffer, int len, void* ssl){
+	if(ssl==NULL){
+	  return write(sockfd, buffer, len);
+	}else{
+	 int r = -1;
+         #ifndef NO_SSL
+         r = ssl_write(ssl, buffer, len);
+         #endif
+	 return r;
+	}
 }
 
-int sock_read(unsigned int sockfd, char* buffer, int len){
-	return read(sockfd, buffer, len);
+int sock_read(int sockfd, char* buffer, int len, void* ssl){
+	if(ssl==NULL){
+	  return read(sockfd, buffer, len);
+	}else{
+	  int r = -1;
+	  #ifndef NO_SSL
+          r = ssl_read(ssl, buffer, len);
+          #endif
+	  return r;
+	}
 }
 
 FILE* popen(const char* cmd, const char* mode);
@@ -78,9 +97,9 @@ char* ftp_resolve_pasv(struct sockaddr_in* sockAddr, char* ipaddr);
 
 int pass(SOCKET sockfd, ftp_session* session, const char* value);
 int user(SOCKET sockfd, ftp_session* session, const char* value);
-int quit(SOCKET sockfd, const char* value);
+int quit(SOCKET sockfd, ftp_session*session, const char* value);
 int noop(SOCKET sockfd, const char* value);
-int syst(SOCKET sockfd, const char* value);
+int syst(SOCKET sockfd, ftp_session* session, const char* value);
 int list(SOCKET sockfd, ftp_session* session);
 int port(SOCKET sockfd, char* value, ftp_session* session);
 int pwd(SOCKET sockfd, ftp_session* session);
@@ -129,8 +148,6 @@ int open_server_sock(ftp_session* session){
 	unsigned int servsock;
 	struct sockaddr_in cli_addr;
 	unsigned int clilen;
-
-	printf("serv\n");
 
 	session->pasv_sockfd=0;
 	servsock=create_socket(session->pasv_port);
@@ -186,14 +203,14 @@ int ftp_stor(SOCKET sockfd, const char* value, ftp_session* session){
 	 printf("Bad file: %s\n", value);
 	 return 0;
 	}
-	while((r=sock_read(s,buffer,1023))>0){
+	while((r=sock_read(s,buffer,1023,NULL))>0){
 	  buffer[r]='\0';
 	  fwrite(buffer,1,r,fd);
 	}
 	fclose(fd);
 
         strcpy(buffer,"226 Closing data connection.\r\n");
-        r=sock_write(sockfd, buffer, strlen(buffer));
+        r=sock_write(sockfd, buffer, strlen(buffer), session->tls);
         shutdown(s,SHUT_RDWR);
         shutdown(session->cAddr.sockfd,SHUT_RDWR);
 
@@ -224,16 +241,16 @@ int ftp_retr(SOCKET sockfd, const char* value, ftp_session* session){
 	fd=fopen(value,session->type==ASCII?"r":"rb");
 	if(fd==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
-	  r=sock_write(sockfd,buffer,strlen(buffer));
+	  r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 	}else{
 	  mem=(char*)malloc(1024);
 	  while((r=fread(mem,1,1024,fd))>0){
-	  	sock_write(s,mem,r);
+	  	sock_write(s,mem,r,NULL);
 	  }
 	  fclose(fd);
 	  free(mem);
 	  strcpy(buffer,"226 Closing data connection.\r\n");
-	  r=sock_write(sockfd, buffer, strlen(buffer));
+	  r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	  shutdown(s,SHUT_RDWR);
 	  shutdown(session->cAddr.sockfd,SHUT_RDWR);
 	}
@@ -242,11 +259,11 @@ int ftp_retr(SOCKET sockfd, const char* value, ftp_session* session){
 return r;
 }
 
-void send_err(SOCKET sockfd){
+void send_err(SOCKET sockfd, ftp_session* session){
 
 	char* buffer = (char*)malloc(1024);
 	strcpy(buffer,"450 Couldn't open the file or directory\r\n");
-	sock_write(sockfd,buffer,strlen(buffer));
+	sock_write(sockfd,buffer,strlen(buffer),session->tls);
 	shutdown(sockfd, SHUT_RDWR);
 	free(buffer);
 
@@ -274,7 +291,7 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 
         int pipefd[2];
         if(pipe(pipefd)==-1){
-	  send_err(sockfd);
+	  send_err(sockfd,session);
 	  free(buffer);
 	  return 0;
 	}
@@ -294,21 +311,22 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
           dup2(pipefd[1], 2);
           close(pipefd[1]);
 	  if(execve("/bin/ls", argv, NULL)==-1){
-	    send_err(sockfd);
+	    send_err(sockfd,session);
 	  }
 	}else if(pid==-1){
-	  send_err(sockfd);
+	  send_err(sockfd,session);
 	  perror("bad fork() list dir\n");
 	}else{
 	  close(pipefd[1]);
 	  memset(buffer,0,1024);
 	  while((r=read(pipefd[0], buffer, 1024))){
 	      buffer[r]='\0';
-	      r=sock_write(s,buffer,strlen(buffer));
+	      r=sock_write(s,buffer,strlen(buffer),NULL);
 	  }
 	  close(pipefd[0]);
 	  strcpy(buffer,"226 Closing data connection.\r\n");
-	  r=sock_write(sockfd, buffer, strlen(buffer));
+	  r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
+	  //if(session->tls!=NULL) SSL_shutdown(session->tls);
 	  shutdown(s,SHUT_RDWR);
 	}
 
@@ -358,8 +376,8 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
-	else if(strcmp(&verb[0],QUIT)==0) r=quit(sockfd, value);
-	else if(strcmp(&verb[0],SYST)==0) r=syst(sockfd, value);
+	else if(strcmp(&verb[0],QUIT)==0) r=quit(sockfd, session, value);
+	else if(strcmp(&verb[0],SYST)==0) r=syst(sockfd, session, value);
 	else if(strcmp(&verb[0],PORT)==0) r=port(sockfd, value, session);
 	else if(strcmp(&verb[0],LIST)==0) r=list(sockfd, session);
 	else if(strcmp(&verb[0],RETR)==0) r=retr(sockfd, value, session);
@@ -376,7 +394,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	else if(strcmp(&verb[0],MKD)==0) r=mkd(sockfd,session,value);
 	else{
 	  strcpy(buffer,"502 Command not implemented.\r\n");
-	  r=sock_write(sockfd,buffer,strlen(buffer));
+	  r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 	}
 
 	free(value);
@@ -404,7 +422,7 @@ int check_cred(SOCKET sockfd, ftp_session* session, unsigned int type){
 	else{
 	  buffer = (char*)malloc(64);
 	  strcpy(buffer, "550 Access is denied.\r\n");
-	  sock_write(sockfd, buffer, strlen(buffer));
+	  sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	  free(buffer);
 	}
 
@@ -423,7 +441,7 @@ int dele(SOCKET sockfd, ftp_session* session, const char* value){
 	}else{
 	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
 	}
-	sock_write(sockfd, buffer, strlen(buffer));
+	sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	free(buffer);
 
 	(void)(session);
@@ -450,7 +468,7 @@ int rnto(SOCKET sockfd, ftp_session* session, const char* value){
 	}else{
 	  strcpy(buffer,&err[0]);
 	}
-	sock_write(sockfd, buffer, strlen(buffer));
+	sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	free(buffer);
  return 1;
 }
@@ -471,7 +489,7 @@ int rnfr(SOCKET sockfd, ftp_session* session, const char* value){
 	}else{
 	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
 	}
-	sock_write(sockfd, buffer, strlen(buffer));
+	sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	free(buffer);
 
   return 1;
@@ -489,7 +507,7 @@ int mkd(SOCKET sockfd, ftp_session* session, const char* value){
 	}else{
 	  sprintf(buffer,"550 Requested action not taken; file unavailable...\r\n");
 	}
-	sock_write(sockfd, buffer, strlen(buffer));
+	sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	free(buffer);
 
 
@@ -507,7 +525,7 @@ int pasv(SOCKET sockfd, ftp_session* session){
 	session->mode=MODE_PASV;
 	// TO_DO: fix port range... TO DO: in one word fucks whith my eyes in nano.
 	sprintf(buffer,"227 Entering Passive Mode (%s,%s)\r\n", &session->pasv_ip[0], toHiLow(session->pasv_port,&hilow[0]));
-	r=sock_write(sockfd, buffer, strlen(buffer));
+	r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	open_server_sock(session);
 
 	free(buffer);
@@ -521,7 +539,7 @@ int type(SOCKET sockfd, const char* value, ftp_session* session){
         char* buffer = (char*)malloc(256);
 
 	strcpy(buffer,"200 Command OK.\r\n");
-	r=sock_write(sockfd, buffer, strlen(buffer));
+	r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	session->type = value[0];
 
 	free(buffer);
@@ -557,7 +575,7 @@ int cwd(SOCKET sockfd, const char* value, ftp_session* session){
 
         if(r>-1) strcpy(buffer,"250 Okay.\r\n");
 	else sprintf(buffer,"550 %s: No such file or directory..\r\n",value);
-        r=sock_write(sockfd,buffer,strlen(buffer));
+        r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 
         free(buffer);
 	free(path);
@@ -581,7 +599,7 @@ int pwd(SOCKET sockfd, ftp_session* session){
 
 	(void)(session);
 
-	r=sock_write(sockfd,buffer,strlen(buffer));
+	r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 	free(buffer);
 	free(dir);
 	(void)(r);
@@ -607,11 +625,11 @@ int stor(SOCKET sockfd, const char* value, ftp_session* session){
         fd=fopen(file,"w");
         if(fd==NULL){
           strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
-          r=sock_write(sockfd,buffer,strlen(buffer));
+          r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
         }else{
 	  fclose(fd);
           strcpy(buffer,"150 File status okay; about to open data connection.\r\n");
-          r=sock_write(sockfd,buffer,strlen(buffer));
+          r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
           r=ftp_stor(sockfd, value, session);
 	}
 
@@ -637,11 +655,11 @@ int retr(SOCKET sockfd, const char* value, ftp_session* session){
 	fd=fopen(file,"r");
 	if(fd==NULL){
 	  strcpy(buffer,"451 Requested action aborted: local error in processing.\r\n");
-	  r=sock_write(sockfd,buffer,strlen(buffer));
+	  r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 	}else{
 	  fclose(fd);
           strcpy(buffer,"150 File status okay; about to open data connection.\r\n");
-          r=sock_write(sockfd,buffer,strlen(buffer));
+          r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
           ftp_retr(sockfd, file, session);
 	}
 	(void)(r);
@@ -658,7 +676,7 @@ int list(SOCKET sockfd, ftp_session* session){
         char* buffer = (char*)malloc(256);
 
 	strcpy(buffer,"150 File status okay; about to open data connection.\r\n");
-	r=sock_write(sockfd,buffer,strlen(buffer));
+	r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 
 	r=ftp_list(sockfd, session);
 
@@ -709,19 +727,19 @@ int port(SOCKET sockfd, char* value, ftp_session* session){
 	strcpy(&session->cAddr.ip[0], &ip[0]);
 
 	strcpy(buffer,"200 PORT command successful.\r\n");
-	r=sock_write(sockfd,buffer,strlen(buffer));
+	r=sock_write(sockfd,buffer,strlen(buffer),session->tls);
 
 	free(buffer);
 
  return r;
 }
 
-int quit(SOCKET sockfd, const char* value){
+int quit(SOCKET sockfd, ftp_session* session, const char* value){
 
         int r;
         char* buffer = (char*)malloc(256);
         strcpy(buffer,"200 Goodbye.\r\n");
-        r=sock_write(sockfd, buffer, strlen(buffer));
+        r=sock_write(sockfd, buffer, strlen(buffer), session->tls);
 	(void)(r);
         free(buffer);
 	(void)(value);
@@ -729,12 +747,12 @@ int quit(SOCKET sockfd, const char* value){
  return -1;
 }
 
-int syst(SOCKET sockfd, const char* value){
+int syst(SOCKET sockfd, ftp_session* session, const char* value){
 
         int r;
         char* buffer = (char*)malloc(256);
         strcpy(buffer,"215 Cornelia FTP server on Linux.\r\n");
-        r=sock_write(sockfd, buffer, strlen(buffer));
+        r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
         free(buffer);
 	(void)(value);
 
@@ -753,7 +771,7 @@ int pass(SOCKET sockfd, ftp_session* session, const char* value){
 	  ret=-1;
 	  strcpy(buffer,"530 Login incorrect.\r\n");
 	}
-        r=sock_write(sockfd, buffer, strlen(buffer));
+        r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
         free(buffer);
 	(void)(r);
 
@@ -767,7 +785,7 @@ int user(SOCKET sockfd, ftp_session* session, const char* value){
 	char* buffer = (char*)malloc(256);
 	strcpy(&session->user[0],value);
 	strcpy(buffer,"331 Please, specify the password.\r\n");
-	r=sock_write(sockfd, buffer, strlen(buffer));
+	r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	free(buffer);
 
  return r;
@@ -804,20 +822,21 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 	}
 
 	strcpy(buffer,"220-Cornelia Web Server\r\n");
-	sock_write(sockfd,buffer, strlen(buffer));
+	sock_write(sockfd,buffer, strlen(buffer),session->tls);
 	strcpy(buffer,"220 Please visit http://crazedout.com\r\n");
-	sock_write(sockfd, buffer, strlen(buffer));
+	sock_write(sockfd, buffer, strlen(buffer),session->tls);
 	int loop=1;
 
 	while(loop){
 	  memset(buffer,0,1024);
-	  r=sock_read(sockfd,buffer,1024);
+	  r=sock_read(sockfd,buffer,1024,session->tls);
 	  if(r<1) {
 	   break;
 	  }
 	  r=parse_request(sockfd, buffer, session);
 	  if(r<1) loop=0;
 	}
+
 
 	shutdown(sockfd, SHUT_RDWR);
 	free(buffer);
@@ -832,7 +851,7 @@ char* parse_pasv_ip(char* ip){
  return ip;
 }
 
-void init_server(char* pasv_ip, int port, const char* root) {
+void init_server(char* pasv_ip, int port, const char* root, int mode) {
 
     	int sock;
 	struct sockaddr_in* pV4Addr;
@@ -843,7 +862,20 @@ void init_server(char* pasv_ip, int port, const char* root) {
     	sock = create_socket(port);
 	int connections=0;
 
-	printf("*** Cornelia FTP Server listening on %s:%d at %s ***\n", pasv_ip, port, root);
+	#ifndef NO_SSL
+	 SSL_CTX *ctx = NULL;
+	 SSL *ssl = NULL;
+	#endif
+
+	if(mode==FTP){
+	  printf("*** Cornelia FTP Server listening on %s:%d at %s ***\n", pasv_ip, port, root);
+	}else if(mode==FTPS){
+	  #ifndef NO_SSL
+	   printf("*** Cornelia FTPS Server listening on %s:%d at %s ***\n", pasv_ip, port, root);
+	   ctx = create_context();
+           configure_context(ctx,"cert/cert.crt","cert/mykey.key");
+	  #endif
+	}
 
 	while(loop){
           int client = accept(sock, (struct sockaddr*)&addr, &len);
@@ -851,11 +883,24 @@ void init_server(char* pasv_ip, int port, const char* root) {
           if (client < 0) {
               perror("Unable to accept");
           }else{
+	    if(mode==FTPS){
+	      #ifndef NO_SSL
+	      ssl = SSL_new(ctx);
+              SSL_set_fd(ssl, client);
+	      if (SSL_accept(ssl) <= 0) {
+                perror("Error accept TLS.\n");
+              }
+	     #endif
+	    }
 	    int pid=fork();
 	    if(pid==0){
 		ftp_session session;
 		memset(&session,0,sizeof(ftp_session));
 		session.addr=addr;
+		#ifndef NO_SSL
+	         session.tls = ssl;
+		 session.ctx = ctx;
+	        #endif
 		if(root[0]=='/'){
 		  sprintf(&session.workdir[0], "%s", root);
 		}else{
@@ -867,6 +912,11 @@ void init_server(char* pasv_ip, int port, const char* root) {
 	        pV4Addr = (struct sockaddr_in*)&cli;
                 inet_ntop(AF_INET, &pV4Addr->sin_addr, &session.clientIP[0], INET_ADDRSTRLEN );
 	    	handle_session(client,&session);
+		#ifndef NO_SSL
+		 SSL_shutdown(session.tls);
+		 SSL_free(session.tls);
+		 SSL_CTX_free(ctx);
+		#endif
 	        loop=0;
 	    }
 	  }
@@ -914,6 +964,7 @@ int main(int args, char* argv[]){
 	char* bind = (char*)malloc(20);
 	char* port = (char*)malloc(20);
 	char* root = (char*)malloc(2048);
+	int mode = FTP;
 
 	dir = getcwd(dir,1024);
 
@@ -937,6 +988,13 @@ int main(int args, char* argv[]){
 	  else if(strcmp(argv[i],"-lip")==0) {
 	    list_ip();
 	    return 0;
+	  }
+	  else if(strcmp(argv[i],"-tls")==0) {
+	    #ifndef NO_SSL
+	      mode = FTPS;
+	    #else
+	     printf("\nWARN! Compiled with NO_SSL. -tls is not available.\n");
+	    #endif
 	  }
 	  else if(strcmp(argv[i],"-port")==0){
 	   if(i<args-1) strcpy(port,argv[i+1]);
@@ -976,7 +1034,7 @@ int main(int args, char* argv[]){
 	   }
 	   fclose(pd);
 	 }else{
-	   strcpy(bind,"127.0.0.1");
+	   strcpy(bind,LOCALHOST);
 	 }
 	 printf("Bind adress missing - defaulting to %s\n", bind);
 	}
@@ -990,7 +1048,7 @@ int main(int args, char* argv[]){
 	 printf("Root dir missing - defaulting to $CORNELIA_HOME/ftp\n");
 	}
 
-	init_server(bind, atoi(port), root);
+	init_server(bind, atoi(port), root, mode);
 
 	free(root);
 	free(bind);
