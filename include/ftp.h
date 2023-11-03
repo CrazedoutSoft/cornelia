@@ -34,7 +34,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <netinet/in.h>
 #include <sys/stat.h>
 #include <crypt.h>
-
+/*
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+*/
 #define SOCKET int
 
 #define USER "USER"
@@ -76,6 +79,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define ANONYMOUS       "anonymous"
 
+#define FTP  0
+#define FTPS 1
+#define LOCALHOST "127.0.0.1"
+
 int setenv(const char *name, const char *value, int overwrite);
 
 typedef struct clientAddr_ {
@@ -102,6 +109,8 @@ typedef struct _ftp_session_ {
         char user[64];
         char pass[64];
         unsigned int cred;
+	void* tls;
+	void* ctx;
 
 } ftp_session;
 
