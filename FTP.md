@@ -1,7 +1,7 @@
 <html>
 <body>
 
-<h2>Simple FTP Server</h2>
+<h2>Simple FTP/FTPS Server</h2>
 A simple FTP server is provided in the Cornalia package.</br>
 Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 <i>anonymous</i> can be set to accept but has only READ access.<p/>
@@ -32,8 +32,16 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 #define DELE "DELE"
 </code>
 </pre>
+<br>
+>FTPS
+>Use implicit FTP over TLS.
+<p>
 
 >bin/ftp_cornelia -bind [my_non_local_ip] -port 8821 -anonymous_allowed 
+>-tls turn on FTPS mode.
+<p>
+>For now the key emd cert is the same as default Cornelia Web Server (conf/cert)
+<p>
 
 Cornelia FTP needs a IP for PASV connection. Otherwise the PASV IP could be 127.0.0.1 which<br/>
 non local users can't connect to.<br>
