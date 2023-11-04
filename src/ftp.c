@@ -26,6 +26,9 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 #include "../include/ftp.h"
 
+//#include <sys/types.h>
+#include <sys/wait.h>
+
 unsigned int anonymous_allowed = 0;
 
 int create_socket(int port) {
@@ -273,7 +276,7 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 
 	int n = 0;
 	int r=0;
-	char* buffer = (char*)malloc(1024);
+	char* buffer = (char*)malloc(4096);
         char* argv[5];
 	SOCKET s;
 
@@ -319,15 +322,17 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 	}else{
 	  close(pipefd[1]);
 	  memset(buffer,0,1024);
-	  while((r=read(pipefd[0], buffer, 1024))){
+	  int rn = 0;
+	 // Sketchy loop, may produce <defunct> process if list is over 4096 bytes...
+	  while((r=read(pipefd[0], buffer, 4096))>0){
 	      buffer[r]='\0';
-	      r=sock_write(s,buffer,strlen(buffer),NULL);
+	      rn=sock_write(s,buffer,strlen(buffer),NULL);
+	      if(r<4096) break;
 	  }
 	  close(pipefd[0]);
+	  shutdown(s,SHUT_RDWR);
 	  strcpy(buffer,"226 Closing data connection.\r\n");
 	  r=sock_write(sockfd, buffer, strlen(buffer),session->tls);
-	  //if(session->tls!=NULL) SSL_shutdown(session->tls);
-	  shutdown(s,SHUT_RDWR);
 	}
 
 	while(1){
@@ -372,7 +377,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	  }
 	}
 
-	//printf("%s %s %s\n", &verb[0], value, value2);
+	printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
