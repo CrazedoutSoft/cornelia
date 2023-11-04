@@ -4,7 +4,9 @@
 <h2>Simple FTP/FTPS Server</h2>
 A simple FTP server is provided in the Cornalia package.</br>
 Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
-<i>anonymous</i> can be set to accept but has only READ access.<p/>
+<i>anonymous</i> can be set to accept but has only READ access.
+<p>
+<b>WARNING Cornelia FTP Server is probably highy insecure at this stage. Do not use in a public context</b><p>
 <b>Following werbs are implemented so far</b>.<br/>
 
 <pre>
@@ -34,6 +36,7 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 </pre>
 <br>
 <b>FTPS</b><br>
+
 >Use implicit FTP over TLS.
 
 >bin/ftp_cornelia -bind [my_non_local_ip] -port 8821 -anonymous_allowed -tls
