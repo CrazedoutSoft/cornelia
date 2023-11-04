@@ -39,6 +39,8 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 
 >Use implicit FTP over TLS.
 
+>Read more about ftps etc here: <a href="https://www.sharetru.com/blog/explicit-ftps-vs-implicit-ftps-what-you-need-to-know">Implicit / Explicit TLS</a>
+
 >bin/ftp_cornelia -bind [my_non_local_ip] -port 8821 -anonymous_allowed -tls
 
 >tls turn on FTPS mode.
