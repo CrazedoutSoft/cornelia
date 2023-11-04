@@ -35,10 +35,15 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 <br>
 <b>FTPS</b><br>
 >Use implicit FTP over TLS.
+
 >bin/ftp_cornelia -bind [my_non_local_ip] -port 8821 -anonymous_allowed -tls
+
 >tls turn on FTPS mode.
+
 <p>
+
 >For now the key and cert is the same as default Cornelia Web Server (conf/cert)
+
 <p>
 
 Cornelia FTP needs a IP for PASV connection. Otherwise the PASV IP could be 127.0.0.1 which<br/>
