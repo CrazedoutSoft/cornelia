@@ -327,6 +327,7 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 	  while((r=read(pipefd[0], buffer, 4096))>0){
 	      buffer[r]='\0';
 	      rn=sock_write(s,buffer,strlen(buffer),NULL);
+	      (void)(rn);
 	      if(r<4096) break;
 	  }
 	  close(pipefd[0]);
