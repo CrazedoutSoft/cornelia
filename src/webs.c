@@ -19,6 +19,12 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE S
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/*
+	This project was initially started to teach my son Alfred C programming.
+	Cornelia is his younger sister. She is Small, Fast and Furious...
+	/Fredrik.
+*/
+
 #include "../include/mkpasswd.h"
 #include "../include/tls.h"
 #include "../include/ssl.h"
