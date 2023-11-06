@@ -30,6 +30,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/wait.h>
 
 unsigned int anonymous_allowed = 0;
+int trace = 0;
 
 int create_socket(int port) {
 
@@ -276,7 +277,7 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 
 	int n = 0;
 	int r=0;
-	char* buffer = (char*)malloc(4096);
+	char* buffer = (char*)malloc(1024);
         char* argv[5];
 	SOCKET s;
 
@@ -323,12 +324,10 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 	  close(pipefd[1]);
 	  memset(buffer,0,1024);
 	  int rn = 0;
-	 // Sketchy loop, may produce <defunct> process if list is over 4096 bytes...
-	  while((r=read(pipefd[0], buffer, 4096))>0){
+	  while((r=read(pipefd[0], buffer, 1024))>0){
 	      buffer[r]='\0';
 	      rn=sock_write(s,buffer,strlen(buffer),NULL);
 	      (void)(rn);
-	      if(r<4096) break;
 	  }
 	  close(pipefd[0]);
 	  shutdown(s,SHUT_RDWR);
@@ -378,7 +377,7 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	  }
 	}
 
-	printf("%s %s %s\n", &verb[0], value, value2);
+	if(trace) printf("%s %s %s\n", &verb[0], value, value2);
 
 	if(strcmp(&verb[0],USER)==0) r=user(sockfd, session, value);
 	else if(strcmp(&verb[0],PASS)==0) r=pass(sockfd, session, value);
@@ -994,6 +993,9 @@ int main(int args, char* argv[]){
 	  else if(strcmp(argv[i],"-lip")==0) {
 	    list_ip();
 	    return 0;
+	  }
+	  else if(strcmp(argv[i],"-trace")==0) {
+	    trace=1;
 	  }
 	  else if(strcmp(argv[i],"-tls")==0) {
 	    #ifndef NO_SSL
