@@ -40,6 +40,21 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MAX_ENV_VARS		256
 #define MAX_QUERYSTRING	 	2048
 
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <dirent.h>
+#include <sys/time.h>
+#include <poll.h>
+#include <time.h>
+#include <crypt.h>
+
 void handle_request(SOCKET sockfd, char* clientIP, void* cSSL);
 
 typedef struct user_endpoint_t {

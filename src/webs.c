@@ -26,20 +26,6 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "../include/misc.h"
 #include "../include/base64.h"
 #include "../include/webs.h"
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <dirent.h>
-#include <sys/time.h>
-#include <poll.h>
-#include <time.h>
-#include <crypt.h>
 
 #define SA struct sockaddr
 #define AUTH_REQUEST_SENT	0
