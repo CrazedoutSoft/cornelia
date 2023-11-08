@@ -110,7 +110,7 @@ void init_server() {
         while(loop){
 	  connfd = accept(sockfd, (SA*)&cli, &len);
 	  int pid = fork();
-	  if(pid>0){
+	  if(pid==0){
 
 	    memset(&cip[0],0,16);
             pV4Addr = (struct sockaddr_in*)&cli;
