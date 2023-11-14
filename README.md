@@ -93,8 +93,8 @@ OpenSSL:<br/>
 If you can't build Cornelia with the OpenSSL headers and libs provided you <br/>
 must compile your own OpenSLL libs and replace them in dir openssl<br/>
 https://github.com/openssl
-<br/>
-<b> ! You should of course replace the default cert/keys width your own using cert/make_ssl_cert and/or cert/make_tls_cert !</b>
+<p>
+<b> ! You should of course replace the default cert/keys with your own using cert/make_ssl_cert and/or cert/make_tls_cert !</b>
 <p>
 Cornelia handles all default CGI such as plain c binaries, shell script, perl and so on.<br/>
 PHP is handled by php-cgi and *.jgazm by jGazm.<br>
