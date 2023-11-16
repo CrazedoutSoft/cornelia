@@ -51,6 +51,9 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 
 <p>
 
+> Files: Spaces in filenames will be replaced by '_' (underscore).
+
+<p>
 Cornelia FTP needs a IP for PASV connection. Otherwise the PASV IP could be 127.0.0.1 which<br/>
 non local users can't connect to.<br>
 Non local IP can be uptained by using <i>bin/findip</i>.
