@@ -13,6 +13,12 @@ else
     exit
 fi
 
+if [[ $1 == "--help" ]];
+then
+$CORNELIA_HOME/bin/cornelia_d --help
+exit
+fi
+
 
 export LD_LIBRARY_PATH=$CORNELIA_HOME/openssl
 
@@ -21,6 +27,7 @@ echo "************************************"
 echo "* Starting Cornelia Web Server     *"
 echo "* (c) CrazedoutSoft 2022 / F.Roos  *"
 echo "************************************"
+
 
 if [[ $1 == "" ]];
 then
