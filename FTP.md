@@ -56,7 +56,8 @@ Users are defined in conf/ftp.passwd and has READ and WRITE access.<br/>
 <p>
 Cornelia FTP needs a IP for PASV connection. Otherwise the PASV IP could be 127.0.0.1 which<br/>
 non local users can't connect to.<br>
-Non local IP can be uptained by using <i>bin/findip</i>.
+Non local IP can be uptained by using <i>bin/findip</i>.<br>
+Cornelia FTP will try to get this right on start-up but may fail depending on network circumstances.<br>
 
 </body>
 <html>
