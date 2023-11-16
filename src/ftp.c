@@ -345,6 +345,27 @@ int ftp_list(SOCKET sockfd, ftp_session* session){
 return r;
 }
 
+char* handle_file_spaces(char* buffer){
+
+    int i=0;
+    int n=0;
+    char* verb = (char*)malloc(16);
+
+    memset(verb,0,16);
+    for(i=0;i<(int)strlen(buffer);i++){
+       if(buffer[i]==' ' && !n) {
+        memcpy(verb,buffer,i);
+        if(strcmp(verb,STOR)==0 || strcmp(verb,RETR)==0){
+         n++;
+        }else break;
+      }else if(buffer[i]==' ' && n){
+        buffer[i]='_';
+      }
+    }
+
+ return buffer;
+}
+
 int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 
 	char *ptr;
@@ -352,6 +373,10 @@ int parse_request(SOCKET sockfd, char* buffer, ftp_session* session){
 	char *value = NULL;
 	char *value2 = NULL;
 	int r = 0;
+
+    if(trace) printf("%s\n", buffer);
+
+    handle_file_spaces(buffer);
 
 	memset(&verb[0],0,strlen(&verb[0]));
 	ptr = strtok(buffer," ");
@@ -838,6 +863,7 @@ void handle_session(unsigned int sockfd, ftp_session* session){
 	  if(r<1) {
 	   break;
 	  }
+      if(trace) printf("%s\n", buffer);
 	  r=parse_request(sockfd, buffer, session);
 	  if(r<1) loop=0;
 	}
