@@ -19,14 +19,12 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE S
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Do to: Handle file names with spaces.
 
 #ifndef NO_SSL
 #include "../include/ftps.h"
 #endif
 #include "../include/ftp.h"
 
-//#include <sys/types.h>
 #include <sys/wait.h>
 
 unsigned int anonymous_allowed = 0;
