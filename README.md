@@ -22,7 +22,7 @@
 ><b>Result in prompt:</b><br>
 ><b>Cornelia listening on 8080 [HTTP]</b><br>
 ><a href="http://localhost:8080">http://localhost:8080</a>
-
+><a href="https://crazedout.com/corny.mp4">Installation video</a>
 <hr>
 <b>RECOMMENDED: FULL INSTRUCTIONS:</b>
 <p>
